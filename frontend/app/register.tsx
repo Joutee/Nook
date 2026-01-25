@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "../utils/supabase";
-import Account from "../components/Account";
 import {
   View,
   Text,
@@ -9,43 +8,40 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { Session } from "@supabase/supabase-js";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
-export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
+export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
-
-  async function signInWithEmail() {
+  async function signUpWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
       email: email,
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
+    if (error) {
+      Alert.alert(error.message);
+    } else {
+      Alert.alert("Registrace úspěšná!", "Můžete se nyní přihlásit.", [
+        {
+          text: "OK",
+          onPress: () => router.push("/"),
+        },
+      ]);
+    }
     setLoading(false);
-  }
-
-  if (session && session.user) {
-    return <Account key={session.user.id} session={session} />;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Přihlášení</Text>
+      <Text style={styles.title}>Registrace</Text>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Text style={styles.label}>Email</Text>
@@ -75,18 +71,19 @@ export default function App() {
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           disabled={loading}
-          onPress={() => signInWithEmail()}
+          onPress={() => signUpWithEmail()}
         >
-          <Text style={styles.buttonText}>Přihlásit se</Text>
+          <Text style={styles.buttonText}>Registrovat se</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Link href="/register" asChild>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Registrovat se</Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.secondaryButtonText}>Zpět na přihlášení</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

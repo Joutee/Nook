@@ -11,7 +11,7 @@ const RootLayout = () => {
           contentStyle: { flex: 1 },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Home" }} />
+        <Stack.Screen name="home" options={{ title: "Home" }} />
         <Stack.Screen name="finance" options={{ title: "Finance" }} />
         <Stack.Screen name="settings" options={{ title: "Settings" }} />
         <Stack.Screen name="flat" options={{ title: "Flat" }} />

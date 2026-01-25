@@ -1,32 +1,31 @@
-import { useState, useEffect } from "react";
-import { supabase } from "../utils/supabase";
-import Account from "../components/Account";
+import React, { useState } from "react";
 import {
+  Alert,
+  StyleSheet,
   View,
+  AppState,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
 } from "react-native";
-import { Session } from "@supabase/supabase-js";
-import { Link } from "expo-router";
+import { supabase } from "../utils/supabase";
 
-export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
+// Tells Supabase Auth to continuously refresh the session automatically if
+// the app is in the foreground. When this is added, you will continue to receive
+// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
+// if the user's session is terminated. This should only be registered once.
+AppState.addEventListener("change", (state) => {
+  if (state === "active") {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
+});
+
+export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
 
   async function signInWithEmail() {
     setLoading(true);
@@ -39,14 +38,24 @@ export default function App() {
     setLoading(false);
   }
 
-  if (session && session.user) {
-    return <Account key={session.user.id} session={session} />;
+  async function signUpWithEmail() {
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+
+    if (error) Alert.alert(error.message);
+    if (!session)
+      Alert.alert("Please check your inbox for email verification!");
+    setLoading(false);
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Přihlášení</Text>
-
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -58,35 +67,34 @@ export default function App() {
           keyboardType="email-address"
         />
       </View>
-
       <View style={styles.verticallySpaced}>
-        <Text style={styles.label}>Heslo</Text>
+        <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           onChangeText={(text: string) => setPassword(text)}
           value={password}
           secureTextEntry={true}
-          placeholder="Heslo"
+          placeholder="Password"
           autoCapitalize={"none"}
         />
       </View>
-
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           disabled={loading}
           onPress={() => signInWithEmail()}
         >
-          <Text style={styles.buttonText}>Přihlásit se</Text>
+          <Text style={styles.buttonText}>Sign in</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.verticallySpaced}>
-        <Link href="/register" asChild>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Registrovat se</Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          disabled={loading}
+          onPress={() => signUpWithEmail()}
+        >
+          <Text style={styles.buttonText}>Sign up</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -96,12 +104,6 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
   },
   verticallySpaced: {
     paddingTop: 4,
@@ -135,19 +137,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  secondaryButton: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#007AFF",
-  },
-  secondaryButtonText: {
-    color: "#007AFF",
     fontSize: 16,
     fontWeight: "bold",
   },
