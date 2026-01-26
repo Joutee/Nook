@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../utils/supabase";
+import { getErrorMessage } from "../utils/errorTranslations";
 import {
   View,
   Text,
@@ -13,10 +14,16 @@ import { useRouter } from "expo-router";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function signUpWithEmail() {
+    if (password !== confirmPassword) {
+      Alert.alert("Chyba", getErrorMessage("PASSWORDS_DO_NOT_MATCH"));
+      return;
+    }
+
     setLoading(true);
     const {
       data: { session },
@@ -27,12 +34,12 @@ export default function Register() {
     });
 
     if (error) {
-      Alert.alert(error.message);
+      Alert.alert("Chyba", getErrorMessage(error.message));
     } else {
       Alert.alert("Registrace úspěšná!", "Můžete se nyní přihlásit.", [
         {
           text: "OK",
-          onPress: () => router.push("/"),
+          onPress: () => router.push("/login"),
         },
       ]);
     }
@@ -67,6 +74,18 @@ export default function Register() {
         />
       </View>
 
+      <View style={styles.verticallySpaced}>
+        <Text style={styles.label}>Potvrzení hesla</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={(text: string) => setConfirmPassword(text)}
+          value={confirmPassword}
+          secureTextEntry={true}
+          placeholder="Zadejte heslo znovu"
+          autoCapitalize={"none"}
+        />
+      </View>
+
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
@@ -80,7 +99,7 @@ export default function Register() {
       <View style={styles.verticallySpaced}>
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => router.back()}
+          onPress={() => router.push("/login")}
         >
           <Text style={styles.secondaryButtonText}>Zpět na přihlášení</Text>
         </TouchableOpacity>

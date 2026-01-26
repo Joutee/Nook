@@ -105,7 +105,6 @@ export default function Account({ session }: { session: Session }) {
         />
       </View>
 
-
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
