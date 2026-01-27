@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter, usePathname } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const NavBar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -14,7 +16,7 @@ const NavBar = () => {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       {navItems.map((item) => (
         <TouchableOpacity
           key={item.path}
