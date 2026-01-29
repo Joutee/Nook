@@ -6,9 +6,7 @@ const Chat = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Chat</Text>
-        <Text style={styles.subtitle}>
-          Komunikace s nájemci
-        </Text>
+        <Text style={styles.subtitle}>Komunikace s nájemci</Text>
       </View>
     </View>
   );

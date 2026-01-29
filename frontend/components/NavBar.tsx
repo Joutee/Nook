@@ -23,7 +23,8 @@ const NavBar = () => {
     { name: "Documents", path: "/documents" },
   ];
 
-  const navItems = userRole === "pronajimatel" ? landlordNavItems : tenantNavItems;
+  const navItems =
+    userRole === "pronajimatel" ? landlordNavItems : tenantNavItems;
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>

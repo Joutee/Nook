@@ -25,7 +25,7 @@ const TopBar = () => {
     }
   };
 
-  const handleSelectFlat = (flat: { id: string; name: string }) => {
+  const handleSelectFlat = (flat: { id: string; name: string; address: string }) => {
     setCurrentFlat(flat);
     setIsModalVisible(false);
   };
@@ -44,7 +44,7 @@ const TopBar = () => {
           disabled={flats.length <= 1}
         >
           <Text style={styles.flatName} numberOfLines={1}>
-            {currentFlat?.name || "Žádný byt"}
+            {currentFlat?.name || currentFlat?.address|| "Žádný byt"}
           </Text>
           {flats.length > 1 && (
             <Ionicons

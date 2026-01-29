@@ -11,9 +11,10 @@ import { Session } from "@supabase/supabase-js";
 interface Flat {
   id: string;
   name: string;
+  address: string;
 }
 
-type UserRole = 'pronajimatel' | 'najemce' | null;
+type UserRole = "pronajimatel" | "najemce" | null;
 
 interface FlatContextType {
   currentFlat: Flat | null;
@@ -62,7 +63,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
       // Načíst všechny byty, ke kterým má uživatel přístup
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
-        .select("flat_id, role, flat:flats(id, name)")
+        .select("flat_id, role, flat:flats(id, name, address)")
         .eq("profile_id", session.user.id);
 
       if (error) {
@@ -77,7 +78,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
           .filter((fp) => fp.flat)
           .map((fp) => ({
             id: (fp.flat as any).id,
-            name: (fp.flat as any).name || "Bez názvu",
+            name: (fp.flat as any).name || (fp.flat as any).address || "Bez názvu",
           }));
 
         setFlats(userFlats);
@@ -94,7 +95,9 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
             setUserRole(flatProfiles[0].role as UserRole);
           } else {
             // Aktualizuj roli pro současný byt
-            const currentProfile = flatProfiles.find((fp) => (fp.flat as any).id === currentFlat.id);
+            const currentProfile = flatProfiles.find(
+              (fp) => (fp.flat as any).id === currentFlat.id,
+            );
             setUserRole(currentProfile?.role as UserRole);
           }
         }
@@ -127,7 +130,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
         .eq("profile_id", session.user.id)
         .eq("flat_id", flat.id)
         .single();
-      
+
       if (data) {
         setUserRole(data.role as UserRole);
       }

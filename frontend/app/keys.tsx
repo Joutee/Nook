@@ -6,9 +6,7 @@ const Keys = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Klíče</Text>
-        <Text style={styles.subtitle}>
-          Správa přístupových klíčů
-        </Text>
+        <Text style={styles.subtitle}>Správa přístupových klíčů</Text>
       </View>
     </View>
   );

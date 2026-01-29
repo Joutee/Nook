@@ -6,9 +6,7 @@ const Documents = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Dokumenty</Text>
-        <Text style={styles.subtitle}>
-          Správa dokumentů k pronájmu
-        </Text>
+        <Text style={styles.subtitle}>Správa dokumentů k pronájmu</Text>
       </View>
     </View>
   );
