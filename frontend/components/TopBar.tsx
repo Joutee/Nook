@@ -28,6 +28,7 @@ const TopBar = () => {
   const handleSelectFlat = (flat: { id: string; name: string; address: string }) => {
     setCurrentFlat(flat);
     setIsModalVisible(false);
+    router.push("/");
   };
 
   const handleSettingsPress = () => {

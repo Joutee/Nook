@@ -6,7 +6,9 @@ const Chat = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Chat</Text>
-        <Text style={styles.subtitle}>Komunikace s nájemci</Text>
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>Komunikace s nájemci</Text>
+        </View>
       </View>
     </View>
   );
@@ -30,8 +32,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
+  subtitleContainer: {
+    width: "100%",
+    maxWidth: 300,
+  },
   subtitle: {
     fontSize: 16,
     color: "#666",
+    textAlign: "center",
   },
 });

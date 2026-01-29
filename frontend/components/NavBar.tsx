@@ -18,6 +18,7 @@ const NavBar = () => {
   ];
 
   const landlordNavItems = [
+    { name: "Home", path: "/" },
     { name: "Chat", path: "/chat" },
     { name: "Keys", path: "/keys" },
     { name: "Documents", path: "/documents" },
@@ -46,6 +47,9 @@ const NavBar = () => {
               styles.navText,
               pathname === item.path && styles.navTextActive,
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
           >
             {item.name}
           </Text>
