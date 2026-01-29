@@ -2,18 +2,28 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFlatContext } from "../contexts/FlatContext";
 
 const NavBar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { userRole } = useFlatContext();
 
-  const navItems = [
+  const tenantNavItems = [
     { name: "Home", path: "/" },
     { name: "Finance", path: "/finance" },
     { name: "Chores", path: "/chores" },
     { name: "Flat", path: "/flat" },
   ];
+
+  const landlordNavItems = [
+    { name: "Chat", path: "/chat" },
+    { name: "Keys", path: "/keys" },
+    { name: "Documents", path: "/documents" },
+  ];
+
+  const navItems = userRole === "pronajimatel" ? landlordNavItems : tenantNavItems;
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
@@ -24,7 +34,11 @@ const NavBar = () => {
             styles.navItem,
             pathname === item.path && styles.navItemActive,
           ]}
-          onPress={() => router.push(item.path as any)}
+          onPress={() => {
+            if (pathname !== item.path) {
+              router.push(item.path as any);
+            }
+          }}
         >
           <Text
             style={[

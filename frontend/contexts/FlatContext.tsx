@@ -13,9 +13,12 @@ interface Flat {
   name: string;
 }
 
+type UserRole = 'pronajimatel' | 'najemce' | null;
+
 interface FlatContextType {
   currentFlat: Flat | null;
   flats: Flat[];
+  userRole: UserRole;
   setCurrentFlat: (flat: Flat) => void;
   isLoading: boolean;
   refreshFlats: () => Promise<void>;
@@ -42,6 +45,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
 }) => {
   const [currentFlat, setCurrentFlatState] = useState<Flat | null>(null);
   const [flats, setFlats] = useState<Flat[]>([]);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchFlats = async () => {
@@ -58,7 +62,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
       // Načíst všechny byty, ke kterým má uživatel přístup
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
-        .select("flat_id, flat:flats(id, name)")
+        .select("flat_id, role, flat:flats(id, name)")
         .eq("profile_id", session.user.id);
 
       if (error) {
@@ -81,21 +85,29 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
         // Pokud není nastaven žádný byt, nastav první
         if (!currentFlat && userFlats.length > 0) {
           setCurrentFlatState(userFlats[0]);
+          setUserRole(flatProfiles[0].role as UserRole);
         } else if (currentFlat) {
           // Zkontroluj, jestli aktuální byt je stále v seznamu
           const stillExists = userFlats.find((f) => f.id === currentFlat.id);
           if (!stillExists) {
             setCurrentFlatState(userFlats[0]);
+            setUserRole(flatProfiles[0].role as UserRole);
+          } else {
+            // Aktualizuj roli pro současný byt
+            const currentProfile = flatProfiles.find((fp) => (fp.flat as any).id === currentFlat.id);
+            setUserRole(currentProfile?.role as UserRole);
           }
         }
       } else {
         setFlats([]);
         setCurrentFlatState(null);
+        setUserRole(null);
       }
     } catch (error) {
       console.error("Error in fetchFlats:", error);
       setFlats([]);
       setCurrentFlatState(null);
+      setUserRole(null);
     } finally {
       setIsLoading(false);
     }
@@ -105,8 +117,21 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
     fetchFlats();
   }, [session?.user?.id]);
 
-  const setCurrentFlat = (flat: Flat) => {
+  const setCurrentFlat = async (flat: Flat) => {
     setCurrentFlatState(flat);
+    // Načíst roli pro nově vybraný byt
+    if (session?.user?.id) {
+      const { data } = await supabase
+        .from("flat_profile")
+        .select("role")
+        .eq("profile_id", session.user.id)
+        .eq("flat_id", flat.id)
+        .single();
+      
+      if (data) {
+        setUserRole(data.role as UserRole);
+      }
+    }
   };
 
   const refreshFlats = async () => {
@@ -118,6 +143,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
       value={{
         currentFlat,
         flats,
+        userRole,
         setCurrentFlat,
         isLoading,
         refreshFlats,

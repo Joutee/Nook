@@ -174,6 +174,18 @@ const RootLayout = () => {
               name="chores"
               options={{ title: "Chores", headerShown: false }}
             />
+            <Stack.Screen
+              name="chat"
+              options={{ title: "Chat", headerShown: false }}
+            />
+            <Stack.Screen
+              name="keys"
+              options={{ title: "Keys", headerShown: false }}
+            />
+            <Stack.Screen
+              name="documents"
+              options={{ title: "Documents", headerShown: false }}
+            />
           </Stack>
           {!isAuthPage && (
             <>
