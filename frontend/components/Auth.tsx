@@ -11,20 +11,23 @@ import { supabase } from "../utils/supabase";
 import { getErrorMessage } from "../utils/errorTranslations";
 import { Link } from "expo-router";
 
+
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [buttonLoading, setButtonLoading] = useState(false);
+  
   async function signInWithEmail() {
-    setLoading(true);
+    setButtonLoading(true);
+
+    
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
-
     if (error) Alert.alert("Chyba", getErrorMessage(error.message));
-    setLoading(false);
+
+    setButtonLoading(false);
   }
 
   return (
@@ -57,8 +60,8 @@ export default function Auth() {
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          disabled={loading}
+          style={[styles.button, buttonLoading && styles.buttonDisabled]}
+          disabled={buttonLoading}
           onPress={() => signInWithEmail()}
         >
           <Text style={styles.buttonText}>Přihlásit se</Text>

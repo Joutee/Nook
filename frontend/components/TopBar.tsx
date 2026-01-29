@@ -8,13 +8,14 @@ import {
   FlatList,
   Pressable,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TopBar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { currentFlat, flats, setCurrentFlat } = useFlatContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
@@ -25,14 +26,30 @@ const TopBar = () => {
     }
   };
 
-  const handleSelectFlat = (flat: { id: string; name: string; address: string }) => {
+  const handleSelectFlat = (flat: {
+    id: string;
+    name: string;
+    address: string;
+  }) => {
+    // Pokud už je tento byt vybraný, jen zavři modal
+    if (currentFlat?.id === flat.id) {
+      setIsModalVisible(false);
+      return;
+    }
+
     setCurrentFlat(flat);
     setIsModalVisible(false);
-    router.push("/");
+    // Pouze pokud nejsme na domovské stránce, přejdi na ni
+    if (pathname !== "/") {
+      router.push("/");
+    }
   };
 
   const handleSettingsPress = () => {
-    router.push("/settings");
+    // Pouze pokud nejsme už v nastavení, přejdi tam
+    if (pathname !== "/settings") {
+      router.push("/settings");
+    }
   };
 
   return (
@@ -45,7 +62,7 @@ const TopBar = () => {
           disabled={flats.length <= 1}
         >
           <Text style={styles.flatName} numberOfLines={1}>
-            {currentFlat?.name || currentFlat?.address|| "Žádný byt"}
+            {currentFlat?.name || currentFlat?.address || "Žádný byt"}
           </Text>
           {flats.length > 1 && (
             <Ionicons
@@ -101,6 +118,7 @@ const TopBar = () => {
                       styles.flatItemText,
                       currentFlat?.id === item.id && styles.flatItemTextActive,
                     ]}
+                    numberOfLines={2}
                   >
                     {item.name}
                   </Text>
@@ -185,6 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
+    gap: 12,
   },
   flatItemActive: {
     backgroundColor: "#f0f0f0",
@@ -192,6 +211,8 @@ const styles = StyleSheet.create({
   flatItemText: {
     fontSize: 16,
     color: "#333",
+    flex: 1,
+    flexWrap: "wrap",
   },
   flatItemTextActive: {
     fontWeight: "600",

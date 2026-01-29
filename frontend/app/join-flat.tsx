@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
+import { useFlatContext } from "../contexts/FlatContext";
 
 export default function JoinFlat() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { refreshFlats, setCurrentFlat } = useFlatContext();
 
   const handleJoinFlat = async () => {
     if (!code.trim()) {
@@ -52,7 +54,7 @@ export default function JoinFlat() {
       const { error: joinError } = await supabase.from("flat_profile").insert({
         flat_id: flat.id,
         profile_id: user.id,
-        role: null, // Nastaví se později v profilu
+        role: null, // Nastaví se na další obrazovce
       });
 
       if (joinError) {
@@ -64,16 +66,22 @@ export default function JoinFlat() {
         return;
       }
 
-      // Úspěch - přesměrovat na domovskou stránku
-      Alert.alert("Úspěch", "Byli jste přidáni do bytu", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/"),
-        },
-      ]);
+      // Načíst kompletní info o bytu a nastavit jako currentFlat
+      const { data: flatData, error: flatDataError } = await supabase
+        .from("flats")
+        .select("id, name, address")
+        .eq("id", flat.id)
+        .single();
+
+      if (!flatDataError && flatData) {
+        setCurrentFlat(flatData);
+      }
+
+      // Obnovit kontext - layout se postará o přesměrování
+      await refreshFlats();
+      setLoading(false);
     } catch (error: any) {
       Alert.alert("Chyba", error.message);
-    } finally {
       setLoading(false);
     }
   };

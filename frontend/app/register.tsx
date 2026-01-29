@@ -15,6 +15,8 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -31,17 +33,18 @@ export default function Register() {
     } = await supabase.auth.signUp({
       email: email,
       password: password,
+      options: {
+        data: {
+          name: name,
+          surname: surname,
+        },
+      },
     });
 
     if (error) {
       Alert.alert("Chyba", getErrorMessage(error.message));
     } else {
-      Alert.alert("Registrace úspěšná!", "Můžete se nyní přihlásit.", [
-        {
-          text: "OK",
-          onPress: () => router.push("/login"),
-        },
-      ]);
+      Alert.alert("Registrace úspěšná!", "Vítejte v aplikaci!");
     }
     setLoading(false);
   }
@@ -51,6 +54,28 @@ export default function Register() {
       <Text style={styles.title}>Registrace</Text>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Text style={styles.label}>Jméno</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={(text: string) => setName(text)}
+          value={name}
+          placeholder="Jan"
+          autoCapitalize={"words"}
+        />
+      </View>
+
+      <View style={styles.verticallySpaced}>
+        <Text style={styles.label}>Příjmení</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={(text: string) => setSurname(text)}
+          value={surname}
+          placeholder="Novák"
+          autoCapitalize={"words"}
+        />
+      </View>
+
+      <View style={styles.verticallySpaced}>
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}

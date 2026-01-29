@@ -6,15 +6,163 @@ import NavBar from "../components/NavBar";
 import TopBar from "../components/TopBar";
 import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
-import { FlatProvider } from "../contexts/FlatContext";
+import { FlatProvider, useFlatContext } from "../contexts/FlatContext";
 
-const RootLayout = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasFlat, setHasFlat] = useState<boolean | null>(null);
+// Vnitřní komponenta s přístupem k FlatContext
+const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
+  const { isLoading, hasFlat, hasRole } = useFlatContext();
   const segments = useSegments();
   const router = useRouter();
   const pathname = usePathname();
+
+//useEffect(() => {console.log(isLoading)}, [isLoading]);
+
+  useEffect(() => {
+    
+    const onSignInPage = segments[0] === "login" || segments[0] === "register";
+    
+    // Není přihlášený -> redirect na login
+    if (!session && !onSignInPage) {
+      router.replace("/login");
+      console.log("redirect to login");
+      return;
+    }
+    
+    console.log("isLoading in layout:", isLoading);
+    if (isLoading) return;
+    
+    const onJoinFlatPage =
+      segments[0] === "join-flat" || segments[0] === "create-flat";
+    const onSelectRolePage = segments[0] === "select-role";
+
+
+    if (session && !hasFlat && !onJoinFlatPage) {
+      console.log("redirect to join-flat");
+      router.replace("/join-flat");
+      return;
+    }
+
+    if (session && hasFlat && !hasRole && !onSelectRolePage) {
+      router.replace("/select-role");
+      return;
+    }
+
+    if (
+      session &&
+      hasFlat &&
+      hasRole &&
+      (onJoinFlatPage || onSelectRolePage || onSignInPage)
+    ) {
+      console.log("redirect to home");
+      router.replace("/");
+      return;
+    }
+  }, [session, segments,isLoading , hasFlat, hasRole]);
+
+  // Skrýt navbar a topbar na přihlašovacích stránkách, join-flat a settings
+  const hideNavigation =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/join-flat" ||
+    pathname === "/create-flat" ||
+    pathname === "/select-role" ||
+    pathname === "/settings";
+
+      if (session && isLoading) {
+    return null; // Nebo loading screen
+  }
+    
+    return (
+    <View style={styles.container}>
+      {!hideNavigation && <TopBar />}
+      <Stack
+        screenOptions={{
+          contentStyle: { flex: 1 },
+        }}
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            title: "Domů",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="register"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="join-flat"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="create-flat"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="select-role"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="finance"
+          options={{ title: "Finance", headerShown: false }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{
+            title: "Nastavení",
+            headerShown: true,
+            headerBackTitle: "Zpět",
+          }}
+        />
+        <Stack.Screen
+          name="flat"
+          options={{ title: "Flat", headerShown: false }}
+        />
+        <Stack.Screen
+          name="chores"
+          options={{ title: "Chores", headerShown: false }}
+        />
+        <Stack.Screen
+          name="chat"
+          options={{ title: "Chat", headerShown: false }}
+        />
+        <Stack.Screen
+          name="keys"
+          options={{ title: "Keys", headerShown: false }}
+        />
+        <Stack.Screen
+          name="documents"
+          options={{ title: "Documents", headerShown: false }}
+        />
+      </Stack>
+      {!hideNavigation && (
+        <>
+          <NavBar />
+        </>
+      )}
+    </View>
+  );
+};
+
+
+const RootLayout = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     // Ověřit platnost session na serveru
@@ -29,170 +177,32 @@ const RootLayout = () => {
           // Session není platný - smazat a odhlásit
           await supabase.auth.signOut();
           setSession(null);
-          setIsLoading(false);
         } else {
           setSession(session);
-          checkFlatAssociation(user.id);
         }
       } else {
         setSession(null);
-        setIsLoading(false);
       }
+      setInitializing(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) {
-        checkFlatAssociation(session.user.id);
-      } else {
-        setHasFlat(null);
-        setIsLoading(false);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkFlatAssociation = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("flat_profile")
-        .select("id")
-        .eq("profile_id", userId);
-
-      // Uživatel má byt, pokud existuje alespoň jeden záznam
-      setHasFlat(!error && data && data.length > 0);
-    } catch (error) {
-      setHasFlat(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const inAuthGroup = segments[0] === "login" || segments[0] === "register";
-    const onJoinFlatPage = segments[0] === "join-flat";
-    const onCreateFlatPage = segments[0] === "create-flat";
-
-    if (!session && !inAuthGroup) {
-      // Není přihlášený a není na auth stránce -> redirect na login
-      router.replace("/login");
-    } else if (session && inAuthGroup) {
-      // Je přihlášený a je na auth stránce -> zkontrolovat byt
-      if (hasFlat === false) {
-        router.replace("/join-flat");
-      } else if (hasFlat === true) {
-        router.replace("/");
-      }
-    } else if (
-      session &&
-      hasFlat === false &&
-      !onJoinFlatPage &&
-      !onCreateFlatPage
-    ) {
-      // Je přihlášený, nemá byt a není na join-flat ani create-flat stránce
-      router.replace("/join-flat");
-    } else if (
-      session &&
-      hasFlat === true &&
-      (onJoinFlatPage || onCreateFlatPage)
-    ) {
-      // Je přihlášený, má byt a je na join-flat nebo create-flat stránce -> redirect home
-      router.replace("/");
-    }
-  }, [session, segments, isLoading, hasFlat]);
-
-  // Skrýt navbar a topbar na přihlašovacích stránkách a join-flat
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/join-flat" ||
-    pathname === "/create-flat";
-
-  if (isLoading) {
+  if (initializing) {
     return null; // Nebo loading screen
   }
 
   return (
     <SafeAreaProvider>
       <FlatProvider session={session}>
-        <View style={styles.container}>
-          {!isAuthPage && <TopBar />}
-          <Stack
-            screenOptions={{
-              contentStyle: { flex: 1 },
-            }}
-          >
-            <Stack.Screen
-              name="index"
-              options={{
-                title: "Domů",
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="login"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="register"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="join-flat"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="create-flat"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="finance"
-              options={{ title: "Finance", headerShown: false }}
-            />
-            <Stack.Screen
-              name="settings"
-              options={{ title: "Settings", headerShown: false }}
-            />
-            <Stack.Screen
-              name="flat"
-              options={{ title: "Flat", headerShown: false }}
-            />
-            <Stack.Screen
-              name="chores"
-              options={{ title: "Chores", headerShown: false }}
-            />
-            <Stack.Screen
-              name="chat"
-              options={{ title: "Chat", headerShown: false }}
-            />
-            <Stack.Screen
-              name="keys"
-              options={{ title: "Keys", headerShown: false }}
-            />
-            <Stack.Screen
-              name="documents"
-              options={{ title: "Documents", headerShown: false }}
-            />
-          </Stack>
-          {!isAuthPage && (
-            <>
-              <NavBar />
-            </>
-          )}
-        </View>
+        <LayoutContent session={session} />
       </FlatProvider>
     </SafeAreaProvider>
   );

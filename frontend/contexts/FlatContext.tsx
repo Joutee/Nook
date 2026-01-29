@@ -32,7 +32,16 @@ export const useFlatContext = () => {
   if (!context) {
     throw new Error("useFlatContext must be used within FlatProvider");
   }
-  return context;
+
+  // Computed values
+  const hasFlat = context.flats.length > 0;
+  const hasRole = hasFlat && context.userRole !== null;
+
+  return {
+    ...context,
+    hasFlat,
+    hasRole,
+  };
 };
 
 interface FlatProviderProps {
@@ -53,19 +62,19 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
     if (!session?.user?.id) {
       setFlats([]);
       setCurrentFlatState(null);
-      setIsLoading(false);
+      setIsLoading(true);
       return;
     }
 
     try {
       setIsLoading(true);
-
+      console.log("started Fetching flats");
       // Načíst všechny byty, ke kterým má uživatel přístup
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
         .select("flat_id, role, flat:flats(id, name, address)")
         .eq("profile_id", session.user.id);
-
+      console.log("ended Fetching flats");
       if (error) {
         console.error("Error fetching flats:", error);
         setFlats([]);
@@ -78,7 +87,9 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
           .filter((fp) => fp.flat)
           .map((fp) => ({
             id: (fp.flat as any).id,
-            name: (fp.flat as any).name || (fp.flat as any).address || "Bez názvu",
+            name:
+              (fp.flat as any).name || (fp.flat as any).address || "Bez názvu",
+            address: (fp.flat as any).address || "",
           }));
 
         setFlats(userFlats);
