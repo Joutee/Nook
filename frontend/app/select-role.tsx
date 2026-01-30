@@ -1,17 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
+import { useToast } from "../contexts/ToastContext";
 
 export default function SelectRole() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refreshFlats, currentFlat } = useFlatContext();
+  const { showToast } = useToast();
 
   const handleSelectRole = async (role: "pronajimatel" | "najemce") => {
     if (!currentFlat?.id) {
-      Alert.alert("Chyba", "ID bytu není k dispozici");
+      showToast("ID bytu není k dispozici", "error");
       return;
     }
 
@@ -23,7 +25,7 @@ export default function SelectRole() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Chyba", "Nejste přihlášeni");
+        showToast("Nejste přihlášeni", "error");
         setLoading(false);
         return;
       }
@@ -36,7 +38,7 @@ export default function SelectRole() {
         .eq("profile_id", user.id);
 
       if (error) {
-        Alert.alert("Chyba", "Nepodařilo se nastavit roli: " + error.message);
+        showToast("Nepodařilo se nastavit roli: " + error.message, "error");
         setLoading(false);
         return;
       }
@@ -44,8 +46,10 @@ export default function SelectRole() {
       // Obnovit kontext - layout se postará o přesměrování
       await refreshFlats();
       setLoading(false);
+
+      showToast("Úspěšně jste si vybrali roli!", "success");
     } catch (error: any) {
-      Alert.alert("Chyba", error.message);
+      showToast("Chyba: " + error.message, "error");
       setLoading(false);
     }
   };

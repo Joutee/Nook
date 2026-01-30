@@ -5,11 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
+import { useToast } from "../contexts/ToastContext";
+import CodeModal from "./CodeModal";
 
 interface CreateFlatFormProps {
   showBackButton?: boolean;
@@ -23,12 +24,33 @@ export default function CreateFlatForm({
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState("");
+  const modalResolveRef = React.useRef<(() => void) | null>(null);
   const router = useRouter();
   const { refreshFlats, setCurrentFlat } = useFlatContext();
+  const { showToast } = useToast();
 
   const generateCode = () => {
     // Generovat 6-místný náhodný kód
     return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
+
+  const waitForModalClose = (): Promise<void> => {
+    return new Promise((resolve) => {
+      modalResolveRef.current = resolve;
+    });
+  };
+
+  const handleModalClose = () => {
+    setShowCodeModal(false);
+    if (modalResolveRef.current) {
+      modalResolveRef.current();
+      modalResolveRef.current = null;
+    }
+    if (onSuccess) {
+      onSuccess();
+    }
   };
 
   const generateUniqueCode = async (): Promise<string> => {
@@ -59,7 +81,7 @@ export default function CreateFlatForm({
 
   const handleCreateFlat = async () => {
     if (!address.trim()) {
-      Alert.alert("Chyba", "Zadejte adresu bytu");
+      showToast("Zadejte adresu bytu", "error");
       return;
     }
 
@@ -72,7 +94,7 @@ export default function CreateFlatForm({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Chyba", "Nejste přihlášeni");
+        showToast("Nejste přihlášeni", "error");
         setLoading(false);
         return;
       }
@@ -87,10 +109,7 @@ export default function CreateFlatForm({
       });
 
       if (flatError) {
-        Alert.alert(
-          "Chyba",
-          "Nepodařilo se vytvořit byt: " + flatError?.message,
-        );
+        showToast("Nepodařilo se vytvořit byt: " + flatError?.message, "error");
         setLoading(false);
         return;
       }
@@ -105,7 +124,7 @@ export default function CreateFlatForm({
         .single();
 
       if (findError || !createdFlat) {
-        Alert.alert("Chyba", "Nepodařilo se najít vytvořený byt");
+        showToast("Nepodařilo se najít vytvořený byt", "error");
         setLoading(false);
         return;
       }
@@ -118,10 +137,10 @@ export default function CreateFlatForm({
       });
 
       if (joinError) {
-        Alert.alert(
-          "Chyba",
+        showToast(
           "Byt byl vytvořen, ale nepodařilo se vás přidat: " +
             joinError.message,
+          "error",
         );
         setLoading(false);
         return;
@@ -134,31 +153,30 @@ export default function CreateFlatForm({
         .eq("id", createdFlat.id)
         .single();
 
+      // Zobrazit modal s kódem a počkat na jeho zavření
+      setGeneratedCode(code);
+      setShowCodeModal(true);
+      await waitForModalClose();
+
+      // Teprve po zavření modalu pokračovat s aktualizací kontextu
       if (!flatDataError && flatData) {
         setCurrentFlat(flatData);
       }
-
-      // Obnovit kontext - layout se postará o přesměrování
       await refreshFlats();
-
-      Alert.alert(
-        "Úspěch",
-        `Byt byl vytvořen!\n\nKód pro připojení: ${code}\n\nTento kód můžete sdílet s ostatními, aby se mohli připojit k bytu.`,
-      );
-
       setLoading(false);
-
-      if (onSuccess) {
-        onSuccess();
-      }
     } catch (error: any) {
-      Alert.alert("Chyba", error.message);
+      showToast(error.message, "error");
       setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
+      <CodeModal
+        visible={showCodeModal}
+        code={generatedCode}
+        onClose={handleModalClose}
+      />
       <View style={styles.content}>
         <Text style={styles.title}>Vytvořit novou domácnost</Text>
         <Text style={styles.description}>

@@ -7,6 +7,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import { FlatProvider, useFlatContext } from "../contexts/FlatContext";
+import { ToastProvider } from "../contexts/ToastContext";
 
 // Vnitřní komponenta s přístupem k FlatContext
 const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
@@ -216,9 +217,11 @@ const RootLayout = () => {
 
   return (
     <SafeAreaProvider>
-      <FlatProvider session={session}>
-        <LayoutContent session={session} />
-      </FlatProvider>
+      <ToastProvider>
+        <FlatProvider session={session}>
+          <LayoutContent session={session} />
+        </FlatProvider>
+      </ToastProvider>
     </SafeAreaProvider>
   );
 };

@@ -10,22 +10,23 @@ import {
 import { supabase } from "../utils/supabase";
 import { getErrorMessage } from "../utils/errorTranslations";
 import { Link } from "expo-router";
-
+import { useToast } from "../contexts/ToastContext";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
-  
+  const { showToast } = useToast();
+
   async function signInWithEmail() {
     setButtonLoading(true);
 
-    
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
-    if (error) Alert.alert("Chyba", getErrorMessage(error.message));
+    if (error) showToast(getErrorMessage(error.message), "error");
+    else showToast("Přihlášení bylo úspěšné", "success");
 
     setButtonLoading(false);
   }

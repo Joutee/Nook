@@ -5,10 +5,10 @@ import {
   View,
   FlatList,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
+import { useToast } from "../contexts/ToastContext";
 
 interface FlatMember {
   id: string;
@@ -31,6 +31,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
 }) => {
   const [members, setMembers] = useState<FlatMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (visible && flatId) {
@@ -62,7 +63,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
 
       if (error) {
         console.error("Error fetching members:", error);
-        Alert.alert("Chyba", "Nepodařilo se načíst členy bytu");
+        showToast("Nepodařilo se načíst členy bytu", "error");
         onClose();
       } else if (data) {
         const formattedMembers = data
@@ -78,7 +79,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
       }
     } catch (error) {
       console.error("Error:", error);
-      Alert.alert("Chyba", "Nepodařilo se načíst členy bytu");
+      showToast("Nepodařilo se načíst členy bytu", "error");
       onClose();
     } finally {
       setIsLoading(false);

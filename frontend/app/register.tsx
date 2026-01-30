@@ -7,9 +7,9 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useToast } from "../contexts/ToastContext";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -19,10 +19,11 @@ export default function Register() {
   const [surname, setSurname] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   async function signUpWithEmail() {
     if (password !== confirmPassword) {
-      Alert.alert("Chyba", getErrorMessage("PASSWORDS_DO_NOT_MATCH"));
+      showToast(getErrorMessage("PASSWORDS_DO_NOT_MATCH"), "error");
       return;
     }
 
@@ -42,9 +43,9 @@ export default function Register() {
     });
 
     if (error) {
-      Alert.alert("Chyba", getErrorMessage(error.message));
+      showToast(getErrorMessage(error.message), "error");
     } else {
-      Alert.alert("Registrace úspěšná!", "Vítejte v aplikaci!");
+      showToast("Registrace úspěšná! Vítejte v aplikaci!", "success");
     }
     setLoading(false);
   }

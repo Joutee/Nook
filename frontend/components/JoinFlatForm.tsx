@@ -10,6 +10,7 @@ import {
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
+import { useToast } from "../contexts/ToastContext";
 
 interface JoinFlatFormProps {
   showCreateOption?: boolean;
@@ -24,6 +25,7 @@ export default function JoinFlatForm({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refreshFlats, setCurrentFlat } = useFlatContext();
+  const { showToast } = useToast();
 
   const handleJoinFlat = async () => {
     if (!code.trim()) {
@@ -102,12 +104,9 @@ export default function JoinFlatForm({
       // Obnovit kontext - layout se postará o přesměrování
       await refreshFlats();
       setLoading(false);
-
-      if (onSuccess) {
-        onSuccess();
-      }
+      showToast("Úspěšně jste se připojili k bytu!", "success");
     } catch (error: any) {
-      Alert.alert("Chyba", error.message);
+      showToast(error.message, "error");
       setLoading(false);
     }
   };
