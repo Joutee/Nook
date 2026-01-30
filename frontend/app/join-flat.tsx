@@ -50,20 +50,32 @@ export default function JoinFlat() {
         return;
       }
 
-      // Přidat uživatele do bytu (flat_profile)
-      const { error: joinError } = await supabase.from("flat_profile").insert({
-        flat_id: flat.id,
-        profile_id: user.id,
-        role: null, // Nastaví se na další obrazovce
-      });
+      // Zkontrolovat, jestli uživatel už není v tomto bytě
+      const { data: existingMembership } = await supabase
+        .from("flat_profile")
+        .select("id")
+        .eq("flat_id", flat.id)
+        .eq("profile_id", user.id)
+        .maybeSingle();
 
-      if (joinError) {
-        Alert.alert(
-          "Chyba",
-          "Nepodařilo se přidat do bytu: " + joinError.message,
-        );
-        setLoading(false);
-        return;
+      if (!existingMembership) {
+        // Přidat uživatele do bytu (flat_profile)
+        const { error: joinError } = await supabase
+          .from("flat_profile")
+          .insert({
+            flat_id: flat.id,
+            profile_id: user.id,
+            role: null, // Nastaví se na další obrazovce
+          });
+
+        if (joinError) {
+          Alert.alert(
+            "Chyba",
+            "Nepodařilo se přidat do bytu: " + joinError.message,
+          );
+          setLoading(false);
+          return;
+        }
       }
 
       // Načíst kompletní info o bytu a nastavit jako currentFlat

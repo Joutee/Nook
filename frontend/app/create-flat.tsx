@@ -9,12 +9,14 @@ import {
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
+import { useFlatContext } from "../contexts/FlatContext";
 
 export default function CreateFlat() {
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { refreshFlats } = useFlatContext();
 
   const generateCode = () => {
     // Generovat 6-místný náhodný kód
@@ -85,11 +87,11 @@ export default function CreateFlat() {
         return;
       }
 
-      // Najít právě vytvořený byt podle adresy (fallback)
+      // Najít právě vytvořený byt podle kodu (fallback)
       const { data: createdFlat, error: findError } = await supabase
         .from("flats")
         .select("id")
-        .eq("address", address.trim())
+        .eq("code", code)
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
@@ -117,21 +119,17 @@ export default function CreateFlat() {
         return;
       }
 
-      // Teď načíst kompletní data bytu (včetně kódu) - už jsi v flat_profile
-      // Nebo použít kód, který jsme vygenerovali
+      // Obnovit kontext - layout se postará o přesměrování
+      await refreshFlats();
+
       Alert.alert(
         "Úspěch",
         `Byt byl vytvořen!\n\nKód pro připojení: ${code}\n\nTento kód můžete sdílet s ostatními, aby se mohli připojit k bytu.`,
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/"),
-          },
-        ],
       );
+
+      setLoading(false);
     } catch (error: any) {
       Alert.alert("Chyba", error.message);
-    } finally {
       setLoading(false);
     }
   };

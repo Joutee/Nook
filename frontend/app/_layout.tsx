@@ -57,7 +57,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
       router.replace("/");
       return;
     }
-  }, [session, segments,isLoading , hasFlat, hasRole]);
+  }, [session, segments, isLoading , hasFlat, hasRole]);
 
   // Skrýt navbar a topbar na přihlašovacích stránkách, join-flat a settings
   const hideNavigation =
