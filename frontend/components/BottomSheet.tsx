@@ -22,6 +22,7 @@ interface BottomSheetProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  headerActions?: ReactNode;
 }
 
 const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -29,6 +30,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   onClose,
   title,
   children,
+  headerActions,
 }) => {
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(0)).current;
@@ -83,10 +85,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const snapTo = (position: number, callback?: () => void) => {
     isAnimating.current = true;
-    Animated.spring(translateY, {
+    Animated.timing(translateY, {
       toValue: position,
-      tension: 65,
-      friction: 11,
+      duration: 300,
       useNativeDriver: true,
     }).start(() => {
       isAnimating.current = false;
@@ -147,9 +148,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             <View style={styles.dragHandle} />
             <View style={styles.bottomSheetHeader}>
               <Text style={styles.bottomSheetTitle}>{title}</Text>
-              <TouchableOpacity onPress={closeBottomSheet}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
+              <View style={styles.headerActions}>
+                {headerActions}
+                <TouchableOpacity onPress={closeBottomSheet}>
+                  <Ionicons name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           <View style={styles.content} onLayout={handleContentLayout}>
@@ -206,6 +210,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     color: "#333",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
   },
   content: {
     minHeight: 100,

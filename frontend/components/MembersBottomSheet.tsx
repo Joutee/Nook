@@ -6,10 +6,13 @@ import {
   FlatList,
   ActivityIndicator,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
+import { useFlatContext } from "../contexts/FlatContext";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -34,7 +37,10 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
 }) => {
   const [members, setMembers] = useState<FlatMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { refreshFlats } = useFlatContext();
 
   useEffect(() => {
     if (visible && flatId) {
@@ -48,6 +54,23 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     setIsLoading(true);
 
     try {
+      // Získat aktuálního uživatele a jeho roli
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setCurrentUserId(user.id);
+        const { data: userProfile } = await supabase
+          .from("flat_profile")
+          .select("is_admin")
+          .eq("flat_id", flatId)
+          .eq("profile_id", user.id)
+          .single();
+
+        setIsCurrentUserAdmin(userProfile?.is_admin || false);
+      }
+
       const { data, error } = await supabase
         .from("flat_profile")
         .select(
@@ -89,6 +112,57 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     }
   };
 
+  const handleRemoveMember = async (memberId: string) => {
+    if (!flatId) return;
+
+    try {
+
+      // Nejdřív zkontrolovat, jestli řádek existuje
+      const { data: existing, error: checkError } = await supabase
+        .from("flat_profile")
+        .select("*")
+        .eq("flat_id", flatId)
+        .eq("profile_id", memberId);
+
+
+      if (!existing || existing.length === 0) {
+        showToast("Člen nebyl nalezen v databázi", "error");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("flat_profile")
+        .delete()
+        .eq("flat_id", flatId)
+        .eq("profile_id", memberId)
+        .select();
+
+
+      if (error) {
+        console.error("Delete error:", error);
+        showToast("Nepodařilo se odebrat člena: " + error.message, "error");
+      } else if (data && data.length > 0) {
+        showToast("Člen byl odebrán z bytu", "success");
+        
+        // Pokud uživatel odstranil sám sebe, zavrít bottom sheet
+        if (memberId === currentUserId) {
+          onClose();
+        }
+        
+        // Aktualizovat kontext - pokud uživatel opustil byt, layout ho přesměruje
+        await refreshFlats();
+        
+        // Znovu načíst členy (pokud uživatel stále vidí tento byt)
+        loadMembers();
+      } else {
+        showToast("Člen nebyl smazán (RLS policy?)", "error");
+      }
+    } catch (error: any) {
+      console.error("Catch error:", error);
+      showToast("Nepodařilo se odebrat člena: " + error.message, "error");
+    }
+  };
+
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Členové bytu">
       {isLoading ? (
@@ -104,29 +178,48 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           <FlatList
             data={members}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.memberItem}>
-                <View style={styles.memberAvatar}>
-                  <Text style={styles.memberAvatarText}>
-                    {item.name
-                      ? item.name.charAt(0).toUpperCase()
-                      : item.username
-                        ? item.username.charAt(0).toUpperCase()
-                        : "?"}
-                  </Text>
+            renderItem={({ item }) => {
+              const showDeleteButton =
+                isCurrentUserAdmin || item.id === currentUserId;
+
+              return (
+                <View style={styles.memberItem}>
+                  <View style={styles.memberAvatar}>
+                    <Text style={styles.memberAvatarText}>
+                      {item.name
+                        ? item.name.charAt(0).toUpperCase()
+                        : item.username
+                          ? item.username.charAt(0).toUpperCase()
+                          : "?"}
+                    </Text>
+                  </View>
+                  <View style={styles.memberInfo}>
+                    <Text style={styles.memberName}>
+                      {item.name && item.surname
+                        ? `${item.name} ${item.surname}`
+                        : item.name || item.username || "Neznámý uživatel"}
+                    </Text>
+                    <Text style={styles.memberRole}>
+                      {item.role === "pronajimatel"
+                        ? "Pronajímatel"
+                        : "Nájemce"}
+                    </Text>
+                  </View>
+                  {showDeleteButton && (
+                    <TouchableOpacity
+                      onPress={() => handleRemoveMember(item.id)}
+                      style={styles.deleteButton}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={24}
+                        color="#FF3B30"
+                      />
+                    </TouchableOpacity>
+                  )}
                 </View>
-                <View style={styles.memberInfo}>
-                  <Text style={styles.memberName}>
-                    {item.name && item.surname
-                      ? `${item.name} ${item.surname}`
-                      : item.name || item.username || "Neznámý uživatel"}
-                  </Text>
-                  <Text style={styles.memberRole}>
-                    {item.role === "pronajimatel" ? "Pronajímatel" : "Nájemce"}
-                  </Text>
-                </View>
-              </View>
-            )}
+              );
+            }}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={styles.membersList}
             scrollEnabled={members.length > 5}
@@ -192,6 +285,9 @@ const styles = StyleSheet.create({
   memberRole: {
     fontSize: 14,
     color: "#666",
+  },
+  deleteButton: {
+    padding: 8,
   },
   separator: {
     height: 1,
