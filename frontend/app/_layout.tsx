@@ -65,6 +65,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     pathname === "/create-flat" ||
     pathname === "/select-role" ||
     pathname === "/join-another-flat" ||
+    pathname === "/create-another-flat" ||
     pathname === "/settings";
 
   if (session && isLoading) {
@@ -152,6 +153,14 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="join-another-flat"
           options={{
             title: "Připojit se k dalšímu bytu",
+            headerShown: true,
+            headerBackTitle: "Zpět",
+          }}
+        />
+        <Stack.Screen
+          name="create-another-flat"
+          options={{
+            title: "Vytvořit novou domácnost",
             headerShown: true,
             headerBackTitle: "Zpět",
           }}

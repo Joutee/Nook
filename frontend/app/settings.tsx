@@ -47,6 +47,12 @@ const settings = () => {
       icon: "add-circle-outline" as const,
       onPress: () => router.push("/join-another-flat"),
     },
+    {
+      id: "create-flat",
+      title: "Vytvořit novou domácnost",
+      icon: "home-outline" as const,
+      onPress: () => router.push("/create-another-flat"),
+    },
   ];
 
   return (
