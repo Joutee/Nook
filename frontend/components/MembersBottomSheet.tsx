@@ -5,10 +5,13 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface FlatMember {
   id: string;
@@ -92,37 +95,43 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
+      ) : members.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Žádní členové</Text>
+        </View>
       ) : (
-        <FlatList
-          data={members}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.memberItem}>
-              <View style={styles.memberAvatar}>
-                <Text style={styles.memberAvatarText}>
-                  {item.name
-                    ? item.name.charAt(0).toUpperCase()
-                    : item.username
-                      ? item.username.charAt(0).toUpperCase()
-                      : "?"}
-                </Text>
+        <View style={styles.listContainer}>
+          <FlatList
+            data={members}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.memberItem}>
+                <View style={styles.memberAvatar}>
+                  <Text style={styles.memberAvatarText}>
+                    {item.name
+                      ? item.name.charAt(0).toUpperCase()
+                      : item.username
+                        ? item.username.charAt(0).toUpperCase()
+                        : "?"}
+                  </Text>
+                </View>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>
+                    {item.name && item.surname
+                      ? `${item.name} ${item.surname}`
+                      : item.name || item.username || "Neznámý uživatel"}
+                  </Text>
+                  <Text style={styles.memberRole}>
+                    {item.role === "pronajimatel" ? "Pronajímatel" : "Nájemce"}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>
-                  {item.name && item.surname
-                    ? `${item.name} ${item.surname}`
-                    : item.name || item.username || "Neznámý uživatel"}
-                </Text>
-                <Text style={styles.memberRole}>
-                  {item.role === "pronajimatel" ? "Pronajímatel" : "Nájemce"}
-                </Text>
-              </View>
-            </View>
-          )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          contentContainerStyle={styles.membersList}
-          scrollEnabled={true}
-        />
+            )}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            contentContainerStyle={styles.membersList}
+            scrollEnabled={members.length > 5}
+          />
+        </View>
       )}
     </BottomSheet>
   );
@@ -135,6 +144,18 @@ const styles = StyleSheet.create({
     padding: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+  },
+  listContainer: {
+    maxHeight: SCREEN_HEIGHT * 0.6,
   },
   membersList: {
     padding: 16,

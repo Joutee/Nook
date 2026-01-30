@@ -14,16 +14,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SNAP_POINT_HALF = SCREEN_HEIGHT * 0.5;
-const SNAP_POINT_FULL = SCREEN_HEIGHT * 0.15; // 5% z vrchu = 95% výška
+const MAX_HEIGHT_PERCENTAGE = 0.85; // Maximálně 85% obrazovky
+const HEADER_HEIGHT = 80; // Přibližná výška headeru + drag handle
 
 interface BottomSheetProps {
   visible: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
-  minHeight?: string;
-  maxHeight?: string;
 }
 
 const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -31,15 +29,23 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   onClose,
   title,
   children,
-  minHeight = "50%",
-  maxHeight = "95%",
 }) => {
   const insets = useSafeAreaInsets();
-  const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const [isExpanded, setIsExpanded] = useState(false);
-  const lastGestureY = useRef(0);
+  const translateY = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
   const startPosition = useRef(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [sheetHeight, setSheetHeight] = useState(SCREEN_HEIGHT * 0.5);
+
+  // Vypočítat optimální výšku podle obsahu
+  useEffect(() => {
+    if (contentHeight > 0 && visible) {
+      const totalHeight = contentHeight + HEADER_HEIGHT + (insets.bottom || 20);
+      const maxHeight = SCREEN_HEIGHT * MAX_HEIGHT_PERCENTAGE;
+      const optimalHeight = Math.min(totalHeight, maxHeight);
+      setSheetHeight(optimalHeight);
+    }
+  }, [contentHeight, insets.bottom, visible]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -48,47 +54,29 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         return Math.abs(gestureState.dy) > 5 && !isAnimating.current;
       },
       onPanResponderGrant: (_, gestureState) => {
-        lastGestureY.current = gestureState.moveY;
-        // Uložit aktuální pozici na začátku gesta
-        const currentSnapPoint = isExpanded ? SNAP_POINT_FULL : SNAP_POINT_HALF;
-        startPosition.current = currentSnapPoint;
+        startPosition.current = 0; // Současná pozice je 0 (viditelný)
       },
       onPanResponderMove: (_, gestureState) => {
-        const newValue = startPosition.current + gestureState.dy;
-
-        // Povolit pohyb dolů vždy, nahoru jen do SNAP_POINT_FULL
-        if (gestureState.dy > 0) {
-          // Pohyb dolů - povolit vždy
-          translateY.setValue(newValue);
-        } else if (newValue >= SNAP_POINT_FULL) {
-          // Pohyb nahoru - jen do SNAP_POINT_FULL
-          translateY.setValue(newValue);
+        // gestureState.dy > 0 znamená pohyb dolů
+        // Povolit jen tažení dolů (zvětšování translateY od 0 směrem k sheetHeight)
+        if (gestureState.dy >= 0) {
+          const newValue = gestureState.dy;
+          if (newValue <= sheetHeight) {
+            translateY.setValue(newValue);
+          }
         }
       },
       onPanResponderRelease: (_, gestureState) => {
         const velocity = gestureState.vy;
 
-        // Pokud je rozbalený a swipne dolů -> sbalit na polovinu
-        if (isExpanded && (gestureState.dy > 50 || velocity > 0.3)) {
-          snapTo(SNAP_POINT_HALF, () => setIsExpanded(false));
-          return;
-        }
-
-        // Pokud je v polovině a swipne dolů -> zavřít
-        if (!isExpanded && (gestureState.dy > 100 || velocity > 0.5)) {
+        // Pokud je gesture rychlé dolů nebo táhne hodně dolů -> zavřít
+        if (gestureState.dy > 100 || velocity > 0.5) {
           closeBottomSheet();
           return;
         }
 
-        // Swipe nahoru z poloviny -> rozbalit
-        if (!isExpanded && (gestureState.dy < -50 || velocity < -0.3)) {
-          snapTo(SNAP_POINT_FULL, () => setIsExpanded(true));
-          return;
-        }
-
-        // Jinak vrátit na současnou pozici
-        const currentSnapPoint = isExpanded ? SNAP_POINT_FULL : SNAP_POINT_HALF;
-        snapTo(currentSnapPoint);
+        // Jinak vrátit na viditelnou pozici
+        snapTo(0);
       },
     }),
   ).current;
@@ -108,45 +96,54 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   useEffect(() => {
     if (visible) {
-      translateY.setValue(SCREEN_HEIGHT);
-      setIsExpanded(false);
-      snapTo(SNAP_POINT_HALF);
+      // Otevřít sheet
+      translateY.setValue(sheetHeight);
+      snapTo(0);
+    } else {
+      // Zavřít sheet a resetovat
+      translateY.setValue(sheetHeight);
+      setContentHeight(0);
+      setSheetHeight(SCREEN_HEIGHT * 0.5);
     }
   }, [visible]);
 
   const closeBottomSheet = () => {
     isAnimating.current = true;
     Animated.timing(translateY, {
-      toValue: SCREEN_HEIGHT,
+      toValue: sheetHeight,
       duration: 250,
       useNativeDriver: true,
     }).start(() => {
       isAnimating.current = false;
       onClose();
-      setIsExpanded(false);
     });
+  };
+
+  const handleContentLayout = (event: any) => {
+    const { height } = event.nativeEvent.layout;
+    setContentHeight(height);
   };
 
   return (
     <Modal
       visible={visible}
       transparent={true}
-      animationType="fade"
+      animationType="none"
       onRequestClose={closeBottomSheet}
     >
-      <Pressable style={styles.modalOverlay} onPress={closeBottomSheet}>
+      <View style={styles.modalContainer}>
+        <Pressable style={styles.modalOverlay} onPress={closeBottomSheet} />
         <Animated.View
           style={[
             styles.bottomSheet,
             {
-              height: SCREEN_HEIGHT,
+              height: sheetHeight,
               paddingBottom: insets.bottom || 20,
               transform: [{ translateY }],
             },
           ]}
-          {...panResponder.panHandlers}
         >
-          <Pressable onPress={(e) => e.stopPropagation()}>
+          <View {...panResponder.panHandlers} style={styles.headerContainer}>
             <View style={styles.dragHandle} />
             <View style={styles.bottomSheetHeader}>
               <Text style={styles.bottomSheetTitle}>{title}</Text>
@@ -154,10 +151,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
-            <View style={styles.content}>{children}</View>
-          </Pressable>
+          </View>
+          <View style={styles.content} onLayout={handleContentLayout}>
+            {children}
+          </View>
         </Animated.View>
-      </Pressable>
+      </View>
     </Modal>
   );
 };
@@ -165,10 +164,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 export default BottomSheet;
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  modalContainer: {
     flex: 1,
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
   },
   dragHandle: {
     width: 40,
@@ -180,6 +181,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   bottomSheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  headerContainer: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -197,5 +207,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
-  content: {},
+  content: {
+    minHeight: 100,
+  },
 });

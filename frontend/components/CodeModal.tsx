@@ -48,10 +48,7 @@ export default function CodeModal({ visible, code, onClose }: CodeModalProps) {
             <Text style={styles.code}>{code}</Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.copyButton}
-            onPress={handleCopyCode}
-          >
+          <TouchableOpacity style={styles.copyButton} onPress={handleCopyCode}>
             <Ionicons name="copy-outline" size={20} color="#007AFF" />
             <Text style={styles.copyButtonText}>Zkopírovat kód</Text>
           </TouchableOpacity>
