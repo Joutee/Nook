@@ -41,6 +41,12 @@ const settings = () => {
       icon: "people-outline" as const,
       onPress: handleOpenMembers,
     },
+    {
+      id: "join-flat",
+      title: "Připojit se k dalšímu bytu",
+      icon: "add-circle-outline" as const,
+      onPress: () => router.push("/join-another-flat"),
+    },
   ];
 
   return (

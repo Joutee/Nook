@@ -15,26 +15,24 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-//useEffect(() => {console.log(isLoading)}, [isLoading]);
+  //useEffect(() => {console.log(isLoading)}, [isLoading]);
 
   useEffect(() => {
-    
     const onSignInPage = segments[0] === "login" || segments[0] === "register";
-    
+
     // Není přihlášený -> redirect na login
     if (!session && !onSignInPage) {
       router.replace("/login");
       console.log("redirect to login");
       return;
     }
-    
+
     console.log("isLoading in layout:", isLoading);
     if (isLoading) return;
-    
+
     const onJoinFlatPage =
       segments[0] === "join-flat" || segments[0] === "create-flat";
     const onSelectRolePage = segments[0] === "select-role";
-
 
     if (session && !hasFlat && !onJoinFlatPage) {
       console.log("redirect to join-flat");
@@ -57,7 +55,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
       router.replace("/");
       return;
     }
-  }, [session, segments, isLoading , hasFlat, hasRole]);
+  }, [session, segments, isLoading, hasFlat, hasRole]);
 
   // Skrýt navbar a topbar na přihlašovacích stránkách, join-flat a settings
   const hideNavigation =
@@ -66,13 +64,14 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     pathname === "/join-flat" ||
     pathname === "/create-flat" ||
     pathname === "/select-role" ||
+    pathname === "/join-another-flat" ||
     pathname === "/settings";
 
-      if (session && isLoading) {
+  if (session && isLoading) {
     return null; // Nebo loading screen
   }
-    
-    return (
+
+  return (
     <View style={styles.container}>
       {!hideNavigation && <TopBar />}
       <Stack
@@ -149,6 +148,14 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="documents"
           options={{ title: "Documents", headerShown: false }}
         />
+        <Stack.Screen
+          name="join-another-flat"
+          options={{
+            title: "Připojit se k dalšímu bytu",
+            headerShown: true,
+            headerBackTitle: "Zpět",
+          }}
+        />
       </Stack>
       {!hideNavigation && (
         <>
@@ -158,7 +165,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     </View>
   );
 };
-
 
 const RootLayout = () => {
   const [session, setSession] = useState<Session | null>(null);
