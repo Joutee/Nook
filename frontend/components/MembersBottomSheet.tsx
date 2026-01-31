@@ -116,14 +116,12 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     if (!flatId) return;
 
     try {
-
       // Nejdřív zkontrolovat, jestli řádek existuje
       const { data: existing, error: checkError } = await supabase
         .from("flat_profile")
         .select("*")
         .eq("flat_id", flatId)
         .eq("profile_id", memberId);
-
 
       if (!existing || existing.length === 0) {
         showToast("Člen nebyl nalezen v databázi", "error");
@@ -137,21 +135,20 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
         .eq("profile_id", memberId)
         .select();
 
-
       if (error) {
         console.error("Delete error:", error);
         showToast("Nepodařilo se odebrat člena: " + error.message, "error");
       } else if (data && data.length > 0) {
         showToast("Člen byl odebrán z bytu", "success");
-        
+
         // Pokud uživatel odstranil sám sebe, zavrít bottom sheet
         if (memberId === currentUserId) {
           onClose();
         }
-        
+
         // Aktualizovat kontext - pokud uživatel opustil byt, layout ho přesměruje
         await refreshFlats();
-        
+
         // Znovu načíst členy (pokud uživatel stále vidí tento byt)
         loadMembers();
       } else {
@@ -160,6 +157,32 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     } catch (error: any) {
       console.error("Catch error:", error);
       showToast("Nepodařilo se odebrat člena: " + error.message, "error");
+    }
+  };
+
+  const handleChangeRole = async (memberId: string, currentRole: string) => {
+    if (!flatId || !isCurrentUserAdmin) return;
+
+    const newRole = currentRole === "pronajimatel" ? "najemce" : "pronajimatel";
+
+    try {
+      const { error } = await supabase
+        .from("flat_profile")
+        .update({ role: newRole })
+        .eq("flat_id", flatId)
+        .eq("profile_id", memberId);
+
+      if (error) {
+        showToast("Nepodařilo se změnit roli: " + error.message, "error");
+      } else {
+        showToast(
+          `Role změněna na ${newRole === "pronajimatel" ? "Pronajímatel" : "Nájemce"}`,
+          "success",
+        );
+        loadMembers();
+      }
+    } catch (error: any) {
+      showToast("Nepodařilo se změnit roli: " + error.message, "error");
     }
   };
 
@@ -199,11 +222,34 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                         ? `${item.name} ${item.surname}`
                         : item.name || item.username || "Neznámý uživatel"}
                     </Text>
-                    <Text style={styles.memberRole}>
-                      {item.role === "pronajimatel"
-                        ? "Pronajímatel"
-                        : "Nájemce"}
-                    </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        isCurrentUserAdmin
+                          ? handleChangeRole(item.id, item.role)
+                          : null
+                      }
+                      disabled={!isCurrentUserAdmin}
+                    >
+                      <View style={styles.roleContainer}>
+                        <Text
+                          style={[
+                            styles.memberRole,
+                            isCurrentUserAdmin && styles.memberRoleClickable,
+                          ]}
+                        >
+                          {item.role === "pronajimatel"
+                            ? "Pronajímatel"
+                            : "Nájemce"}
+                        </Text>
+                        {isCurrentUserAdmin && (
+                          <Ionicons
+                            name="swap-horizontal"
+                            size={16}
+                            color="#007AFF"
+                          />
+                        )}
+                      </View>
+                    </TouchableOpacity>
                   </View>
                   {showDeleteButton && (
                     <TouchableOpacity
@@ -282,9 +328,18 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 2,
   },
+  roleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   memberRole: {
     fontSize: 14,
     color: "#666",
+  },
+  memberRoleClickable: {
+    color: "#007AFF",
+    fontWeight: "500",
   },
   deleteButton: {
     padding: 8,
