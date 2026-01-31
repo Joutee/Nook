@@ -59,15 +59,17 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   }, [session, segments, isLoading, hasFlat, hasRole]);
 
   // Skrýt navbar a topbar na přihlašovacích stránkách, join-flat a settings
-  const hideNavigation =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/join-flat" ||
-    pathname === "/create-flat" ||
-    pathname === "/select-role" ||
-    pathname === "/join-another-flat" ||
-    pathname === "/create-another-flat" ||
-    pathname === "/settings";
+
+  const showNavigationPaths = [
+    "/",
+    "/chores",
+    "/finance",
+    "/chat",
+    "/keys",
+    "/documents",
+  ];
+  const showNavigation = showNavigationPaths.includes(pathname);
+  console.log("showNavigation:", showNavigation);
 
   if (session && isLoading) {
     return null; // Nebo loading screen
@@ -75,7 +77,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
 
   return (
     <View style={styles.container}>
-      {!hideNavigation && <TopBar />}
+      {showNavigation && <TopBar />}
       <Stack
         screenOptions={{
           contentStyle: { flex: 1 },
@@ -138,6 +140,11 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="chores"
           options={{ title: "Chores", headerShown: false }}
         />
+        <Stack.Screen name="create-chore" options={{ title: "Nový úkol" }} />
+        <Stack.Screen
+          name="chore-history"
+          options={{ title: "Historie úkolu" }}
+        />
         <Stack.Screen
           name="chat"
           options={{ title: "Chat", headerShown: false }}
@@ -167,7 +174,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
       </Stack>
-      {!hideNavigation && (
+      {showNavigation && (
         <>
           <NavBar />
         </>
