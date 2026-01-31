@@ -145,6 +145,12 @@ const Chores = () => {
             <View style={styles.choreHeaderIcons}>
               <TouchableOpacity
                 style={styles.historyButton}
+                onPress={() => router.push(`/chore-edit?id=${item.id}`)}
+              >
+                <Ionicons name="pencil-outline" size={20} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.historyButton}
                 onPress={() => router.push(`/chore-history?id=${item.id}`)}
               >
                 <Ionicons name="time-outline" size={20} color="#007AFF" />
@@ -218,7 +224,7 @@ const Chores = () => {
         <Text style={styles.title}>Domácí práce</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => router.push("/create-chore")}
+          onPress={() => router.push("/chore-create")}
         >
           <Ionicons name="add" size={28} color="#007AFF" />
         </TouchableOpacity>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   StyleSheet,
   Text,
   View,
@@ -10,29 +10,50 @@
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../utils/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
-import { DatePickerInput } from "../components/CreateChore/DatePickerInput";
-import { MemberSelector } from "../components/CreateChore/MemberSelector";
-import { MemberOrderList } from "../components/CreateChore/MemberOrderList";
+import { supabase } from "../../utils/supabase";
+import { useFlatContext } from "../../contexts/FlatContext";
+import { useToast } from "../../contexts/ToastContext";
+import { DatePickerInput } from "./DatePickerInput";
+import { MemberSelector } from "./MemberSelector";
+import { MemberOrderList } from "./MemberOrderList";
 
-interface Member {
+export interface Member {
   id: string;
   name: string;
   surname: string;
   avatar_url: string | null;
 }
 
-const CreateChore = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [intervalDays, setIntervalDays] = useState("");
-  const [startDate, setStartDate] = useState("");
+interface ChoreFormProps {
+  mode: "create" | "edit";
+  choreId?: string;
+  initialData?: {
+    name: string;
+    description: string;
+    intervalDays: string;
+    startDate: string;
+    selectedMembers: Member[];
+  };
+}
+
+export const ChoreForm: React.FC<ChoreFormProps> = ({
+  mode,
+  choreId,
+  initialData,
+}) => {
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(
+    initialData?.description || "",
+  );
+  const [intervalDays, setIntervalDays] = useState(
+    initialData?.intervalDays || "",
+  );
+  const [startDate, setStartDate] = useState(initialData?.startDate || "");
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
-  const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>(
+    initialData?.selectedMembers || [],
+  );
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
 
@@ -41,6 +62,16 @@ const CreateChore = () => {
       loadMembers();
     }
   }, [currentFlat]);
+
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setDescription(initialData.description);
+      setIntervalDays(initialData.intervalDays);
+      setStartDate(initialData.startDate);
+      setSelectedMembers(initialData.selectedMembers);
+    }
+  }, [initialData]);
 
   const loadMembers = async () => {
     if (!currentFlat?.id) return;
@@ -93,18 +124,15 @@ const CreateChore = () => {
     setSelectedMembers(newOrder);
   };
 
-  const handleCreateChore = async () => {
-    // Zabránit multiple clicks
-    if (isLoading) return;
-
+  const validateForm = (): boolean => {
     if (!currentFlat?.id) {
       showToast("Nejste přihlášeni do žádného bytu", "error");
-      return;
+      return false;
     }
 
     if (!name.trim()) {
       showToast("Vyplňte název úkolu", "error");
-      return;
+      return false;
     }
 
     if (
@@ -113,73 +141,135 @@ const CreateChore = () => {
       Number(intervalDays) < 1
     ) {
       showToast("Zadejte platný interval (číslo větší než 0)", "error");
-      return;
+      return false;
     }
 
     if (!startDate.trim()) {
       showToast("Zadejte datum začátku", "error");
-      return;
+      return false;
     }
 
-    // Validace formátu data
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(startDate)) {
       showToast("Neplatný formát data. Použijte YYYY-MM-DD", "error");
-      return;
+      return false;
     }
 
     if (selectedMembers.length === 0) {
       showToast("Vyberte alespoň jednoho uživatele", "error");
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (isLoading) return;
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-      // 1. Vytvoříme chore
-      const { data: choreData, error: choreError } = await supabase
-        .from("chores")
-        .insert({
-          flat_id: currentFlat.id,
-          name: name.trim(),
-          description: description.trim() || null,
-          interval_days: Number(intervalDays),
-          start_date: startDate,
-        })
-        .select()
-        .single();
-
-      if (choreError) {
-        showToast(
-          "Nepodařilo se vytvořit úkol: " + choreError.message,
-          "error",
-        );
-        return;
-      }
-
-      // 2. Přiřadíme uživatele s pořadím
-      const assignments = selectedMembers.map((member, index) => ({
-        chore_id: choreData.id,
-        profile_id: member.id,
-        rotation_order: index + 1,
-      }));
-
-      const { error: assignError } = await supabase
-        .from("chore_profile")
-        .insert(assignments);
-
-      if (assignError) {
-        showToast(
-          "Nepodařilo se přiřadit uživatele: " + assignError.message,
-          "error",
-        );
+      if (mode === "create") {
+        await handleCreate();
       } else {
-        showToast("Úkol vytvořen!", "success");
-        router.back();
+        await handleUpdate();
       }
-    } catch (error: any) {
-      showToast("Nepodařilo se vytvořit úkol: " + error.message, "error");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    const { data: choreData, error: choreError } = await supabase
+      .from("chores")
+      .insert({
+        flat_id: currentFlat!.id,
+        name: name.trim(),
+        description: description.trim() || null,
+        interval_days: Number(intervalDays),
+        start_date: startDate,
+      })
+      .select()
+      .single();
+
+    if (choreError) {
+      showToast("Nepodařilo se vytvořit úkol: " + choreError.message, "error");
+      return;
+    }
+
+    const assignments = selectedMembers.map((member, index) => ({
+      chore_id: choreData.id,
+      profile_id: member.id,
+      rotation_order: index + 1,
+    }));
+
+    const { error: assignError } = await supabase
+      .from("chore_profile")
+      .insert(assignments);
+
+    if (assignError) {
+      showToast(
+        "Nepodařilo se přiřadit uživatele: " + assignError.message,
+        "error",
+      );
+    } else {
+      showToast("Úkol vytvořen!", "success");
+      router.back();
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!choreId) return;
+
+    const { error: choreError } = await supabase
+      .from("chores")
+      .update({
+        name: name.trim(),
+        description: description.trim() || null,
+        interval_days: Number(intervalDays),
+        start_date: startDate,
+      })
+      .eq("id", choreId);
+
+    if (choreError) {
+      showToast(
+        "Nepodařilo se aktualizovat úkol: " + choreError.message,
+        "error",
+      );
+      return;
+    }
+
+    const { error: deleteError } = await supabase
+      .from("chore_profile")
+      .delete()
+      .eq("chore_id", choreId);
+
+    if (deleteError) {
+      showToast(
+        "Nepodařilo se aktualizovat přiřazení: " + deleteError.message,
+        "error",
+      );
+      return;
+    }
+
+    const assignments = selectedMembers.map((member, index) => ({
+      chore_id: choreId,
+      profile_id: member.id,
+      rotation_order: index + 1,
+    }));
+
+    const { error: assignError } = await supabase
+      .from("chore_profile")
+      .insert(assignments);
+
+    if (assignError) {
+      showToast(
+        "Nepodařilo se přiřadit uživatele: " + assignError.message,
+        "error",
+      );
+    } else {
+      showToast("Úkol aktualizován!", "success");
+      router.back();
     }
   };
 
@@ -213,7 +303,7 @@ const CreateChore = () => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Interval (dnÅ¯) *</Text>
+          <Text style={styles.label}>Interval (dnů) *</Text>
           <TextInput
             style={styles.input}
             value={intervalDays}
@@ -244,23 +334,24 @@ const CreateChore = () => {
         </View>
 
         <TouchableOpacity
-          style={[
-            styles.createButton,
-            isLoading && styles.createButtonDisabled,
-          ]}
-          onPress={handleCreateChore}
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleSubmit}
           disabled={isLoading}
         >
-          <Text style={styles.createButtonText}>
-            {isLoading ? "Vytváření..." : "Vytvořit úkol"}
+          <Text style={styles.buttonText}>
+            {isLoading
+              ? mode === "create"
+                ? "Vytváření..."
+                : "Ukládání..."
+              : mode === "create"
+                ? "Vytvořit úkol"
+                : "Uložit změny"}
           </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
-export default CreateChore;
 
 const styles = StyleSheet.create({
   container: {
@@ -316,85 +407,17 @@ const styles = StyleSheet.create({
     minHeight: 100,
     paddingTop: 12,
   },
-  hint: {
-    fontSize: 12,
-    color: "#999",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  memberAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  memberAvatarText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  memberName: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
-  },
-  orderSection: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-  },
-  orderTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
-  },
-  orderItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-  },
-  orderInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  orderNumber: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#007AFF",
-    marginRight: 8,
-    width: 24,
-  },
-  orderControls: {
-    flexDirection: "row",
-    gap: 4,
-  },
-  orderButton: {
-    padding: 4,
-  },
-  orderButtonDisabled: {
-    opacity: 0.3,
-  },
-  createButton: {
+  button: {
     backgroundColor: "#007AFF",
     borderRadius: 8,
     padding: 16,
     alignItems: "center",
     marginTop: 20,
   },
-  createButtonDisabled: {
+  buttonDisabled: {
     opacity: 0.6,
   },
-  createButtonText: {
+  buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",

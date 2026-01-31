@@ -140,11 +140,12 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="chores"
           options={{ title: "Chores", headerShown: false }}
         />
-        <Stack.Screen name="create-chore" options={{ title: "Nový úkol" }} />
+        <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
         <Stack.Screen
           name="chore-history"
           options={{ title: "Historie úkolu" }}
         />
+        <Stack.Screen name="chore-edit" options={{ title: "Upravit úkol" }} />
         <Stack.Screen
           name="chat"
           options={{ title: "Chat", headerShown: false }}
