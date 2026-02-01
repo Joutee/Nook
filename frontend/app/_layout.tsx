@@ -67,6 +67,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     "/chat",
     "/keys",
     "/documents",
+    "/flat"
   ];
   const showNavigation = showNavigationPaths.includes(pathname);
   console.log("showNavigation:", showNavigation);
