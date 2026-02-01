@@ -10,7 +10,8 @@ import {
 import { router } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-import { uploadDocument } from "../utils/documentUpload";
+import { uploadDocument, takePhotoAndUpload } from "../utils/documentService";
+import { Ionicons } from "@expo/vector-icons";
 
 const DocumentAdd = () => {
   const { currentFlat } = useFlatContext();
@@ -45,6 +46,32 @@ const DocumentAdd = () => {
     }
   };
 
+  const handleTakePhoto = async () => {
+    if (!currentFlat) {
+      showToast("Není vybrán žádný byt", "error");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await takePhotoAndUpload(
+        currentFlat.id,
+        documentName,
+        documentDescription,
+      );
+
+      if (result) {
+        showToast("Dokument úspěšně nahrán", "success");
+        router.back();
+      } else {
+        setIsUploading(false);
+      }
+    } catch (error: any) {
+      showToast("Chyba při fotografování: " + error.message, "error");
+      setIsUploading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Přidat dokument</Text>
@@ -70,15 +97,35 @@ const DocumentAdd = () => {
           editable={!isUploading}
         />
 
+        <Text style={styles.sectionTitle}>Vyberte způsob přidání</Text>
+
         <TouchableOpacity
           style={[styles.button, isUploading && styles.buttonDisabled]}
-          onPress={handleUpload}
+          onPress={handleTakePhoto}
           disabled={isUploading}
         >
           {isUploading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Vybrat a nahrát soubor</Text>
+            <View style={styles.buttonContent}>
+              <Ionicons name="camera" size={24} color="#fff" />
+              <Text style={styles.buttonText}>Vyfotit dokument</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.buttonSecondary, isUploading && styles.buttonDisabled]}
+          onPress={handleUpload}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <ActivityIndicator color="#007AFF" />
+          ) : (
+            <View style={styles.buttonContent}>
+              <Ionicons name="document" size={24} color="#007AFF" />
+              <Text style={styles.buttonSecondaryText}>Nahrát ze souboru</Text>
+            </View>
           )}
         </TouchableOpacity>
 
@@ -116,6 +163,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   textArea: { height: 100, textAlignVertical: "top" },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    marginTop: 10,
+    color: "#333",
+  },
   button: {
     backgroundColor: "#007AFF",
     padding: 16,
@@ -123,13 +177,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
+  buttonSecondary: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+  },
   buttonDisabled: { opacity: 0.6 },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+  buttonSecondaryText: { color: "#007AFF", fontSize: 18, fontWeight: "600" },
   cancelButton: {
     backgroundColor: "#f0f0f0",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 10,
   },
   cancelButtonText: { color: "#333", fontSize: 18, fontWeight: "600" },
 });
