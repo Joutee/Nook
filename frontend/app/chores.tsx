@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -39,17 +39,12 @@ const Chores = () => {
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    if (currentFlat?.id) {
-      loadChores();
-      getCurrentUser();
-    }
-  }, [currentFlat]);
-
+  
   useFocusEffect(
     useCallback(() => {
       if (currentFlat?.id) {
         loadChores();
+        getCurrentUser();
       }
     }, [currentFlat]),
   );

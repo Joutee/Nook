@@ -6,11 +6,12 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { router } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
+import DocumentViewerModal from "../components/DocumentViewerModal";
 
 interface Document {
   id: string;
@@ -25,6 +26,11 @@ const documents = () => {
   const { showToast } = useToast();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    path: string;
+    name: string;
+  } | null>(null);
 
   const loadDocuments = async () => {
     if (!currentFlat) return;
@@ -47,27 +53,38 @@ const documents = () => {
     }
   };
 
-  useEffect(() => {
-    loadDocuments();
-  }, [currentFlat]);
+  useFocusEffect(
+    useCallback(() => {
+      if (currentFlat?.id) {
+        loadDocuments();
+      }
+    }, [currentFlat]),
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("cs-CZ");
   };
 
+  const handleOpenDocument = (path: string, name: string = "Dokument") => {
+    setSelectedDocument({ path, name });
+    setViewerVisible(true);
+  };
+
   const renderDocument = ({ item }: { item: Document }) => (
-    <View style={styles.documentItem}>
-      <View style={styles.documentInfo}>
-        <Text style={styles.documentName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.documentDescription}>{item.description}</Text>
-        )}
-        <Text style={styles.documentDate}>
-          Přidáno: {formatDate(item.created_at)}
-        </Text>
+    <TouchableOpacity onPress={() => handleOpenDocument(item.path, item.name)}>
+      <View style={styles.documentItem}>
+        <View style={styles.documentInfo}>
+          <Text style={styles.documentName}>{item.name}</Text>
+          {item.description && (
+            <Text style={styles.documentDescription}>{item.description}</Text>
+          )}
+          <Text style={styles.documentDate}>
+            Přidáno: {formatDate(item.created_at)}
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -93,6 +110,12 @@ const documents = () => {
           contentContainerStyle={styles.list}
         />
       )}
+      <DocumentViewerModal
+        visible={viewerVisible}
+        onClose={() => setViewerVisible(false)}
+        filePath={selectedDocument?.path || null}
+        fileName={selectedDocument?.name}
+      />
     </View>
   );
 };
