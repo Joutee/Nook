@@ -65,9 +65,7 @@ const uploadFileToStorage = async ({
   const fileInfo = await getInfoAsync(processedUri);
   if (fileInfo.exists && fileInfo.size > SUPABASE_LIMIT) {
     const sizeInMb = (fileInfo.size / (1024 * 1024)).toFixed(2);
-    throw new Error(
-      `Soubor je příliš velký (${sizeInMb} MB). Limit je 5 MB.`
-    );
+    throw new Error(`Soubor je příliš velký (${sizeInMb} MB). Limit je 5 MB.`);
   }
 
   console.log("Zpracovávám pro upload:", processedFileName, processedMimeType);
@@ -118,7 +116,7 @@ const uploadFileToStorage = async ({
 export const uploadDocument = async (
   flatId: string,
   documentName: string,
-  documentDescription: string
+  documentDescription: string,
 ): Promise<boolean> => {
   try {
     const result = await DocumentPicker.getDocumentAsync({
@@ -149,7 +147,7 @@ export const uploadDocument = async (
       else if (fileName.endsWith(".heic")) mimeType = "image/heic";
       else {
         throw new Error(
-          "Nepodporovaný typ souboru. Nahrajte prosím PDF nebo obrázek."
+          "Nepodporovaný typ souboru. Nahrajte prosím PDF nebo obrázek.",
         );
       }
     }
@@ -175,7 +173,7 @@ export const uploadDocument = async (
 export const takePhotoAndUpload = async (
   flatId: string,
   documentName: string,
-  documentDescription: string
+  documentDescription: string,
 ): Promise<boolean> => {
   try {
     // Požádat o oprávnění ke kameře

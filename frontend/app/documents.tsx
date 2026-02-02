@@ -5,6 +5,8 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  Linking,
+  Platform,
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
@@ -12,6 +14,7 @@ import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import DocumentViewerModal from "../components/DocumentViewerModal";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Document {
   id: string;
@@ -71,20 +74,53 @@ const documents = () => {
     setViewerVisible(true);
   };
 
+  const handleDownloadDocument = async (path: string, name: string) => {
+    try {
+      // Získání podepsané URL s download parametrem
+      const { data, error } = await supabase.storage
+        .from("documents")
+        .createSignedUrl(path, 3600, {
+          download: name, // Nastaví Content-Disposition: attachment; filename="name"
+        });
+
+      if (error) throw error;
+      if (!data?.signedUrl) throw new Error("Nepodařilo se získat URL");
+
+      // Otevřít URL v prohlížeči - soubor se automaticky stáhne díky download parametru
+      const canOpen = await Linking.canOpenURL(data.signedUrl);
+      if (canOpen) {
+        await Linking.openURL(data.signedUrl);
+        showToast("Stahování dokumentu...", "success");
+      } else {
+        throw new Error("Nelze otevřít odkaz");
+      }
+    } catch (error: any) {
+      showToast("Chyba při stahování: " + error.message, "error");
+      console.error(error);
+    }
+  };
+
   const renderDocument = ({ item }: { item: Document }) => (
-    <TouchableOpacity onPress={() => handleOpenDocument(item.path, item.name)}>
-      <View style={styles.documentItem}>
-        <View style={styles.documentInfo}>
-          <Text style={styles.documentName}>{item.name}</Text>
-          {item.description && (
-            <Text style={styles.documentDescription}>{item.description}</Text>
-          )}
-          <Text style={styles.documentDate}>
-            Přidáno: {formatDate(item.created_at)}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <View style={styles.documentItem}>
+      <TouchableOpacity
+        style={styles.documentInfo}
+        onPress={() => handleOpenDocument(item.path, item.name)}
+      >
+        <Text style={styles.documentName}>{item.name}</Text>
+        {item.description && (
+          <Text style={styles.documentDescription}>{item.description}</Text>
+        )}
+        <Text style={styles.documentDate}>
+          Přidáno: {formatDate(item.created_at)}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.downloadButton}
+        onPress={() => handleDownloadDocument(item.path, item.name)}
+      >
+        <Ionicons name="download-outline" size={24} color="#007AFF" />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -165,9 +201,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderLeftWidth: 4,
     borderLeftColor: "#007AFF",
+    flexDirection: "row",
+    alignItems: "center",
   },
   documentInfo: {
     flex: 1,
+  },
+  downloadButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   documentName: {
     fontSize: 18,
