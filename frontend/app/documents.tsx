@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Linking,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
@@ -100,6 +101,47 @@ const documents = () => {
     }
   };
 
+  const handleDeleteDocument = async (id: string, path: string, name: string) => {
+    Alert.alert(
+      "Smazat dokument",
+      `Opravdu chcete smazat dokument "${name}"?`,
+      [
+        {
+          text: "Zrušit",
+          style: "cancel",
+        },
+        {
+          text: "Smazat",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Smazat ze storage
+              const { error: storageError } = await supabase.storage
+                .from("documents")
+                .remove([path]);
+
+              if (storageError) throw storageError;
+
+              // Smazat z databáze
+              const { error: dbError } = await supabase
+                .from("documents")
+                .delete()
+                .eq("id", id);
+
+              if (dbError) throw dbError;
+
+              showToast("Dokument smazán", "success");
+              loadDocuments(); // Refresh seznamu
+            } catch (error: any) {
+              showToast("Chyba při mazání: " + error.message, "error");
+              console.error(error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderDocument = ({ item }: { item: Document }) => (
     <View style={styles.documentItem}>
       <TouchableOpacity
@@ -114,12 +156,20 @@ const documents = () => {
           Přidáno: {formatDate(item.created_at)}
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.downloadButton}
-        onPress={() => handleDownloadDocument(item.path, item.name)}
-      >
-        <Ionicons name="download-outline" size={24} color="#007AFF" />
-      </TouchableOpacity>
+      <View style={styles.buttonGroup}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleDownloadDocument(item.path, item.name)}
+        >
+          <Ionicons name="download-outline" size={24} color="#007AFF" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => handleDeleteDocument(item.id, item.path, item.name)}
+        >
+          <Ionicons name="trash-outline" size={24} color="#FF3B30" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -199,17 +249,19 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#007AFF",
     flexDirection: "row",
     alignItems: "center",
   },
   documentInfo: {
     flex: 1,
   },
-  downloadButton: {
+  buttonGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconButton: {
     padding: 8,
-    marginLeft: 8,
   },
   documentName: {
     fontSize: 18,
