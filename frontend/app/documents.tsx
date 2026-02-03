@@ -16,13 +16,14 @@ import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import DocumentViewerModal from "../components/DocumentViewerModal";
 import { Ionicons } from "@expo/vector-icons";
+import { deleteFile } from "../utils/fileService";
 
 interface Document {
   id: string;
   created_at: string;
   name: string;
   description: string | null;
-  path: string;
+  document_path: string;
 }
 
 const documents = () => {
@@ -32,7 +33,7 @@ const documents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
-    path: string;
+    document_path: string;
     name: string;
   } | null>(null);
 
@@ -70,17 +71,23 @@ const documents = () => {
     return date.toLocaleDateString("cs-CZ");
   };
 
-  const handleOpenDocument = (path: string, name: string = "Dokument") => {
-    setSelectedDocument({ path, name });
+  const handleOpenDocument = (
+    document_path: string,
+    name: string = "Dokument",
+  ) => {
+    setSelectedDocument({ document_path, name });
     setViewerVisible(true);
   };
 
-  const handleDownloadDocument = async (path: string, name: string) => {
+  const handleDownloadDocument = async (
+    document_path: string,
+    name: string,
+  ) => {
     try {
       // Získání podepsané URL s download parametrem
       const { data, error } = await supabase.storage
         .from("documents")
-        .createSignedUrl(path, 3600, {
+        .createSignedUrl(document_path, 3600, {
           download: name, // Nastaví Content-Disposition: attachment; filename="name"
         });
 
@@ -101,7 +108,11 @@ const documents = () => {
     }
   };
 
-  const handleDeleteDocument = async (id: string, path: string, name: string) => {
+  const handleDeleteDocument = async (
+    id: string,
+    document_path: string,
+    name: string,
+  ) => {
     Alert.alert(
       "Smazat dokument",
       `Opravdu chcete smazat dokument "${name}"?`,
@@ -115,20 +126,12 @@ const documents = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              // Smazat ze storage
-              const { error: storageError } = await supabase.storage
-                .from("documents")
-                .remove([path]);
-
-              if (storageError) throw storageError;
-
-              // Smazat z databáze
-              const { error: dbError } = await supabase
-                .from("documents")
-                .delete()
-                .eq("id", id);
-
-              if (dbError) throw dbError;
+              await deleteFile({
+                bucket: "documents",
+                path: document_path,
+                tableName: "documents",
+                recordId: id,
+              });
 
               showToast("Dokument smazán", "success");
               loadDocuments(); // Refresh seznamu
@@ -138,7 +141,7 @@ const documents = () => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -146,7 +149,7 @@ const documents = () => {
     <View style={styles.documentItem}>
       <TouchableOpacity
         style={styles.documentInfo}
-        onPress={() => handleOpenDocument(item.path, item.name)}
+        onPress={() => handleOpenDocument(item.document_path, item.name)}
       >
         <Text style={styles.documentName}>{item.name}</Text>
         {item.description && (
@@ -159,13 +162,15 @@ const documents = () => {
       <View style={styles.buttonGroup}>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => handleDownloadDocument(item.path, item.name)}
+          onPress={() => handleDownloadDocument(item.document_path, item.name)}
         >
           <Ionicons name="download-outline" size={24} color="#007AFF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={() => handleDeleteDocument(item.id, item.path, item.name)}
+          onPress={() =>
+            handleDeleteDocument(item.id, item.document_path, item.name)
+          }
         >
           <Ionicons name="trash-outline" size={24} color="#FF3B30" />
         </TouchableOpacity>

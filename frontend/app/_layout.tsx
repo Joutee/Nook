@@ -64,10 +64,10 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     "/",
     "/chores",
     "/finance",
-    "/chat",
+    "/issues",
     "/keys",
     "/documents",
-    "/flat"
+    "/flat",
   ];
   const showNavigation = showNavigationPaths.includes(pathname);
   console.log("showNavigation:", showNavigation);
@@ -148,8 +148,8 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen name="chore-edit" options={{ title: "Upravit úkol" }} />
         <Stack.Screen
-          name="chat"
-          options={{ title: "Chat", headerShown: false }}
+          name="issues"
+          options={{ title: "issues", headerShown: false }}
         />
         <Stack.Screen
           name="keys"

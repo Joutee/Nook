@@ -19,7 +19,7 @@ const NavBar = () => {
 
   const landlordNavItems = [
     { name: "Home", path: "/" },
-    { name: "Chat", path: "/chat" },
+    { name: "Issues", path: "/issues" },
     { name: "Keys", path: "/keys" },
     { name: "Documents", path: "/documents" },
   ];

@@ -10,7 +10,7 @@ import {
 import { router } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-import { uploadDocument, takePhotoAndUpload } from "../utils/documentService";
+import { takePhoto, pickFile, uploadFile } from "../utils/fileService";
 import { Ionicons } from "@expo/vector-icons";
 
 const DocumentAdd = () => {
@@ -28,18 +28,29 @@ const DocumentAdd = () => {
 
     setIsUploading(true);
     try {
-      const result = await uploadDocument(
-        currentFlat.id,
-        documentName,
-        documentDescription,
-      );
+      const file = await pickFile();
 
-      if (result) {
-        showToast("Dokument úspěšně nahrán", "success");
-        router.back();
-      } else {
+      if (!file) {
         setIsUploading(false);
+        return;
       }
+
+      await uploadFile({
+        bucket: "documents",
+        flatId: currentFlat.id,
+        fileUri: file.uri,
+        fileName: file.name,
+        mimeType: file.mimeType,
+        tableName: "documents",
+        pathColumnName: "document_path",
+        additionalData: {
+          name: documentName || file.name,
+          description: documentDescription,
+        },
+      });
+
+      showToast("Dokument úspěšně nahrán", "success");
+      router.back();
     } catch (error: any) {
       showToast("Chyba při nahrávání: " + error.message, "error");
       setIsUploading(false);
@@ -54,18 +65,31 @@ const DocumentAdd = () => {
 
     setIsUploading(true);
     try {
-      const result = await takePhotoAndUpload(
-        currentFlat.id,
-        documentName,
-        documentDescription,
-      );
+      const photoUri = await takePhoto();
 
-      if (result) {
-        showToast("Dokument úspěšně nahrán", "success");
-        router.back();
-      } else {
+      if (!photoUri) {
         setIsUploading(false);
+        return;
       }
+
+      const fileName = `photo_${Date.now()}.jpg`;
+
+      await uploadFile({
+        bucket: "documents",
+        flatId: currentFlat.id,
+        fileUri: photoUri,
+        fileName: fileName,
+        mimeType: "image/jpeg",
+        tableName: "documents",
+        pathColumnName: "document_path",
+        additionalData: {
+          name: documentName || fileName,
+          description: documentDescription,
+        },
+      });
+
+      showToast("Dokument úspěšně nahrán", "success");
+      router.back();
     } catch (error: any) {
       showToast("Chyba při fotografování: " + error.message, "error");
       setIsUploading(false);

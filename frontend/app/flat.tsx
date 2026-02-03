@@ -21,8 +21,8 @@ const flat = () => {
         <Text style={styles.buttonText}>Klíč</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/")}>
-        <Text style={styles.buttonText}>Nahlásit závadu</Text>
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/issues")}>
+        <Text style={styles.buttonText}>Závady</Text>
       </TouchableOpacity>
     </View>
   );
