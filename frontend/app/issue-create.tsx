@@ -20,6 +20,7 @@ import {
   pickGalleryPhoto,
   uploadFile,
 } from "../utils/fileService";
+import DocumentViewerModal from "../components/DocumentViewerModal";
 
 const IssueCreate = () => {
   const { currentFlat } = useFlatContext();
@@ -28,6 +29,7 @@ const IssueCreate = () => {
   const [description, setDescription] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
 
   const handlePickImage = async () => {
     try {
@@ -147,7 +149,13 @@ const IssueCreate = () => {
         <View style={styles.imageSection}>
           {imageUri ? (
             <View style={styles.imagePreview}>
-              <Image source={{ uri: imageUri }} style={styles.image} />
+              <TouchableOpacity
+                onPress={() => setViewerVisible(true)}
+                activeOpacity={0.8}
+                style={{ width: "100%" }}
+              >
+                <Image source={{ uri: imageUri }} style={styles.image} />
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.removeImageButton}
                 onPress={() => setImageUri(null)}
@@ -198,6 +206,13 @@ const IssueCreate = () => {
           <Text style={styles.cancelButtonText}>Zrušit</Text>
         </TouchableOpacity>
       </View>
+
+      <DocumentViewerModal
+        visible={viewerVisible}
+        onClose={() => setViewerVisible(false)}
+        imageUri={imageUri}
+        fileName="Náhled fotografie"
+      />
     </ScrollView>
   );
 };
@@ -243,11 +258,17 @@ const styles = StyleSheet.create({
   },
   imageButtons: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    gap: 16,
+    width: "100%", // 1. Zaručí, že kontejner drží šířku
+    justifyContent: "space-between", // 2. Roztáhne tlačítka od sebe (nahrazuje gap)
+    // gap: 16,                    // SMAZAT (pro jistotu, space-between je bezpečnější)
   },
   imageButton: {
-    flex: 1,
+    width: "48%", // 3. Pevná šířka (ignoruje délku textu uvnitř)
+    // flexBasis: 0,               // SMAZAT
+    // flexGrow: 1,                // SMAZAT
+    // flexShrink: 1,              // SMAZAT
+    // flex: 1,                    // SMAZAT
+
     borderWidth: 2,
     borderColor: "#007AFF",
     borderRadius: 8,

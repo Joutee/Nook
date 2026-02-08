@@ -19,6 +19,7 @@ import {
 } from "../utils/fileService";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
+import DocumentViewerModal from "../components/DocumentViewerModal";
 
 const DocumentAdd = () => {
   const { currentFlat } = useFlatContext();
@@ -26,6 +27,7 @@ const DocumentAdd = () => {
   const [documentName, setDocumentName] = useState("");
   const [documentDescription, setDocumentDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
   const [file, setFile] = useState<{
     uri: string;
     name: string;
@@ -140,7 +142,13 @@ const DocumentAdd = () => {
           {file ? (
             <View style={styles.filePreview}>
               {file.mimeType.startsWith("image/") && (
-                <Image source={{ uri: file.uri }} style={styles.image} />
+                <TouchableOpacity
+                  onPress={() => setViewerVisible(true)}
+                  activeOpacity={0.8}
+                  style={{ width: "100%" }}
+                >
+                  <Image source={{ uri: file.uri }} style={styles.image} />
+                </TouchableOpacity>
               )}
               <View style={styles.fileInfo}>
                 <Ionicons
@@ -204,6 +212,15 @@ const DocumentAdd = () => {
           <Text style={styles.cancelButtonText}>Zrušit</Text>
         </TouchableOpacity>
       </View>
+
+      {file?.mimeType.startsWith("image/") && (
+        <DocumentViewerModal
+          visible={viewerVisible}
+          onClose={() => setViewerVisible(false)}
+          imageUri={file.uri}
+          fileName={file.name}
+        />
+      )}
     </View>
   );
 };
@@ -242,11 +259,17 @@ const styles = StyleSheet.create({
   },
   fileButtons: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    gap: 16,
+    width: "100%", // 1. Zaručí, že kontejner drží šířku
+    justifyContent: "space-between", // 2. Roztáhne tlačítka od sebe (nahrazuje gap)
+    // gap: 16,                    // SMAZAT (pro jistotu, space-between je bezpečnější)
   },
   fileButton: {
-    flex: 1,
+    width: "48%", // 3. Pevná šířka (ignoruje délku textu uvnitř)
+    // flexBasis: 0,               // SMAZAT
+    // flexGrow: 1,                // SMAZAT
+    // flexShrink: 1,              // SMAZAT
+    // flex: 1,                    // SMAZAT
+
     borderWidth: 2,
     borderColor: "#007AFF",
     borderRadius: 8,

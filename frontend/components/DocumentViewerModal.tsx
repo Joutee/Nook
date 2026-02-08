@@ -17,7 +17,8 @@ import { supabase } from "../utils/supabase";
 type Props = {
   visible: boolean;
   onClose: () => void;
-  filePath: string | null; // Cesta v Supabase (např. "flat_1/smlouva.pdf")
+  filePath?: string | null; // Cesta v Supabase (např. "flat_1/smlouva.pdf")
+  imageUri?: string | null; // Přímé URI pro lokální obrázky (před nahráním)
   fileName?: string;
 };
 
@@ -25,6 +26,7 @@ export default function DocumentViewerModal({
   visible,
   onClose,
   filePath,
+  imageUri,
   fileName,
 }: Props) {
   const [url, setUrl] = useState<string | null>(null);
@@ -35,14 +37,19 @@ export default function DocumentViewerModal({
 
   // Načtení URL ze Supabase při otevření
   useEffect(() => {
-    if (visible && filePath) {
+    // Pokud máme přímé imageUri, použijeme ho rovnou
+    if (visible && imageUri) {
+      setUrl(imageUri);
+      setFileType("image");
+      setLoading(false);
+    } else if (visible && filePath) {
       loadDocumentUrl();
     } else {
       // Reset při zavření
       setUrl(null);
       setLoading(true);
     }
-  }, [visible, filePath]);
+  }, [visible, filePath, imageUri]);
 
   const loadDocumentUrl = async () => {
     if (!filePath) return;

@@ -152,12 +152,20 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{ title: "issues", headerShown: false }}
         />
         <Stack.Screen
+          name="issue-create"
+          options={{ title: "Nahlásit závadu" }}
+        />
+        <Stack.Screen
           name="keys"
           options={{ title: "Keys", headerShown: false }}
         />
         <Stack.Screen
           name="documents"
           options={{ title: "Documents", headerShown: false }}
+        />
+        <Stack.Screen
+          name="document-add"
+          options={{ title: "Nový dokument", headerShown: false }}
         />
         <Stack.Screen
           name="join-another-flat"
