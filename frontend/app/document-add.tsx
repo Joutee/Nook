@@ -6,12 +6,19 @@ import {
   View,
   TextInput,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-import { takePhoto, pickFile, uploadFile } from "../utils/fileService";
+import {
+  takePhoto,
+  pickFile,
+  uploadFile,
+  compressImage,
+} from "../utils/fileService";
 import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../utils/supabase";
 
 const DocumentAdd = () => {
   const { currentFlat } = useFlatContext();
@@ -19,8 +26,32 @@ const DocumentAdd = () => {
   const [documentName, setDocumentName] = useState("");
   const [documentDescription, setDocumentDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState<{
+    uri: string;
+    name: string;
+    mimeType: string;
+    size: number;
+  } | null>(null);
 
-  const handleUpload = async () => {
+  const handlePickFile = async () => {
+    try {
+      const file = await pickFile();
+      if (file) {
+        // Pokud je to obrázek, zkomprimuj ho, jinak (např. PDF) použij originál
+        if (file.mimeType.startsWith("image/")) {
+          const compressed = await compressImage(file.uri);
+          setFile({ ...file, uri: compressed });
+        } else {
+          setFile(file);
+        }
+      }
+    } catch (error: any) {
+      showToast("Chyba při výběru souboru: " + error.message, "error");
+      console.error(error);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!currentFlat) {
       showToast("Není vybrán žádný byt", "error");
       return;
@@ -28,7 +59,10 @@ const DocumentAdd = () => {
 
     setIsUploading(true);
     try {
-      const file = await pickFile();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Nejste přihlášeni");
 
       if (!file) {
         setIsUploading(false);
@@ -58,41 +92,21 @@ const DocumentAdd = () => {
   };
 
   const handleTakePhoto = async () => {
-    if (!currentFlat) {
-      showToast("Není vybrán žádný byt", "error");
-      return;
-    }
-
-    setIsUploading(true);
     try {
       const photoUri = await takePhoto();
-
-      if (!photoUri) {
-        setIsUploading(false);
-        return;
+      if (photoUri) {
+        const compressed = await compressImage(photoUri);
+        const fileName = `photo_${Date.now()}.jpg`;
+        setFile({
+          uri: compressed,
+          name: fileName,
+          mimeType: "image/jpeg",
+          size: 0, // velikost není k dispozici při přímém focení
+        });
       }
-
-      const fileName = `photo_${Date.now()}.jpg`;
-
-      await uploadFile({
-        bucket: "documents",
-        flatId: currentFlat.id,
-        fileUri: photoUri,
-        fileName: fileName,
-        mimeType: "image/jpeg",
-        tableName: "documents",
-        pathColumnName: "document_path",
-        additionalData: {
-          name: documentName || fileName,
-          description: documentDescription,
-        },
-      });
-
-      showToast("Dokument úspěšně nahrán", "success");
-      router.back();
     } catch (error: any) {
-      showToast("Chyba při fotografování: " + error.message, "error");
-      setIsUploading(false);
+      showToast("Chyba při focení: " + error.message, "error");
+      console.error(error);
     }
   };
 
@@ -121,35 +135,64 @@ const DocumentAdd = () => {
           editable={!isUploading}
         />
 
-        <Text style={styles.sectionTitle}>Vyberte způsob přidání</Text>
+        <Text style={styles.sectionTitle}>Soubor (volitelné)</Text>
+        <View style={styles.fileSection}>
+          {file ? (
+            <View style={styles.filePreview}>
+              {file.mimeType.startsWith("image/") && (
+                <Image source={{ uri: file.uri }} style={styles.image} />
+              )}
+              <View style={styles.fileInfo}>
+                <Ionicons
+                  name={
+                    file.mimeType.startsWith("image/") ? "image" : "document"
+                  }
+                  size={24}
+                  color="#007AFF"
+                />
+                <Text style={styles.fileName}>{file.name}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.removeFileButton}
+                onPress={() => setFile(null)}
+              >
+                <Ionicons name="close-circle" size={32} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.fileButtons}>
+              <TouchableOpacity
+                style={styles.fileButton}
+                onPress={handleTakePhoto}
+                disabled={isUploading}
+              >
+                <Ionicons name="camera" size={32} color="#007AFF" />
+                <Text style={styles.fileButtonText}>Vyfotit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.fileButton}
+                onPress={handlePickFile}
+                disabled={isUploading}
+              >
+                <Ionicons name="document" size={32} color="#007AFF" />
+                <Text style={styles.fileButtonText}>Vybrat soubor</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
 
         <TouchableOpacity
-          style={[styles.button, isUploading && styles.buttonDisabled]}
-          onPress={handleTakePhoto}
-          disabled={isUploading}
+          style={[
+            styles.button,
+            (!file || isUploading) && styles.buttonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={!file || isUploading}
         >
           {isUploading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <View style={styles.buttonContent}>
-              <Ionicons name="camera" size={24} color="#fff" />
-              <Text style={styles.buttonText}>Vyfotit dokument</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.buttonSecondary, isUploading && styles.buttonDisabled]}
-          onPress={handleUpload}
-          disabled={isUploading}
-        >
-          {isUploading ? (
-            <ActivityIndicator color="#007AFF" />
-          ) : (
-            <View style={styles.buttonContent}>
-              <Ionicons name="document" size={24} color="#007AFF" />
-              <Text style={styles.buttonSecondaryText}>Nahrát ze souboru</Text>
-            </View>
+            <Text style={styles.buttonText}>Nahrát dokument</Text>
           )}
         </TouchableOpacity>
 
@@ -194,6 +237,61 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#333",
   },
+  fileSection: {
+    marginBottom: 20,
+  },
+  fileButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    gap: 16,
+  },
+  fileButton: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    borderRadius: 8,
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: "#F0F8FF",
+  },
+  fileButtonText: {
+    marginTop: 8,
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: "600",
+  },
+  filePreview: {
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#f9f9f9",
+  },
+  image: {
+    width: "100%",
+    height: 250,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+    marginBottom: 12,
+  },
+  fileInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  fileName: {
+    fontSize: 16,
+    color: "#333",
+    flex: 1,
+  },
+  removeFileButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+  },
   button: {
     backgroundColor: "#007AFF",
     padding: 16,
@@ -201,23 +299,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  buttonSecondary: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: "#007AFF",
-  },
   buttonDisabled: { opacity: 0.6 },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "600" },
-  buttonSecondaryText: { color: "#007AFF", fontSize: 18, fontWeight: "600" },
   cancelButton: {
     backgroundColor: "#f0f0f0",
     padding: 16,

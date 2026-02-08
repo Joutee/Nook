@@ -204,7 +204,7 @@ const documents = () => {
       <DocumentViewerModal
         visible={viewerVisible}
         onClose={() => setViewerVisible(false)}
-        filePath={selectedDocument?.path || null}
+        filePath={selectedDocument?.document_path || null}
         fileName={selectedDocument?.name}
       />
     </View>
