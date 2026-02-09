@@ -6,14 +6,16 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import DocumentViewerModal from "../components/DocumentViewerModal";
+const isDeletedRef = useRef(false);
 
 interface Issue {
   id: string;
@@ -44,16 +46,14 @@ const IssueDetail = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
 
   // 1. ČÁST: Načtení dat (Text + Profil)
-  // Tato funkce NEŘEŠÍ stahování URL obrázku, jen uloží cestu z databáze.
   const loadIssueData = useCallback(async () => {
-    if (!id) return;
+    if (!id || isDeletedRef.current) return;
 
-    // Loading zapneme jen pokud data ještě nemáme (první načtení).
-    // Tím zamezíme probliknutí celé obrazovky při refreshování.
-    if (!issue) setIsLoading(true);
+    setIsLoading(true);
 
     try {
       // A) Načteme issue
@@ -61,9 +61,17 @@ const IssueDetail = () => {
         .from("issues")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
-      if (issueError) throw issueError;
+      if (issueError) {
+        throw issueError;
+      }
+
+      if (!issueData) {
+        showToast("Závada nebyla nalezena", "error");
+        router.replace("/issues");
+        return;
+      }
       setIssue(issueData);
 
       // B) Načteme profil (pokud existuje)
@@ -87,7 +95,7 @@ const IssueDetail = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id, showToast, issue]); // 'issue' je zde proto, abychom věděli, zda zapnout loader
+  }, [id, showToast]);
 
   // useFocusEffect zajistí načtení dat při příchodu na obrazovku
   useFocusEffect(
@@ -220,6 +228,55 @@ const IssueDetail = () => {
     }
   };
 
+  const handleDeleteIssue = () => {
+    Alert.alert(
+      "Smazat závadu",
+      "Opravdu chcete smazat tuto závadu? Tato akce je nevratná.",
+      [
+        {
+          text: "Zrušit",
+          style: "cancel",
+        },
+        {
+          text: "Smazat",
+          style: "destructive",
+          onPress: deleteIssue,
+        },
+      ],
+    );
+  };
+
+  const deleteIssue = async () => {
+    if (!issue || !id) return;
+
+    setIsDeleting(true);
+    try {
+      // Pokud má issue obrázek, smažeme ho ze storage
+      if (issue.image_path) {
+        const { error: storageError } = await supabase.storage
+          .from("issue-images")
+          .remove([issue.image_path]);
+
+        if (storageError) {
+          console.error("Chyba při mazání obrázku:", storageError);
+          // Pokračujeme i přes chybu storage, hlavně aby se smazal záznam
+        }
+      }
+
+      // Smažeme záznam z databáze
+      const { error } = await supabase.from("issues").delete().eq("id", id);
+
+      if (error) throw error;
+      isDeletedRef.current = true;
+      showToast("Závada byla smazána", "success");
+      router.replace("/issues");
+    } catch (error: any) {
+      showToast("Chyba při mazání závady: " + error.message, "error");
+      console.error(error);
+      setIsDeleting(false);
+    }
+  };
+
   // --- Render ---
 
   if (isLoading) {
@@ -260,13 +317,35 @@ const IssueDetail = () => {
 
           <View style={styles.actionButtons}>
             {userRole === "najemce" && (
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => router.push(`/issue-create?id=${issue.id}`)}
-              >
-                <Ionicons name="pencil" size={18} color="#007AFF" />
-                <Text style={styles.editButtonText}>Upravit</Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => router.push(`/issue-create?id=${issue.id}`)}
+                  disabled={isDeleting}
+                >
+                  <Ionicons name="pencil" size={18} color="#007AFF" />
+                  <Text style={styles.editButtonText}>Upravit</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={handleDeleteIssue}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <ActivityIndicator size="small" color="#FF3B30" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="trash-outline"
+                        size={18}
+                        color="#FF3B30"
+                      />
+                      <Text style={styles.deleteButtonText}>Smazat</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </>
             )}
 
             {userRole === "pronajimatel" && (
@@ -422,6 +501,22 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     color: "#007AFF",
+    fontWeight: "600",
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#FF3B30",
+    backgroundColor: "#FFF0F0",
+  },
+  deleteButtonText: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: "#FF3B30",
     fontWeight: "600",
   },
   changeStatusButton: {

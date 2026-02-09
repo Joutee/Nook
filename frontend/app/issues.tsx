@@ -33,7 +33,7 @@ const Issues = () => {
 
   const loadIssues = async () => {
     if (!currentFlat) return;
-
+console.log("Načítám závady pro flat ID:", currentFlat.id);
     try {
       const { data, error } = await supabase
         .from("issues")
