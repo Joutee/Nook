@@ -67,12 +67,14 @@ const Issues = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "#FF3B30";
+      case "new":
+        return "#1953ff";
       case "in_progress":
         return "#FF9500";
       case "resolved":
         return "#34C759";
+      case "cancelled":
+        return "#FF3B30";
       default:
         return "#999";
     }
@@ -80,47 +82,50 @@ const Issues = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "open":
-        return "Otevřená";
+      case "new":
+        return "Nová";
       case "in_progress":
         return "Řeší se";
       case "resolved":
         return "Vyřešená";
+      case "cancelled":
+        return "Zrušená";
       default:
         return status;
     }
   };
 
   const renderIssue = ({ item }: { item: Issue }) => (
-    <TouchableOpacity
-      style={styles.issueItem}
-      onPress={() => router.push(`/issue-detail?id=${item.id}`)}
-    >
-      <View style={styles.issueHeader}>
-        <Text style={styles.issueTitle}>{item.title}</Text>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(item.status) },
-          ]}
-        >
-          <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+    <View style={styles.issueItem}>
+      <TouchableOpacity
+        onPress={() => router.push(`/issue-detail?id=${item.id}`)}
+      >
+        <View style={styles.issueHeader}>
+          <Text style={styles.issueTitle}>{item.title}</Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(item.status) },
+            ]}
+          >
+            <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+          </View>
         </View>
-      </View>
-      {item.description && (
-        <Text style={styles.issueDescription} numberOfLines={2}>
-          {item.description}
-        </Text>
-      )}
-      <View style={styles.issueFooter}>
-        <Text style={styles.issueDate}>
-          Vytvořena: {formatDate(item.created_at)}
-        </Text>
-        {item.image_path && (
-          <Ionicons name="image-outline" size={16} color="#666" />
+        {item.description && (
+          <Text style={styles.issueDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
         )}
-      </View>
-    </TouchableOpacity>
+        <View style={styles.issueFooter}>
+          <Text style={styles.issueDate}>
+            Vytvořena: {formatDate(item.created_at)}
+          </Text>
+          {item.image_path && (
+            <Ionicons name="image-outline" size={16} color="#666" />
+          )}
+        </View>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -192,9 +197,9 @@ const styles = StyleSheet.create({
   },
   issueItem: {
     backgroundColor: "#f9f9f9",
-    padding: 16,
     borderRadius: 8,
     marginBottom: 12,
+    padding: 16,
   },
   issueHeader: {
     flexDirection: "row",

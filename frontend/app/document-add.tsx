@@ -71,19 +71,24 @@ const DocumentAdd = () => {
         return;
       }
 
-      await uploadFile({
+      // Nahrajeme soubor do storage
+      const documentPath = await uploadFile({
         bucket: "documents",
         flatId: currentFlat.id,
         fileUri: file.uri,
         fileName: file.name,
         mimeType: file.mimeType,
-        tableName: "documents",
-        pathColumnName: "document_path",
-        additionalData: {
-          name: documentName || file.name,
-          description: documentDescription,
-        },
       });
+
+      // Přidáme záznam do databáze
+      const { error } = await supabase.from("documents").insert({
+        flat_id: currentFlat.id,
+        document_path: documentPath,
+        name: documentName || file.name,
+        description: documentDescription || null,
+      });
+
+      if (error) throw error;
 
       showToast("Dokument úspěšně nahrán", "success");
       router.back();

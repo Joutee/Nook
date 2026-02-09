@@ -143,21 +143,15 @@ interface UploadFileParams {
   fileUri: string;
   fileName: string;
   mimeType: string;
-  tableName: string;
-  additionalData?: Record<string, any>;
-  pathColumnName?: string; // Název sloupce pro cestu (výchozí: "path")
 }
 
 /**
- * Nahraje soubor nebo fotku do Supabase Storage a přidá záznam do databáze
+ * Nahraje soubor nebo fotku do Supabase Storage
  * @param bucket - název storage bucketu
  * @param flatId - ID bytu pro organizaci souborů
  * @param fileUri - URI souboru k nahrání
  * @param fileName - název souboru
  * @param mimeType - MIME typ souboru
- * @param tableName - název tabulky pro uložení záznamu
- * @param additionalData - další data pro uložení do tabulky (např. title, description)
- * @param pathColumnName - název sloupce pro cestu (výchozí: "path")
  * @returns path v storage
  */
 export const uploadFile = async ({
@@ -166,9 +160,6 @@ export const uploadFile = async ({
   fileUri,
   fileName,
   mimeType,
-  tableName,
-  additionalData = {},
-  pathColumnName = "path",
 }: UploadFileParams): Promise<string> => {
   // Komprese obrázků
   let processedUri = fileUri;
@@ -218,22 +209,6 @@ export const uploadFile = async ({
   }
 
   console.log("Nahráno do Storage:", data.path);
-
-  // Uložení do databáze
-  const dbData = {
-    flat_id: flatId,
-    [pathColumnName]: data.path,
-    ...additionalData,
-  };
-
-  const { error: dbError } = await supabase.from(tableName).insert(dbData);
-
-  if (dbError) {
-    console.error("Supabase DB Error:", dbError);
-    throw dbError;
-  }
-
-  console.log("Záznam uložen do DB úspěšně");
   return data.path;
 };
 

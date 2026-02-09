@@ -155,6 +155,10 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="issue-create"
           options={{ title: "Nahlásit závadu" }}
         />
+                <Stack.Screen
+          name="issue-detail"
+          options={{ title: "Detail závady" }}
+        />
         <Stack.Screen
           name="keys"
           options={{ title: "Keys", headerShown: false }}

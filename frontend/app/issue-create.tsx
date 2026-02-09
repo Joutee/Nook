@@ -8,8 +8,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
-import { router } from "expo-router";
+import React, { useState, useCallback } from "react";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
@@ -23,14 +23,79 @@ import {
 import DocumentViewerModal from "../components/DocumentViewerModal";
 
 const IssueCreate = () => {
+  const { id } = useLocalSearchParams<{ id?: string }>();
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+  // NOVÉ: Musíme si pamatovat původní cestu v DB, abychom ji mohli smazat
+  const [originalImagePath, setOriginalImagePath] = useState<string | null>(
+    null,
+  );
+
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
 
+  const isEditMode = !!id;
+
+  const loadIssue = useCallback(async () => {
+    if (!id) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("issues")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setTitle(data.title);
+        setDescription(data.description || "");
+
+        // Uložíme si původní cestu (např. "folder/image.jpg") pro pozdější mazání
+        setOriginalImagePath(data.image_path);
+
+        // Načteme URL pro zobrazení existujícího obrázku
+        if (data.image_path) {
+          // Druhý parametr (3600) je platnost odkazu v sekundách (např. 1 hodina)
+          const { data: urlData, error: signedUrlError } =
+            await supabase.storage
+              .from("issue-images")
+              .createSignedUrl(data.image_path, 3600);
+
+          if (signedUrlError) {
+            console.error("Chyba při získávání podepsané URL:", signedUrlError);
+          }
+
+          // createSignedUrl vrací objekt { signedUrl: string }, ne { publicUrl: string }
+          if (urlData?.signedUrl) {
+            setImageUri(urlData.signedUrl);
+          }
+        }
+      }
+    } catch (error: any) {
+      showToast("Chyba při načítání závady: " + error.message, "error");
+      console.error(error);
+      router.back();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, showToast]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadIssue();
+    }, [loadIssue]),
+  );
+
+  // ... funkce handlePickImage a handleTakePhoto zůstávají stejné ...
   const handlePickImage = async () => {
     try {
       const uri = await pickGalleryPhoto();
@@ -40,7 +105,6 @@ const IssueCreate = () => {
       }
     } catch (error: any) {
       showToast("Chyba při výběru obrázku: " + error.message, "error");
-      console.error(error);
     }
   };
 
@@ -53,7 +117,6 @@ const IssueCreate = () => {
       }
     } catch (error: any) {
       showToast("Chyba při focení: " + error.message, "error");
-      console.error(error);
     }
   };
 
@@ -76,40 +139,79 @@ const IssueCreate = () => {
       } = await supabase.auth.getSession();
       if (!session) throw new Error("Nejste přihlášeni");
 
-      let imagePath: string | null = null;
-      if (imageUri) {
-        imagePath = await uploadFile({
-          bucket: "issue-images",
-          flatId: currentFlat.id,
-          fileUri: imageUri,
-          fileName: `issue_${Date.now()}.jpg`,
-          mimeType: "image/jpeg",
-          tableName: "issues",
-          pathColumnName: "image_path",
-          additionalData: {
-            profile_id: session.user.id,
+      // === EDIT MODE ===
+      if (isEditMode && id) {
+        let finalImagePath: string | null = originalImagePath; // Výchozí je stará cesta
+
+        // A) Uživatel vybral NOVÝ obrázek (imageUri je lokální cesta 'file://')
+        if (imageUri && !imageUri.startsWith("http")) {
+          // 1. Smažeme starý, pokud existoval
+          if (originalImagePath) {
+            await supabase.storage
+              .from("issue-images")
+              .remove([originalImagePath]);
+          }
+
+          // 2. Nahrajeme nový
+          finalImagePath = await uploadFile({
+            bucket: "issue-images",
+            flatId: currentFlat.id,
+            fileUri: imageUri,
+            fileName: `issue_${Date.now()}.jpg`,
+            mimeType: "image/jpeg",
+          });
+        }
+        // B) Uživatel ODSTRANIL obrázek (křížkem)
+        else if (!imageUri && originalImagePath) {
+          await supabase.storage
+            .from("issue-images")
+            .remove([originalImagePath]);
+          finalImagePath = null;
+        }
+        // C) Pokud imageUri začíná na "http", uživatel obrázek nezměnil -> neděláme nic se storage
+
+        // 3. Update databáze
+        const { error } = await supabase
+          .from("issues")
+          .update({
             title: title.trim(),
             description: description.trim() || null,
-            status: "new",
-          },
-        });
-      }
+            image_path: finalImagePath,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id);
 
-      // Pokud není obrázek, vložíme přímo do databáze
-      if (!imagePath) {
+        if (error) throw error;
+        showToast("Závada aktualizována", "success");
+      }
+      // === CREATE MODE ===
+      else {
+        let imagePath: string | null = null;
+
+        if (imageUri) {
+          imagePath = await uploadFile({
+            bucket: "issue-images",
+            flatId: currentFlat.id,
+            fileUri: imageUri,
+            fileName: `issue_${Date.now()}.jpg`,
+            mimeType: "image/jpeg",
+          });
+        }
+
+        // Vložíme do databáze
         const { error } = await supabase.from("issues").insert({
           title: title.trim(),
           description: description.trim() || null,
-          image_path: null,
+          image_path: imagePath,
           flat_id: currentFlat.id,
           profile_id: session.user.id,
-          status: "open",
+          status: "new",
         });
 
         if (error) throw error;
+        showToast("Závada nahlášena", "success");
       }
 
-      showToast("Závada nahlášena", "success");
       router.back();
     } catch (error: any) {
       showToast("Chyba: " + error.message, "error");
@@ -119,11 +221,25 @@ const IssueCreate = () => {
     }
   };
 
+  // ... zbytek renderu (JSX) zůstává stejný ...
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Nahlásit závadu</Text>
+      {/* ... Zbytek JSX kódu je v pořádku ... */}
+      {/* ... Zkopírujte zbytek z vašeho původního kódu ... */}
+      <Text style={styles.title}>
+        {isEditMode ? "Upravit závadu" : "Nahlásit závadu"}
+      </Text>
 
       <View style={styles.form}>
+        {/* ... INPUTY ... */}
         <Text style={styles.label}>Název závady *</Text>
         <TextInput
           style={styles.input}
@@ -145,6 +261,7 @@ const IssueCreate = () => {
           textAlignVertical="top"
         />
 
+        {/* ... Sekce obrázku - Zůstává stejná ... */}
         <Text style={styles.label}>Fotografie (volitelné)</Text>
         <View style={styles.imageSection}>
           {imageUri ? (
@@ -183,6 +300,7 @@ const IssueCreate = () => {
           )}
         </View>
 
+        {/* ... Tlačítka ... */}
         <TouchableOpacity
           style={[
             styles.submitButton,
@@ -194,7 +312,9 @@ const IssueCreate = () => {
           {isUploading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>Odeslat</Text>
+            <Text style={styles.submitButtonText}>
+              {isEditMode ? "Uložit změny" : "Odeslat"}
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -219,10 +339,15 @@ const IssueCreate = () => {
 
 export default IssueCreate;
 
+// Styles zůstávají stejné
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
@@ -258,17 +383,11 @@ const styles = StyleSheet.create({
   },
   imageButtons: {
     flexDirection: "row",
-    width: "100%", // 1. Zaručí, že kontejner drží šířku
-    justifyContent: "space-between", // 2. Roztáhne tlačítka od sebe (nahrazuje gap)
-    // gap: 16,                    // SMAZAT (pro jistotu, space-between je bezpečnější)
+    width: "100%",
+    justifyContent: "space-between",
   },
   imageButton: {
-    width: "48%", // 3. Pevná šířka (ignoruje délku textu uvnitř)
-    // flexBasis: 0,               // SMAZAT
-    // flexGrow: 1,                // SMAZAT
-    // flexShrink: 1,              // SMAZAT
-    // flex: 1,                    // SMAZAT
-
+    width: "48%",
     borderWidth: 2,
     borderColor: "#007AFF",
     borderRadius: 8,
