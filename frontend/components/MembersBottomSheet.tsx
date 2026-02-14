@@ -13,16 +13,9 @@ import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
+import { FlatMember } from "../types/flat";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-interface FlatMember {
-  id: string;
-  username: string;
-  name: string | null;
-  surname: string | null;
-  role: string;
-}
 
 interface MembersBottomSheetProps {
   visible: boolean;

@@ -11,22 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useToast } from "../contexts/ToastContext";
-
-interface HistoryItem {
-  chore_id: string;
-  flat_id: string;
-  cycle_index: number;
-  cycle_start_date: string;
-  expected_profile_id: string | null;
-  expected_profile_name: string | null;
-  expected_profile_surname: string | null;
-  expected_profile_avatar: string | null;
-  is_done: boolean;
-  completed_by_profile_id: string | null;
-  completed_by_name: string | null;
-  completed_by_surname: string | null;
-  completed_at: string | null;
-}
+import { HistoryItem } from "../types/chores";
 
 const ChoreHistory = () => {
   const { id } = useLocalSearchParams<{ id: string }>();

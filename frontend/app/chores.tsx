@@ -12,22 +12,7 @@ import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-
-interface Chore {
-  id: string;
-  flat_id: string;
-  name: string;
-  description: string | null;
-  interval_days: number;
-  current_cycle_index: number;
-  current_assignee_id: string | null;
-  assignee_name: string | null;
-  assignee_surname: string | null;
-  assignee_avatar: string | null;
-  assignee_user_id: string | null;
-  is_completed_current_cycle: boolean;
-  start_date: string | null;
-}
+import { Chore } from "../types/chores";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -39,7 +24,6 @@ const Chores = () => {
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
 
-  
   useFocusEffect(
     useCallback(() => {
       if (currentFlat?.id) {

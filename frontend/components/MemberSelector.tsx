@@ -7,8 +7,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import BottomSheet from "../BottomSheet";
-import { Member } from "../../types/members";
+import BottomSheet from "./BottomSheet";
+import { Member } from "../types/members";
 
 interface MemberSelectorProps {
   members: Member[];

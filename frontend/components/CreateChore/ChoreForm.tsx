@@ -14,15 +14,9 @@ import { supabase } from "../../utils/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { useToast } from "../../contexts/ToastContext";
 import { DatePickerInput } from "./DatePickerInput";
-import { MemberSelector } from "./MemberSelector";
+import { MemberSelector } from "../MemberSelector";
 import { MemberOrderList } from "./MemberOrderList";
-
-export interface Member {
-  id: string;
-  name: string;
-  surname: string;
-  avatar_url: string | null;
-}
+import { Member } from "../../types/members";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -275,7 +269,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
   return (
     <ScrollView style={styles.container}>
-
       <View style={styles.form}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Název *</Text>

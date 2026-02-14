@@ -13,17 +13,7 @@ import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
-
-interface Issue {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  title: string;
-  description: string | null;
-  image_path: string | null;
-  status: string;
-  profile_id: string;
-}
+import { Issue } from "../types/issues";
 
 const Issues = () => {
   const { currentFlat, userRole } = useFlatContext();
@@ -33,7 +23,7 @@ const Issues = () => {
 
   const loadIssues = async () => {
     if (!currentFlat) return;
-console.log("Načítám závady pro flat ID:", currentFlat.id);
+    console.log("Načítám závady pro flat ID:", currentFlat.id);
     try {
       const { data, error } = await supabase
         .from("issues")

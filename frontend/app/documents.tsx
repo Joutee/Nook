@@ -17,14 +17,7 @@ import { useToast } from "../contexts/ToastContext";
 import DocumentViewerModal from "../components/DocumentViewerModal";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteFile } from "../utils/fileService";
-
-interface Document {
-  id: string;
-  created_at: string;
-  name: string;
-  description: string | null;
-  document_path: string;
-}
+import { Document } from "../types/documents";
 
 const documents = () => {
   const { currentFlat } = useFlatContext();

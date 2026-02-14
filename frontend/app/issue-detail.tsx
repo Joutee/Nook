@@ -15,25 +15,9 @@ import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import DocumentViewerModal from "../components/DocumentViewerModal";
+import { Issue } from "../types/issues";
+import { Profile } from "../types/profile";
 const isDeletedRef = useRef(false);
-
-interface Issue {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  title: string;
-  description: string | null;
-  image_path: string | null;
-  status: string;
-  profile_id: string;
-  flat_id: string;
-}
-
-interface Profile {
-  id: string;
-  name: string;
-  surname: string;
-}
 
 const IssueDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -78,7 +62,7 @@ const IssueDetail = () => {
       if (issueData.profile_id) {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("id, name, surname")
+          .select("id, name, surname, avatar_url")
           .eq("id", issueData.profile_id)
           .single();
 

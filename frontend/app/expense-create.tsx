@@ -14,22 +14,26 @@ import { router } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-import { Profile } from "../types/finance";
+import { Profile } from "../types/profile";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { MemberSelector } from "../components/MemberSelector";
 
 const ExpenseAdd = () => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [payerId, setPayerId] = useState<string | null>(null);
-  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
-    new Set(),
-  );
+  const [selectedPayer, setSelectedPayer] = useState<Profile[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<Profile[]>([]);
   const [flatMembers, setFlatMembers] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [splitMode, setSplitMode] = useState<"auto" | "manual">("auto");
+  const [manualAmounts, setManualAmounts] = useState<Record<string, string>>(
+    {},
+  );
+  const [touchedMembers, setTouchedMembers] = useState<Set<string>>(new Set());
 
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
@@ -39,14 +43,22 @@ const ExpenseAdd = () => {
     getCurrentUser();
   }, [currentFlat]);
 
+  useEffect(() => {
+    // Set default payer when members are loaded and current user is known
+    if (flatMembers.length > 0 && currentUserId && selectedPayer.length === 0) {
+      const currentUser = flatMembers.find((m) => m.id === currentUserId);
+      if (currentUser) {
+        setSelectedPayer([currentUser]);
+      }
+    }
+  }, [flatMembers, currentUserId]);
+
   const getCurrentUser = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
       setCurrentUserId(user.id);
-      // Default payer to current user
-      setPayerId(user.id);
     }
   };
 
@@ -63,6 +75,7 @@ const ExpenseAdd = () => {
         profiles (
           id,
           name,
+          surname,
           avatar_url
         )
       `,
@@ -76,11 +89,12 @@ const ExpenseAdd = () => {
         const members: Profile[] = data.map((m: any) => ({
           id: m.profiles.id,
           name: m.profiles.name,
+          surname: m.profiles.surname,
           avatar_url: m.profiles.avatar_url,
         }));
         setFlatMembers(members);
         // Pre-select all members by default
-        setSelectedMembers(new Set(members.map((m) => m.id)));
+        setSelectedMembers(members);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -90,14 +104,189 @@ const ExpenseAdd = () => {
     }
   };
 
-  const toggleMemberSelection = (memberId: string) => {
-    const newSelection = new Set(selectedMembers);
-    if (newSelection.has(memberId)) {
-      newSelection.delete(memberId);
+  const handlePayerSelect = (member: Profile) => {
+    // For single select, replace the selection
+    setSelectedPayer([member]);
+  };
+
+  const handleMemberToggle = (member: Profile) => {
+    const isSelected = selectedMembers.some((m) => m.id === member.id);
+    if (isSelected) {
+      setSelectedMembers(selectedMembers.filter((m) => m.id !== member.id));
+      // Remove manual amount if exists
+      const newManualAmounts = { ...manualAmounts };
+      delete newManualAmounts[member.id];
+      setManualAmounts(newManualAmounts);
+      // Remove from touched members
+      const newTouched = new Set(touchedMembers);
+      newTouched.delete(member.id);
+      setTouchedMembers(newTouched);
     } else {
-      newSelection.add(memberId);
+      const newSelectedMembers = [...selectedMembers, member];
+      setSelectedMembers(newSelectedMembers);
+
+      // In manual mode, auto-calculate amount for new member
+      if (splitMode === "manual") {
+        const amountNum = parseFloat(amount);
+        if (!isNaN(amountNum)) {
+          // Calculate total of touched members
+          const touchedTotal = Array.from(touchedMembers).reduce(
+            (sum, memberId) => {
+              return sum + (parseFloat(manualAmounts[memberId]) || 0);
+            },
+            0,
+          );
+
+          // Remaining amount to distribute among untouched
+          const untouchedCount = newSelectedMembers.filter(
+            (m) => !touchedMembers.has(m.id),
+          ).length;
+          const remaining = amountNum - touchedTotal;
+
+          if (untouchedCount > 0) {
+            const baseShare =
+              Math.ceil((remaining / untouchedCount) * 100) / 100;
+            const newManualAmounts = { ...manualAmounts };
+            let distributedTotal = 0;
+
+            newSelectedMembers.forEach((m, index) => {
+              if (!touchedMembers.has(m.id)) {
+                const isLast = index === newSelectedMembers.length - 1;
+                if (isLast) {
+                  newManualAmounts[m.id] = (
+                    remaining - distributedTotal
+                  ).toFixed(2);
+                } else {
+                  newManualAmounts[m.id] = baseShare.toFixed(2);
+                  distributedTotal += baseShare;
+                }
+              }
+            });
+
+            setManualAmounts(newManualAmounts);
+          }
+        }
+      }
     }
-    setSelectedMembers(newSelection);
+  };
+
+  const handleManualAmountChange = (memberId: string, value: string) => {
+    // Mark this member as touched
+    const newTouched = new Set(touchedMembers);
+    newTouched.add(memberId);
+    setTouchedMembers(newTouched);
+
+    // Update the manual amount for this member
+    const newManualAmounts = {
+      ...manualAmounts,
+      [memberId]: value,
+    };
+
+    const valueNum = parseFloat(value) || 0;
+
+    // Find untouched members
+    const untouchedMembers = selectedMembers.filter(
+      (m) => !newTouched.has(m.id),
+    );
+
+    if (untouchedMembers.length > 0) {
+      // Recalculate amounts for untouched members
+      const amountNum = parseFloat(amount);
+      if (!isNaN(amountNum)) {
+        // Calculate total of all touched members
+        const touchedTotal = Array.from(newTouched).reduce((sum, id) => {
+          const amt =
+            id === memberId ? valueNum : parseFloat(manualAmounts[id]) || 0;
+          return sum + amt;
+        }, 0);
+
+        // Remaining amount for untouched members
+        const remaining = amountNum - touchedTotal;
+
+        if (remaining > 0) {
+          const baseShare =
+            Math.ceil((remaining / untouchedMembers.length) * 100) / 100;
+          let distributedTotal = 0;
+
+          untouchedMembers.forEach((member, index) => {
+            const isLast = index === untouchedMembers.length - 1;
+            if (isLast) {
+              newManualAmounts[member.id] = (
+                remaining - distributedTotal
+              ).toFixed(2);
+            } else {
+              newManualAmounts[member.id] = baseShare.toFixed(2);
+              distributedTotal += baseShare;
+            }
+          });
+        } else {
+          // If remaining is negative or zero, set untouched to 0
+          untouchedMembers.forEach((member) => {
+            newManualAmounts[member.id] = "0.00";
+          });
+        }
+      }
+
+      setManualAmounts(newManualAmounts);
+    } else {
+      // All members are touched - update total amount
+      const newTotal = selectedMembers.reduce((sum, member) => {
+        const amt =
+          member.id === memberId
+            ? valueNum
+            : parseFloat(manualAmounts[member.id]) || 0;
+        return sum + amt;
+      }, 0);
+
+      setAmount(newTotal.toFixed(2));
+      setManualAmounts(newManualAmounts);
+    }
+  };
+
+  const calculateTotalManualAmount = () => {
+    return Object.values(manualAmounts).reduce((sum, val) => {
+      const num = parseFloat(val);
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
+  };
+
+  const getAutoShareAmount = () => {
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || selectedMembers.length === 0) return 0;
+    // Return the base share that most members will pay (rounded up)
+    return Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
+  };
+
+  const handleSplitModeChange = () => {
+    if (splitMode === "auto") {
+      // Switching to manual - pre-fill with equal amounts
+      const amountNum = parseFloat(amount);
+      if (!isNaN(amountNum) && selectedMembers.length > 0) {
+        const newManualAmounts: Record<string, string> = {};
+        const baseShare =
+          Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
+        let total = 0;
+
+        selectedMembers.forEach((member, index) => {
+          if (index === selectedMembers.length - 1) {
+            // Last member gets the remainder to ensure exact total
+            const remainder = amountNum - total;
+            newManualAmounts[member.id] = remainder.toFixed(2);
+          } else {
+            newManualAmounts[member.id] = baseShare.toFixed(2);
+            total += baseShare;
+          }
+        });
+        setManualAmounts(newManualAmounts);
+      }
+      // Reset touched members when switching to manual
+      setTouchedMembers(new Set());
+      setSplitMode("manual");
+    } else {
+      // Switching to auto
+      setTouchedMembers(new Set());
+      setSplitMode("auto");
+    }
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -125,14 +314,51 @@ const ExpenseAdd = () => {
       return;
     }
 
-    if (!payerId) {
+    if (selectedPayer.length === 0) {
       showToast("Vyberte plátce", "error");
       return;
     }
 
-    if (selectedMembers.size === 0) {
+    if (selectedMembers.length === 0) {
       showToast("Vyberte alespoň jednoho člena pro rozdělení", "error");
       return;
+    }
+
+    // Validate manual amounts if in manual mode
+    if (splitMode === "manual") {
+      const totalManual = calculateTotalManualAmount();
+      const untouchedCount = selectedMembers.filter(
+        (m) => !touchedMembers.has(m.id),
+      ).length;
+
+      // Only validate total if there are untouched members
+      // If all are touched, the amount has been auto-updated
+      if (untouchedCount > 0 && Math.abs(totalManual - amountNum) > 0.01) {
+        showToast(
+          `Součet částek (${totalManual.toFixed(2)} Kč) musí odpovídat celkové částce (${amountNum.toFixed(2)} Kč)`,
+          "error",
+        );
+        return;
+      }
+
+      // Check that all selected members have amounts
+      for (const member of selectedMembers) {
+        const memberAmount = parseFloat(manualAmounts[member.id] || "0");
+        if (isNaN(memberAmount) || memberAmount < 0) {
+          showToast(`Zadejte platnou částku pro ${member.name}`, "error");
+          return;
+        }
+      }
+
+      // If all members are touched, use the calculated total as the final amount
+      if (untouchedCount === 0) {
+        // Update amountNum to the actual total
+        const finalAmount = totalManual;
+        if (finalAmount <= 0) {
+          showToast("Celková částka musí být větší než 0", "error");
+          return;
+        }
+      }
     }
 
     if (!currentFlat?.id) {
@@ -142,17 +368,25 @@ const ExpenseAdd = () => {
 
     setIsSaving(true);
     try {
-      // Calculate share per person
-      const shareAmount = amountNum / selectedMembers.size;
+      // Determine final amount - if all members are touched in manual mode, use their total
+      let finalAmount = amountNum;
+      if (splitMode === "manual") {
+        const untouchedCount = selectedMembers.filter(
+          (m) => !touchedMembers.has(m.id),
+        ).length;
+        if (untouchedCount === 0) {
+          finalAmount = calculateTotalManualAmount();
+        }
+      }
 
       // 1. Insert the expense
       const { data: expenseData, error: expenseError } = await supabase
         .from("expenses")
         .insert({
           flat_id: currentFlat.id,
-          payer_id: payerId,
+          payer_id: selectedPayer[0].id,
           title: finalTitle,
-          amount: amountNum,
+          amount: finalAmount,
           happened_at: date.toISOString(),
           is_settlement: false,
         })
@@ -169,11 +403,30 @@ const ExpenseAdd = () => {
       }
 
       // 2. Insert expense shares for each selected member
-      const expenseShares = Array.from(selectedMembers).map((memberId) => ({
-        expense_id: expenseData.id,
-        profile_id: memberId,
-        owed_amount: shareAmount,
-      }));
+      const expenseShares = selectedMembers.map((member, index) => {
+        let shareAmount: number;
+
+        if (splitMode === "auto") {
+          if (index === selectedMembers.length - 1) {
+            // Last member gets the remainder to ensure exact total
+            const baseShare =
+              Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+            const totalBeforeLast = baseShare * (selectedMembers.length - 1);
+            shareAmount = finalAmount - totalBeforeLast;
+          } else {
+            shareAmount =
+              Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+          }
+        } else {
+          shareAmount = parseFloat(manualAmounts[member.id] || "0");
+        }
+
+        return {
+          expense_id: expenseData.id,
+          profile_id: member.id,
+          owed_amount: shareAmount,
+        };
+      });
 
       const { error: sharesError } = await supabase
         .from("expense_shares")
@@ -226,13 +479,36 @@ const ExpenseAdd = () => {
         <View style={styles.section}>
           <Text style={styles.label}>Částka (Kč)</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              splitMode === "manual" &&
+                selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                  .length === 0 &&
+                selectedMembers.length > 0 &&
+                styles.inputReadOnly,
+            ]}
             placeholder="0.00"
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
             placeholderTextColor="#999"
+            editable={
+              !(
+                splitMode === "manual" &&
+                selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                  .length === 0 &&
+                selectedMembers.length > 0
+              )
+            }
           />
+          {splitMode === "manual" &&
+            selectedMembers.filter((m) => !touchedMembers.has(m.id)).length ===
+              0 &&
+            selectedMembers.length > 0 && (
+              <Text style={styles.readOnlyHint}>
+                Částka se počítá automaticky z rozdělení
+              </Text>
+            )}
         </View>
 
         {/* Date Picker */}
@@ -259,70 +535,135 @@ const ExpenseAdd = () => {
         {/* Who Paid */}
         <View style={styles.section}>
           <Text style={styles.label}>Kdo zaplatil</Text>
-          {flatMembers.map((member) => (
-            <TouchableOpacity
-              key={member.id}
-              style={[
-                styles.memberItem,
-                payerId === member.id && styles.memberItemSelected,
-              ]}
-              onPress={() => setPayerId(member.id)}
-            >
-              <View style={styles.memberLeft}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <Text style={styles.memberName}>{member.name}</Text>
-              </View>
-              <View
-                style={[
-                  styles.radioButton,
-                  payerId === member.id && styles.radioButtonSelected,
-                ]}
-              >
-                {payerId === member.id && (
-                  <View style={styles.radioButtonInner} />
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+          <MemberSelector
+            members={flatMembers}
+            selectedMembers={selectedPayer}
+            onToggleMember={handlePayerSelect}
+            multiSelect={false}
+            title="Vyberte plátce"
+          />
         </View>
 
         {/* For Whom (Split) */}
         <View style={styles.section}>
-          <Text style={styles.label}>Rozdělit mezi</Text>
-          <Text style={styles.helperText}>
-            {selectedMembers.size > 0 &&
-              `Každý zaplatí: ${(parseFloat(amount) / selectedMembers.size || 0).toFixed(2)} Kč`}
-          </Text>
-          {flatMembers.map((member) => (
-            <TouchableOpacity
-              key={member.id}
-              style={styles.memberItem}
-              onPress={() => toggleMemberSelection(member.id)}
-            >
-              <View style={styles.memberLeft}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <Text style={styles.memberName}>{member.name}</Text>
-              </View>
-              <View
+          <View style={styles.splitHeader}>
+            <Text style={styles.label}>Rozdělit mezi</Text>
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchLabel}>Automaticky</Text>
+              <TouchableOpacity
                 style={[
-                  styles.checkbox,
-                  selectedMembers.has(member.id) && styles.checkboxSelected,
+                  styles.switch,
+                  splitMode === "manual" && styles.switchActive,
                 ]}
+                onPress={handleSplitModeChange}
               >
-                {selectedMembers.has(member.id) && (
-                  <Ionicons name="checkmark" size={16} color="#fff" />
+                <View
+                  style={[
+                    styles.switchThumb,
+                    splitMode === "manual" && styles.switchThumbActive,
+                  ]}
+                />
+              </TouchableOpacity>
+              <Text style={styles.switchLabel}>Manuálně</Text>
+            </View>
+          </View>
+
+          {splitMode === "auto" && selectedMembers.length > 0 && (
+            <Text style={styles.helperText}>
+              {(() => {
+                const amountNum = parseFloat(amount) || 0;
+                if (selectedMembers.length === 1) {
+                  return `Jediný člen zaplatí: ${amountNum.toFixed(2)} Kč`;
+                }
+                const baseShare =
+                  Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
+                const lastShare =
+                  amountNum - baseShare * (selectedMembers.length - 1);
+                if (Math.abs(baseShare - lastShare) < 0.01) {
+                  return `Každý zaplatí: ${baseShare.toFixed(2)} Kč`;
+                }
+                return `Každý zaplatí: ${baseShare.toFixed(2)} Kč (poslední ${lastShare.toFixed(2)} Kč)`;
+              })()}
+            </Text>
+          )}
+
+          {splitMode === "manual" && (
+            <Text style={styles.helperText}>
+              {(() => {
+                const total = calculateTotalManualAmount();
+                const targetAmount = parseFloat(amount) || 0;
+                const untouchedCount = selectedMembers.filter(
+                  (m) => !touchedMembers.has(m.id),
+                ).length;
+
+                if (untouchedCount > 0) {
+                  return `Součet: ${total.toFixed(2)} Kč / ${targetAmount.toFixed(2)} Kč (${untouchedCount} automaticky přepočítáno)`;
+                } else {
+                  return `Součet: ${total.toFixed(2)} Kč (celková částka se upravuje automaticky)`;
+                }
+              })()}
+            </Text>
+          )}
+
+          {flatMembers.map((member) => {
+            const isSelected = selectedMembers.some((m) => m.id === member.id);
+            return (
+              <View key={member.id} style={styles.memberRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.memberItem,
+                    isSelected && styles.memberItemSelected,
+                  ]}
+                  onPress={() => handleMemberToggle(member)}
+                >
+                  <View style={styles.memberLeft}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {member.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text style={styles.memberName}>
+                      {member.surname
+                        ? `${member.name} ${member.surname}`
+                        : member.name}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      isSelected && styles.checkboxSelected,
+                    ]}
+                  >
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={16} color="#fff" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {splitMode === "manual" && isSelected && (
+                  <View style={styles.amountInputContainer}>
+                    <TextInput
+                      style={[
+                        styles.amountInput,
+                        touchedMembers.has(member.id) &&
+                          styles.amountInputTouched,
+                      ]}
+                      placeholder="0.00"
+                      value={manualAmounts[member.id] || ""}
+                      onChangeText={(value) =>
+                        handleManualAmountChange(member.id, value)
+                      }
+                      keyboardType="decimal-pad"
+                      placeholderTextColor="#999"
+                    />
+                    {!touchedMembers.has(member.id) && (
+                      <Text style={styles.autoLabel}>Auto</Text>
+                    )}
+                  </View>
                 )}
               </View>
-            </TouchableOpacity>
-          ))}
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -398,6 +739,16 @@ const styles = StyleSheet.create({
     color: "#333",
     backgroundColor: "#fff",
   },
+  inputReadOnly: {
+    backgroundColor: "#f0f0f0",
+    color: "#666",
+  },
+  readOnlyHint: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+    fontStyle: "italic",
+  },
   dateButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -412,6 +763,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+  splitHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  switchLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
+  switch: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#ddd",
+    padding: 2,
+    justifyContent: "center",
+  },
+  switchActive: {
+    backgroundColor: "#007AFF",
+  },
+  switchThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    alignSelf: "flex-start",
+  },
+  switchThumbActive: {
+    alignSelf: "flex-end",
+  },
+  memberRow: {
+    marginBottom: 8,
+  },
   memberItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -419,12 +809,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 8,
-    marginBottom: 8,
     backgroundColor: "#f8f9fa",
   },
   memberItemSelected: {
     backgroundColor: "#e7f3ff",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#007AFF",
   },
   memberLeft: {
@@ -450,24 +839,6 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "500",
   },
-  radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#ddd",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioButtonSelected: {
-    borderColor: "#007AFF",
-  },
-  radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#007AFF",
-  },
   checkbox: {
     width: 24,
     height: 24,
@@ -480,6 +851,35 @@ const styles = StyleSheet.create({
   checkboxSelected: {
     backgroundColor: "#007AFF",
     borderColor: "#007AFF",
+  },
+  amountInputContainer: {
+    marginTop: 8,
+    position: "relative",
+  },
+  amountInput: {
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: "#333",
+    backgroundColor: "#fff",
+  },
+  amountInputTouched: {
+    borderColor: "#28a745",
+    borderWidth: 2,
+  },
+  autoLabel: {
+    position: "absolute",
+    top: -8,
+    right: 8,
+    backgroundColor: "#007AFF",
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "600",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   bottomActions: {
     flexDirection: "row",

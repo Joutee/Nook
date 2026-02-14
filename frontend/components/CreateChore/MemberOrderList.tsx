@@ -1,13 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-interface Member {
-  id: string;
-  name: string;
-  surname: string;
-  avatar_url: string | null;
-}
+import { Member } from "../../types/members";
 
 interface MemberOrderListProps {
   members: Member[];

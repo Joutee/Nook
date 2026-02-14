@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
-
-interface Flat {
-  id: string;
-  name: string;
-  address: string;
-}
+import { Flat } from "../types/flat";
 
 type UserRole = "pronajimatel" | "najemce" | null;
 

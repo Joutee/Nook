@@ -183,7 +183,6 @@ const Finance = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Načítám finanční data...</Text>
       </View>
     );
   }

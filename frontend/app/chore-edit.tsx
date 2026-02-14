@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useToast } from "../contexts/ToastContext";
-import { ChoreForm, Member } from "../components/CreateChore/ChoreForm";
+import { ChoreForm } from "../components/CreateChore/ChoreForm";
+import { Member } from "../types/members";
 
 const EditChore = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
