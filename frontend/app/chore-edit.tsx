@@ -13,7 +13,7 @@ const EditChore = () => {
     name: string;
     description: string;
     intervalDays: string;
-    startDate: string;
+    startDate: Date;
     selectedMembers: Member[];
   } | null>(null);
   const { showToast } = useToast();
@@ -63,7 +63,7 @@ const EditChore = () => {
         name: choreData.name,
         description: choreData.description || "",
         intervalDays: choreData.interval_days.toString(),
-        startDate: choreData.start_date || "",
+        startDate: new Date(choreData.start_date),
         selectedMembers: assignedMembers,
       });
     } catch (error) {

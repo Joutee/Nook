@@ -127,6 +127,10 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen name="expense-create" options={{ title: "Nový výdaj" }} />
         <Stack.Screen
+          name="expense-edit"
+          options={{ title: "Upravit výdaj" }}
+        />
+        <Stack.Screen
           name="settings"
           options={{
             title: "Nastavení",

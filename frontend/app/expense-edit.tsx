@@ -1,0 +1,141 @@
+import { ActivityIndicator, View, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { supabase } from "../utils/supabase";
+import { useToast } from "../contexts/ToastContext";
+import { ExpenseForm } from "../components/ExpenseForm";
+import { Profile } from "../types/profile";
+
+const EditExpense = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [initialData, setInitialData] = useState<{
+    title: string;
+    amount: string;
+    date: Date;
+    selectedPayer: Profile[];
+    selectedMembers: Profile[];
+    manualAmounts: Record<string, string>;
+    splitMode: "auto" | "manual";
+  } | null>(null);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (id) {
+      loadExpenseData();
+    }
+  }, [id]);
+
+  const loadExpenseData = async () => {
+    if (!id) return;
+
+    setIsLoadingData(true);
+    try {
+      // Load expense data
+      const { data: expenseData, error: expenseError } = await supabase
+        .from("expenses")
+        .select(
+          `
+          *,
+          payer:profiles!expenses_payer_id_fkey(id, name, surname, avatar_url)
+        `,
+        )
+        .eq("id", id)
+        .single();
+
+      if (expenseError) {
+        showToast(
+          "Nepodařilo se načíst výdaj: " + expenseError.message,
+          "error",
+        );
+        router.back();
+        return;
+      }
+
+      // Load expense shares
+      const { data: sharesData, error: sharesError } = await supabase
+        .from("expense_shares")
+        .select(
+          `
+          profile_id,
+          owed_amount,
+          profile:profiles(id, name, surname, avatar_url)
+        `,
+        )
+        .eq("expense_id", id);
+
+      if (sharesError) {
+        console.error("Error loading shares:", sharesError);
+        showToast(
+          "Nepodařilo se načíst rozdělení: " + sharesError.message,
+          "error",
+        );
+        router.back();
+        return;
+      }
+
+      // Process the data
+      const selectedMembers: Profile[] = sharesData
+        .map((share: any) => share.profile)
+        .filter((p: any) => p);
+
+      const manualAmounts: Record<string, string> = {};
+      sharesData.forEach((share: any) => {
+        manualAmounts[share.profile_id] = share.owed_amount.toFixed(2);
+      });
+
+      // Determine split mode - if amounts are equal (within 0.01), it's auto mode
+      const amounts = Object.values(manualAmounts).map((a) => parseFloat(a));
+      const avgAmount = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
+      const isAutoSplit = amounts.every((a) => Math.abs(a - avgAmount) < 0.5); // Allow small variations for rounding
+
+      setInitialData({
+        title: expenseData.title,
+        amount: expenseData.amount.toFixed(2),
+        date: new Date(expenseData.happened_at),
+        selectedPayer: [expenseData.payer],
+        selectedMembers,
+        manualAmounts,
+        splitMode: isAutoSplit ? "auto" : "manual",
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      showToast("Nepodařilo se načíst výdaj", "error");
+      router.back();
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  if (isLoadingData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (!initialData) {
+    return null;
+  }
+
+  return (
+    <ExpenseForm
+      key={id}
+      mode="edit"
+      expenseId={id}
+      initialData={initialData}
+    />
+  );
+};
+
+export default EditExpense;
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+});

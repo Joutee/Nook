@@ -154,7 +154,11 @@ const Finance = () => {
 
   const renderExpenseItem = ({ item }: { item: ExpenseWithDetails }) => {
     return (
-      <View style={styles.expenseItem}>
+      <TouchableOpacity
+        style={styles.expenseItem}
+        onPress={() => router.push(`/expense-edit?id=${item.id}`)}
+        activeOpacity={0.7}
+      >
         <View style={styles.expenseLeft}>
           {item.is_settlement ? (
             <View style={[styles.expenseIcon, styles.settlementIcon]}>
@@ -175,7 +179,7 @@ const Finance = () => {
           </View>
         </View>
         <Text style={styles.expenseAmount}>{formatCurrency(item.amount)}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 

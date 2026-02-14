@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../utils/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { useToast } from "../../contexts/ToastContext";
-import { DatePickerInput } from "./DatePickerInput";
+import { DatePickerInput } from "../DatePickerInput";
 import { MemberSelector } from "../MemberSelector";
 import { MemberOrderList } from "./MemberOrderList";
 import { Member } from "../../types/members";
@@ -25,7 +25,7 @@ interface ChoreFormProps {
     name: string;
     description: string;
     intervalDays: string;
-    startDate: string;
+    startDate: Date;
     selectedMembers: Member[];
   };
 }
@@ -42,7 +42,9 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   const [intervalDays, setIntervalDays] = useState(
     initialData?.intervalDays || "",
   );
-  const [startDate, setStartDate] = useState(initialData?.startDate || "");
+  const [startDate, setStartDate] = useState(
+    initialData?.startDate || new Date(),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>(
@@ -138,14 +140,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       return false;
     }
 
-    if (!startDate.trim()) {
-      showToast("Zadejte datum začátku", "error");
-      return false;
-    }
-
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(startDate)) {
-      showToast("Neplatný formát data. Použijte YYYY-MM-DD", "error");
+    if (!startDate || isNaN(startDate.getTime())) {
+      showToast("Zadejte platné datum začátku", "error");
       return false;
     }
 
@@ -181,7 +177,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
         name: name.trim(),
         description: description.trim() || null,
         interval_days: Number(intervalDays),
-        start_date: startDate,
+        start_date: startDate.toISOString().split("T")[0],
       })
       .select()
       .single();
@@ -221,7 +217,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
         name: name.trim(),
         description: description.trim() || null,
         interval_days: Number(intervalDays),
-        start_date: startDate,
+        start_date: startDate.toISOString().split("T")[0],
       })
       .eq("id", choreId);
 
@@ -309,7 +305,11 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Datum začátku *</Text>
-          <DatePickerInput value={startDate} onChange={setStartDate} />
+          <DatePickerInput
+            value={startDate}
+            onChange={setStartDate}
+            showIcon={false}
+          />
         </View>
 
         <View style={styles.inputGroup}>
