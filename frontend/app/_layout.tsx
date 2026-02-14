@@ -146,6 +146,10 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="chores"
           options={{ title: "Chores", headerShown: false }}
         />
+                <Stack.Screen
+          name="chore-detail"
+          options={{ title: "Detail úkolu" }}
+        />
         <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
         <Stack.Screen
           name="chore-history"

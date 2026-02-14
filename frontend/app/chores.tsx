@@ -118,26 +118,15 @@ const Chores = () => {
       <View
         style={[styles.choreItem, isCompleted && styles.choreItemCompleted]}
       >
-        <View style={styles.choreInfo}>
+        <TouchableOpacity
+          style={styles.choreInfo}
+          onPress={() => router.push(`/chore-detail?id=${item.id}`)}
+        >
           <View style={styles.choreHeader}>
             <Text style={styles.choreName}>{item.name}</Text>
-            <View style={styles.choreHeaderIcons}>
-              <TouchableOpacity
-                style={styles.historyButton}
-                onPress={() => router.push(`/chore-edit?id=${item.id}`)}
-              >
-                <Ionicons name="pencil-outline" size={20} color="#007AFF" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.historyButton}
-                onPress={() => router.push(`/chore-history?id=${item.id}`)}
-              >
-                <Ionicons name="time-outline" size={20} color="#007AFF" />
-              </TouchableOpacity>
-              {isCompleted && (
-                <Ionicons name="checkmark-circle" size={24} color="#28a745" />
-              )}
-            </View>
+            {isCompleted && (
+              <Ionicons name="checkmark-circle" size={24} color="#28a745" />
+            )}
           </View>
           {item.description && (
             <Text style={styles.choreDescription}>{item.description}</Text>
@@ -168,7 +157,7 @@ const Chores = () => {
               )}
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
         {isMyTurn && !isCompleted && (
           <TouchableOpacity
             style={[
@@ -298,15 +287,6 @@ const styles = StyleSheet.create({
   choreName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
-    flex: 1,
-  },
-  choreDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-  },
-  choreDetails: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
