@@ -125,6 +125,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="finance"
           options={{ title: "Finance", headerShown: false }}
         />
+        <Stack.Screen name="expense-create" options={{ title: "Nový výdaj" }} />
         <Stack.Screen
           name="settings"
           options={{
@@ -155,7 +156,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="issue-create"
           options={{ title: "Nahlásit závadu" }}
         />
-                <Stack.Screen
+        <Stack.Screen
           name="issue-detail"
           options={{ title: "Detail závady" }}
         />
@@ -169,7 +170,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen
           name="document-add"
-          options={{ title: "Nový dokument", headerShown: false }}
+          options={{ title: "Nový dokument" }}
         />
         <Stack.Screen
           name="join-another-flat"

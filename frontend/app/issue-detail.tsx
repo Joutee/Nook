@@ -320,7 +320,7 @@ const IssueDetail = () => {
               <>
                 <TouchableOpacity
                   style={styles.editButton}
-                  onPress={() => router.push(`/issue-create?id=${issue.id}`)}
+                  onPress={() => router.push(`/issue-edit?id=${issue.id}`)}
                   disabled={isDeleting}
                 >
                   <Ionicons name="pencil" size={18} color="#007AFF" />
