@@ -4,10 +4,10 @@
 node_modules/
 
 # Expo
-frontend/.expo/
-frontend/dist/
-frontend/web-build/
-frontend/expo-env.d.ts
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
 # Native
 .kotlin/
@@ -37,8 +37,6 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders
-frontend/ios
-frontend/android
+ios
+android
 
-
-notes.txt

@@ -1,0 +1,16 @@
+TODO:
+OCR
+Finance
+Keys
+
+chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se pritahl z db
+profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
+u edit screen povolit odeslani pouze pokud se neco zmenilo
+reset password
+
+
+kdyz zbyde cas:
+pridat vic intervalu repetetivnosti u chores (tyden, mesic,...)
+o auth
+otisk prstu
+opakujici se vydaje (najem)
