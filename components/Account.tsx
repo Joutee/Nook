@@ -4,10 +4,10 @@ import {
   StyleSheet,
   View,
   Alert,
-  Text,
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Session } from "@supabase/supabase-js";
 
 export default function Account({ session }: { session: Session }) {

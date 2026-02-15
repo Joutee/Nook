@@ -2,11 +2,11 @@ import React from "react";
 import {
   Modal,
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Pressable,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "../contexts/ToastContext";

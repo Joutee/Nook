@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Hlavní pozadí aplikace - používej pro View, Screen backgrounds */
+    --background: 0 0% 100%;
+
+    /* Hlavní barva textu - používej pro běžný text, nadpisy */
+    --foreground: 0 0% 3.9%;
+
+    /* Pozadí pro karty, kontejnery, modaly - odděluje obsah od pozadí */
+    --card: 0 0% 100%;
+
+    /* Text na kartách - používej pro text uvnitř card komponent */
+    --card-foreground: 0 0% 3.9%;
+
+    /* Pozadí pro vyskakovací menu, dropdown, tooltip */
+    --popover: 0 0% 100%;
+
+    /* Text ve vyskakovacích menu */
+    --popover-foreground: 0 0% 3.9%;
+
+    /* Primární akční barva - používej pro hlavní CTA tlačítka, aktivní stavy */
+    --primary: 270 89.1% 49%;
+
+    /* Text na primárních tlačítkách */
+    --primary-foreground: 0 0% 98%;
+
+    /* Sekundární prvky - méně důležitá tlačítka, badge, tagy */
+    --secondary: 0 0% 96.1%;
+
+    /* Text na sekundárních prvcích */
+    --secondary-foreground: 0 0% 9%;
+
+    /* Ztlumené pozadí - používej pro neaktivní/zakázané stavy, subtle highlights */
+    --muted: 0 0% 96.1%;
+
+    /* Ztlumený text - popisky, pomocný text, placeholder */
+    --muted-foreground: 0 0% 45.1%;
+
+    /* Zvýraznění při hover - používej pro hover efekty, zvýraznění položek */
+    --accent: 0 0% 96.1%;
+
+    /* Text na zvýrazněných prvcích */
+    --accent-foreground: 0 0% 9%;
+
+    /* Destruktivní akce - mazání, varování, chyby */
+    --destructive: 0 84.2% 60.2%;
+
+    /* Bordery - používej pro ohraničení karet, separátory, inputy */
+    --border: 0 0% 89.8%;
+
+    /* Border u input polí - může být stejný jako border nebo lehce odlišný */
+    --input: 0 0% 89.8%;
+
+    /* Focus ring - zvýraznění při focusu na interaktivní prvky */
+    --ring: 0 0% 63%;
+
+    /* Globální border radius - používej pro konzistentní zaoblení */
+    --radius: 0.625rem;
+
+    /* Barvy pro grafy a vizualizace dat */
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    /* Tmavé pozadí aplikace */
+    --background: 213 11% 9.4%;
+
+    /* Světlý text pro tmavý režim */
+    --foreground: 0 0% 98%;
+
+    /* Pozadí karet navbaru a topbaru v dark mode - svetlejsi než background pro kontrast */
+    --card: 213 11% 18.5%;
+
+    /* Text na kartách v dark mode */
+    --card-foreground: 0 0% 98%;
+
+    /* Pozadí pro popover v dark mode */
+    --popover: 0 0% 3.9%;
+
+    /* Text v popover v dark mode */
+    --popover-foreground: 0 0% 98%;
+
+    /* Primární akční barva v dark mode - světlejší než v light mode */
+    --primary: 270 89.1% 49%;
+
+    /* Text na primárních tlačítkách v dark mode */
+    --primary-foreground: 0 0% 9%;
+
+    /* Sekundární prvky v dark mode */
+    --secondary: 0 0% 14.9%;
+
+    /* Text na sekundárních prvcích v dark mode */
+    --secondary-foreground: 0 0% 98%;
+
+    /* Ztlumené pozadí v dark mode */
+    --muted: 0 0% 14.9%;
+
+    /* Ztlumený text v dark mode */
+    --muted-foreground: 0 0% 63.9%;
+
+    /* Zvýraznění při hover v dark mode */
+    --accent: 0 0% 14.9%;
+
+    /* Text na zvýrazněných prvcích v dark mode */
+    --accent-foreground: 0 0% 98%;
+
+    /* Destruktivní akce v dark mode */
+    --destructive: 0 70.9% 59.4%;
+
+    /* Bordery v dark mode - světlejší než background */
+    --border: 0 0% 14.9%;
+
+    /* Border u input polí v dark mode */
+    --input: 0 0% 14.9%;
+
+    /* Focus ring v dark mode */
+    --ring: 300 0% 45%;
+
+    /* Barvy pro grafy v dark mode - upravené pro lepší viditelnost */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}

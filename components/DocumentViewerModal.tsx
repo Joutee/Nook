@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   Modal,
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Image,
   Platform,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons"; // Pro křížek na zavření

@@ -1,4 +1,7 @@
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import { View, Alert, ScrollView } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -7,6 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 import MembersBottomSheet from "../components/MembersBottomSheet";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "../contexts/ToastContext";
+import { ThemeToggle } from "../components/ThemeToggle";
+import { Separator } from "@/components/ui/separator";
 
 const settings = () => {
   const router = useRouter();
@@ -63,93 +68,158 @@ const settings = () => {
     setIsMembersModalVisible(true);
   };
 
-  const settingsCategories = [
-    {
-      title: "Domácnost",
-      items: [
-        {
-          id: "members",
-          title: "Členové bytu",
-          icon: "people-outline" as const,
-          onPress: handleOpenMembers,
-        },
-        {
-          id: "join-flat",
-          title: "Připojit se k dalšímu bytu",
-          icon: "add-circle-outline" as const,
-          onPress: () => router.push("/join-another-flat"),
-        },
-        {
-          id: "create-flat",
-          title: "Vytvořit novou domácnost",
-          icon: "home-outline" as const,
-          onPress: () => router.push("/create-another-flat"),
-        },
-      ],
-    },
-    {
-      title: "Účet",
-      items: [
-        {
-          id: "logout",
-          title: "Odhlásit se",
-          icon: "log-out-outline" as const,
-          onPress: handleLogout,
-        },
-      ],
-    },
-    {
-      title: "Aplikace",
-      items: [],
-    },
-  ];
-
   return (
-    <View style={styles.container}>
-      {/* Seznam kategorií a položek nastavení */}
-      {settingsCategories.map((category, categoryIndex) => (
-        <View key={categoryIndex}>
-          <Text style={styles.categoryTitle}>{category.title}</Text>
-          {category.items.length > 0 && (
-            <View style={styles.settingsSection}>
-              {/* Pokud je to kategorie Domácnost, zobraz nejdřív kód bytu */}
-              {category.title === "Domácnost" && flatCode && (
-                <TouchableOpacity
-                  style={[styles.settingsItem, styles.settingsItemBorder]}
+    <ScrollView className="flex-1 bg-background">
+      <View className="p-5 gap-6">
+        {/* Domácnost */}
+        <View className="gap-2">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
+            Domácnost
+          </Text>
+
+          <Card className="gap-0 py-0">
+            {/* Kód bytu */}
+            {flatCode && (
+              <>
+                <Button
+                  variant="ghost"
+                  className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
                   onPress={handleCopyCode}
                 >
-                  <View style={styles.settingsItemLeft}>
-                    <Ionicons name="key-outline" size={24} color="#333" />
-                    <View>
-                      <Text style={styles.codeLabel}>Kód pro připojení</Text>
-                      <Text style={styles.codeText}>{flatCode}</Text>
+                  <View className="flex-row items-center gap-3 flex-1">
+                    <Ionicons
+                      name="key-outline"
+                      size={24}
+                      className="text-foreground"
+                    />
+                    <View className="flex-1">
+                      <Text className="text-xs text-muted-foreground mb-1">
+                        Kód pro připojení
+                      </Text>
+                      <Text className="text-lg font-semibold text-primary tracking-widest">
+                        {flatCode}
+                      </Text>
                     </View>
                   </View>
-                  <Ionicons name="copy-outline" size={20} color="#999" />
-                </TouchableOpacity>
-              )}
+                  <Ionicons
+                    name="copy-outline"
+                    size={20}
+                    className="text-foreground"
+                  />
+                </Button>
+              </>
+            )}
+            <Separator />
 
-              {category.items.map((item, itemIndex) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[
-                    styles.settingsItem,
-                    itemIndex < category.items.length - 1 &&
-                      styles.settingsItemBorder,
-                  ]}
-                  onPress={item.onPress}
-                >
-                  <View style={styles.settingsItemLeft}>
-                    <Ionicons name={item.icon} size={24} color="#333" />
-                    <Text style={styles.settingsItemText}>{item.title}</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#999" />
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
+            {/* Členové bytu */}
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={handleOpenMembers}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="people-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <Text className="text-base">Členové bytu</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+
+            <Separator />
+
+            {/* Připojit se k dalšímu bytu */}
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={() => router.push("/join-another-flat")}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="add-circle-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <Text className="text-base">Připojit se k dalšímu bytu</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+
+            <Separator />
+
+            {/* Vytvořit novou domácnost */}
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={() => router.push("/create-another-flat")}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="home-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <Text className="text-base">Vytvořit novou domácnost</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+          </Card>
         </View>
-      ))}
+
+        {/* Aplikace */}
+        <View className="gap-2">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
+            Aplikace
+          </Text>
+
+          <Card className="gap-0 py-0">
+            <ThemeToggle />
+          </Card>
+        </View>
+
+        {/* Účet */}
+        <View className="gap-2">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
+            Účet
+          </Text>
+
+          <Card className="gap-0 py-0">
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={handleLogout}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="log-out-outline"
+                  size={24}
+                  className="text-destructive"
+                />
+                <Text className="text-base text-destructive">Odhlásit se</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+          </Card>
+        </View>
+      </View>
 
       {/* Bottom Sheet pro členy bytu */}
       <MembersBottomSheet
@@ -157,74 +227,8 @@ const settings = () => {
         onClose={() => setIsMembersModalVisible(false)}
         flatId={currentFlat?.id || null}
       />
-    </View>
+    </ScrollView>
   );
 };
 
 export default settings;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  categoryTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#666",
-    textTransform: "uppercase",
-    marginBottom: 8,
-    marginTop: 20,
-    marginLeft: 4,
-  },
-  settingsSection: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    overflow: "hidden",
-    marginBottom: 10,
-  },
-  settingsItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  settingsItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  settingsItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  settingsItemText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  codeLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 4,
-  },
-  codeText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#007AFF",
-    letterSpacing: 2,
-  },
-  logoutButton: {
-    backgroundColor: "#ff3b30",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: "auto",
-  },
-  logoutText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   TextInput,
   ActivityIndicator,
   Image,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { router } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";

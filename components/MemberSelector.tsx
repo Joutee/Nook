@@ -1,11 +1,11 @@
 import React from "react";
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet from "./BottomSheet";
 import { Member } from "../types/members";

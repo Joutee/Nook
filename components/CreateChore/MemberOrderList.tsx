@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Ionicons } from "@expo/vector-icons";
 import { Member } from "../../types/members";
 

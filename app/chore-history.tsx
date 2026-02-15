@@ -1,11 +1,11 @@
 import {
   StyleSheet,
-  Text,
   View,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";

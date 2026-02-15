@@ -10,6 +10,7 @@ reset password
 
 
 kdyz zbyde cas:
+system theme
 pridat vic intervalu repetetivnosti u chores (tyden, mesic,...)
 o auth
 otisk prstu

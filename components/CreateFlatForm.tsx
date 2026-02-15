@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";

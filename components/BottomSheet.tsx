@@ -4,12 +4,12 @@ import {
   Modal,
   Pressable,
   View,
-  Text,
   TouchableOpacity,
   Animated,
   PanResponder,
   Dimensions,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   View,
   TextInput,
   TouchableOpacity,
@@ -8,6 +7,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";

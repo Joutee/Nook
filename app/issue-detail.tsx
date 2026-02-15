@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   View,
   ScrollView,
   ActivityIndicator,
@@ -8,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";

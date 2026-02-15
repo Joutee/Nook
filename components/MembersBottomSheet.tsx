@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
-  Text,
   View,
   FlatList,
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
@@ -172,6 +172,11 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           `Role změněna na ${newRole === "pronajimatel" ? "Pronajímatel" : "Nájemce"}`,
           "success",
         );
+        
+        // Aktualizovat FlatContext (důležité pokud se změnila role aktuálního uživatele)
+        await refreshFlats();
+        
+        // Znovu načíst seznam členů
         loadMembers();
       }
     } catch (error: any) {

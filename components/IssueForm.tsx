@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -8,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useState, useEffect } from "react";
 import { router } from "expo-router";
 import { supabase } from "../utils/supabase";

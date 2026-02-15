@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   Modal,
   FlatList,
   Pressable,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import { useRouter, usePathname } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -54,32 +53,38 @@ const TopBar = () => {
 
   return (
     <>
-      <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+      <View
+        className="flex-row items-center justify-between px-4 py-3 bg-card border-b border-border shadow-sm"
+        style={{ paddingTop: insets.top + 12 }}
+      >
         {/* Levá strana - název bytu s možností přepínání */}
         <TouchableOpacity
-          style={styles.flatSelector}
+          className="flex-1 flex-row items-center pr-4"
           onPress={handleFlatPress}
           disabled={flats.length <= 1}
         >
-          <Text style={styles.flatName} numberOfLines={1}>
+          <Text
+            className="flex-1 text-lg font-semibold text-foreground"
+            numberOfLines={1}
+          >
             {currentFlat?.name || currentFlat?.address || "Žádný byt"}
           </Text>
           {flats.length > 1 && (
             <Ionicons
               name="chevron-down"
               size={20}
-              color="#333"
-              style={styles.chevron}
+              className="ml-1 text-foreground"
             />
           )}
         </TouchableOpacity>
 
         {/* Pravá strana - tlačítko nastavení */}
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={handleSettingsPress}
-        >
-          <Ionicons name="settings-outline" size={24} color="#333" />
+        <TouchableOpacity className="p-1" onPress={handleSettingsPress}>
+          <Ionicons
+            name="settings-outline"
+            size={24}
+            className="text-foreground"
+          />
         </TouchableOpacity>
       </View>
 
@@ -91,14 +96,17 @@ const TopBar = () => {
         onRequestClose={() => setIsModalVisible(false)}
       >
         <Pressable
-          style={styles.modalOverlay}
+          className="flex-1 justify-center items-center"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
           onPress={() => setIsModalVisible(false)}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Vyberte byt</Text>
+          <View className="bg-card rounded-xl w-[80%] max-h-[60%] overflow-hidden">
+            <View className="flex-row justify-between items-center p-4 border-b border-border">
+              <Text className="text-lg font-semibold text-foreground">
+                Vyberte byt
+              </Text>
               <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color="hsl(0, 0%, 20%)" />
               </TouchableOpacity>
             </View>
 
@@ -107,27 +115,31 @@ const TopBar = () => {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[
-                    styles.flatItem,
-                    currentFlat?.id === item.id && styles.flatItemActive,
-                  ]}
+                  className={`flex-row justify-between items-center p-4 gap-3 ${
+                    currentFlat?.id === item.id ? "bg-muted" : ""
+                  }`}
                   onPress={() => handleSelectFlat(item)}
                 >
                   <Text
-                    style={[
-                      styles.flatItemText,
-                      currentFlat?.id === item.id && styles.flatItemTextActive,
-                    ]}
+                    className={`flex-1 text-base ${
+                      currentFlat?.id === item.id
+                        ? "font-semibold text-primary"
+                        : "text-foreground"
+                    }`}
                     numberOfLines={2}
                   >
                     {item.name}
                   </Text>
                   {currentFlat?.id === item.id && (
-                    <Ionicons name="checkmark" size={20} color="#007AFF" />
+                    <Ionicons
+                      name="checkmark"
+                      size={20}
+                      color="hsl(0, 0%, 9%)"
+                    />
                   )}
                 </TouchableOpacity>
               )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ItemSeparatorComponent={() => <View className="h-px bg-border" />}
             />
           </View>
         </Pressable>
@@ -137,89 +149,3 @@ const TopBar = () => {
 };
 
 export default TopBar;
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  flatSelector: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingRight: 16,
-  },
-  flatName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    flex: 1,
-  },
-  chevron: {
-    marginLeft: 4,
-  },
-  settingsButton: {
-    padding: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    width: "80%",
-    maxHeight: "60%",
-    overflow: "hidden",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  flatItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    gap: 12,
-  },
-  flatItemActive: {
-    backgroundColor: "#f0f0f0",
-  },
-  flatItemText: {
-    fontSize: 16,
-    color: "#333",
-    flex: 1,
-    flexWrap: "wrap",
-  },
-  flatItemTextActive: {
-    fontWeight: "600",
-    color: "#007AFF",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-});

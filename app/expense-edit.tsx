@@ -3,9 +3,9 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Text,
   Alert,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";

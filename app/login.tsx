@@ -1,21 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { View, TextInput, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "../utils/supabase";
 import { getErrorMessage } from "../utils/errorTranslations";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { useToast } from "../contexts/ToastContext";
+import { Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
   const { showToast } = useToast();
+  const router = useRouter();
+  const passwordInputRef = useRef<TextInput>(null);
+  const { colorScheme } = useColorScheme();
+
+  const iconColor =
+    colorScheme === "dark" ? "hsl(0, 0%, 98%)" : "hsl(0, 0%, 3.9%)";
+
+  function onEmailSubmitEditing() {
+    passwordInputRef.current?.focus();
+  }
 
   async function signInWithEmail() {
     setButtonLoading(true);
@@ -31,111 +49,99 @@ export default function Login() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Přihlášení</Text>
+    <View className="flex-1 bg-background justify-center p-5">
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">Přihlášení</CardTitle>
+          <CardDescription className="text-center">
+            Vítejte zpět! Přihlaste se prosím k pokračování
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="gap-6">
+          <View className="gap-6">
+            <View className="gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                className="bg-background"
+                id="email"
+                placeholder="email@address.com"
+                keyboardType="email-address"
+                autoComplete="email"
+                autoCapitalize="none"
+                onChangeText={setEmail}
+                value={email}
+                onSubmitEditing={onEmailSubmitEditing}
+                returnKeyType="next"
+              />
+            </View>
 
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text: string) => setEmail(text)}
-          value={email}
-          placeholder="email@address.com"
-          autoCapitalize={"none"}
-          keyboardType="email-address"
-        />
-      </View>
+            <View className="gap-1.5">
+              <View className="flex-row items-center justify-between">
+                <Label htmlFor="password">Heslo</Label>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0"
+                  onPress={() => {
+                    // TODO: Navigate to forgot password screen
+                  }}
+                >
+                  <Text className="text-xs text-primary">
+                    Zapomněli jste heslo?
+                  </Text>
+                </Button>
+              </View>
+              <Input
+                className="bg-background"
+                ref={passwordInputRef}
+                id="password"
+                placeholder="Zadejte heslo"
+                secureTextEntry
+                autoCapitalize="none"
+                onChangeText={setPassword}
+                value={password}
+                returnKeyType="send"
+                onSubmitEditing={signInWithEmail}
+              />
+            </View>
 
-      <View style={styles.verticallySpaced}>
-        <Text style={styles.label}>Heslo</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text: string) => setPassword(text)}
-          value={password}
-          secureTextEntry={true}
-          placeholder="Heslo"
-          autoCapitalize={"none"}
-        />
-      </View>
+            <Button
+              className="w-full"
+              onPress={signInWithEmail}
+              disabled={buttonLoading}
+            >
+              <Text>Přihlásit se</Text>
+            </Button>
+          </View>
 
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <TouchableOpacity
-          style={[styles.button, buttonLoading && styles.buttonDisabled]}
-          disabled={buttonLoading}
-          onPress={() => signInWithEmail()}
-        >
-          <Text style={styles.buttonText}>Přihlásit se</Text>
-        </TouchableOpacity>
-      </View>
+          <Button
+            variant="ghost"
+            className="w-full"
+            onPress={() => router.push("/register")}
+          >
+            <Text className="text-foreground">Registrovat se</Text>
+          </Button>
 
-      <View style={styles.verticallySpaced}>
-        <Link href="/register" asChild>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Registrovat se</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
+          <View className="flex-row items-center gap-4">
+            <Separator className="flex-1" />
+            <Text className="text-muted-foreground text-sm shrink-0 px-1">
+              nebo
+            </Text>
+            <Separator className="flex-1" />
+          </View>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onPress={() => {
+              // TODO: Implement Google OAuth
+            }}
+          >
+            <Ionicons name="logo-google" size={20} color={iconColor} />
+            <Text>Pokračovat s Google</Text>
+          </Button>
+        </CardContent>
+      </Card>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    padding: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: "stretch",
-  },
-  mt20: {
-    marginTop: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    borderRadius: 5,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  secondaryButton: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#007AFF",
-  },
-  secondaryButtonText: {
-    color: "#007AFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});

@@ -1,12 +1,12 @@
 import {
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   FlatList,
   ActivityIndicator,
   Image,
 } from "react-native";
+import { Text } from "@/components/ui/text"
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";

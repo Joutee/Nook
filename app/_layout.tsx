@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Text, Alert } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,6 +8,12 @@ import { supabase } from "../utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import { FlatProvider, useFlatContext } from "../contexts/FlatContext";
 import { ToastProvider } from "../contexts/ToastContext";
+import "../global.css";
+import "../lib/icons";
+import { useColorScheme } from "nativewind";
+import { THEME } from "../lib/theme"; //
+
+import { PortalHost } from "@rn-primitives/portal";
 
 // Vnitřní komponenta s přístupem k FlatContext
 const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
@@ -72,16 +78,32 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const showNavigation = showNavigationPaths.includes(pathname);
   console.log("showNavigation:", showNavigation);
 
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+  // Vybere správnou sadu barev z tvého souboru theme.ts
+  const currentTheme = THEME[isDark ? "dark" : "light"];
+
   if (session && isLoading) {
     return null; // Nebo loading screen
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-background">
       {showNavigation && <TopBar />}
       <Stack
         screenOptions={{
-          contentStyle: { flex: 1 },
+          contentStyle: { flex: 1, backgroundColor: "transparent" },
+
+          // --- NASTAVENÍ HEADERU ---
+          headerStyle: {
+            // Použije barvu 'background' z tvého theme.ts
+            backgroundColor: currentTheme.card,
+          },
+          headerTintColor: currentTheme.foreground, // Barva šipky "Zpět" a názvu
+          headerTitleStyle: {
+            fontWeight: "bold",
+            color: currentTheme.foreground, // Barva textu titulku
+          },
         }}
       >
         <Stack.Screen
@@ -146,10 +168,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           name="chores"
           options={{ title: "Chores", headerShown: false }}
         />
-                <Stack.Screen
-          name="chore-detail"
-          options={{ title: "Detail úkolu" }}
-        />
+        <Stack.Screen name="chore-detail" options={{ title: "Detail úkolu" }} />
         <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
         <Stack.Screen
           name="chore-history"
@@ -250,6 +269,7 @@ const RootLayout = () => {
       <ToastProvider>
         <FlatProvider session={session}>
           <LayoutContent session={session} />
+          <PortalHost />
         </FlatProvider>
       </ToastProvider>
     </SafeAreaProvider>
@@ -257,9 +277,3 @@ const RootLayout = () => {
 };
 
 export default RootLayout;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
