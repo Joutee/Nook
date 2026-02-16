@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
   View,
   FlatList,
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
@@ -172,10 +173,10 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           `Role změněna na ${newRole === "pronajimatel" ? "Pronajímatel" : "Nájemce"}`,
           "success",
         );
-        
+
         // Aktualizovat FlatContext (důležité pokud se změnila role aktuálního uživatele)
         await refreshFlats();
-        
+
         // Znovu načíst seznam členů
         loadMembers();
       }
@@ -187,15 +188,15 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Členové bytu">
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+        <View className="p-10 items-center justify-center">
+          <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
         </View>
       ) : members.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Žádní členové</Text>
+        <View className="p-10 items-center justify-center">
+          <Text className="text-base text-muted-foreground">Žádní členové</Text>
         </View>
       ) : (
-        <View style={styles.listContainer}>
+        <View style={{ maxHeight: SCREEN_HEIGHT * 0.6 }}>
           <FlatList
             data={members}
             keyExtractor={(item) => item.id}
@@ -204,9 +205,9 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                 isCurrentUserAdmin || item.id === currentUserId;
 
               return (
-                <View style={styles.memberItem}>
-                  <View style={styles.memberAvatar}>
-                    <Text style={styles.memberAvatarText}>
+                <View className="flex-row items-center py-3">
+                  <View className="w-12 h-12 rounded-full bg-primary items-center justify-center mr-3">
+                    <Text className="text-primary-foreground text-lg font-semibold">
                       {item.name
                         ? item.name.charAt(0).toUpperCase()
                         : item.username
@@ -214,13 +215,13 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                           : "?"}
                     </Text>
                   </View>
-                  <View style={styles.memberInfo}>
-                    <Text style={styles.memberName}>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-foreground mb-0.5">
                       {item.name && item.surname
                         ? `${item.name} ${item.surname}`
                         : item.name || item.username || "Neznámý uživatel"}
                     </Text>
-                    <TouchableOpacity
+                    <Pressable
                       onPress={() =>
                         isCurrentUserAdmin
                           ? handleChangeRole(item.id, item.role)
@@ -228,12 +229,13 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                       }
                       disabled={!isCurrentUserAdmin}
                     >
-                      <View style={styles.roleContainer}>
+                      <View className="flex-row items-center gap-1">
                         <Text
-                          style={[
-                            styles.memberRole,
-                            isCurrentUserAdmin && styles.memberRoleClickable,
-                          ]}
+                          className={`text-sm w-auto ${
+                            isCurrentUserAdmin
+                              ? "text-primary font-medium"
+                              : "text-muted-foreground"
+                          }`}
                         >
                           {item.role === "pronajimatel"
                             ? "Pronajímatel"
@@ -243,29 +245,29 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                           <Ionicons
                             name="swap-horizontal"
                             size={16}
-                            color="#007AFF"
+                            className="text-primary"
                           />
                         )}
                       </View>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                   {showDeleteButton && (
                     <TouchableOpacity
                       onPress={() => handleRemoveMember(item.id)}
-                      style={styles.deleteButton}
+                      className="p-2"
                     >
                       <Ionicons
                         name="trash-outline"
                         size={24}
-                        color="#FF3B30"
+                        className="text-destructive"
                       />
                     </TouchableOpacity>
                   )}
                 </View>
               );
             }}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            contentContainerStyle={styles.membersList}
+            ItemSeparatorComponent={() => <View className="h-px bg-border" />}
+            contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
             scrollEnabled={members.length > 5}
           />
         </View>
@@ -275,75 +277,3 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
 };
 
 export default MembersBottomSheet;
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    padding: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  listContainer: {
-    maxHeight: SCREEN_HEIGHT * 0.6,
-  },
-  membersList: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  memberItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  memberAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  memberAvatarText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  memberInfo: {
-    flex: 1,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 2,
-  },
-  roleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  memberRole: {
-    fontSize: 14,
-    color: "#666",
-  },
-  memberRoleClickable: {
-    color: "#007AFF",
-    fontWeight: "500",
-  },
-  deleteButton: {
-    padding: 8,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-});

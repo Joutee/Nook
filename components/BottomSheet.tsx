@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, ReactNode, useState } from "react";
 import {
-  StyleSheet,
   Modal,
   Pressable,
   View,
@@ -9,7 +8,7 @@ import {
   PanResponder,
   Dimensions,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -132,31 +131,40 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       animationType="none"
       onRequestClose={closeBottomSheet}
     >
-      <View style={styles.modalContainer}>
-        <Pressable style={styles.modalOverlay} onPress={closeBottomSheet} />
+      <View className="flex-1">
+        <Pressable
+          className="absolute inset-0 bg-black/50"
+          onPress={closeBottomSheet}
+        />
         <Animated.View
           style={[
-            styles.bottomSheet,
             {
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
               height: sheetHeight,
               paddingBottom: insets.bottom || 20,
               transform: [{ translateY }],
             },
           ]}
+          className="bg-card rounded-t-3xl"
         >
-          <View {...panResponder.panHandlers} style={styles.headerContainer}>
-            <View style={styles.dragHandle} />
-            <View style={styles.bottomSheetHeader}>
-              <Text style={styles.bottomSheetTitle}>{title}</Text>
-              <View style={styles.headerActions}>
+          <View {...panResponder.panHandlers} className="bg-card rounded-t-3xl">
+            <View className="w-10 h-1 bg-border rounded-full self-center mt-2.5 mb-1" />
+            <View className="flex-row justify-between items-center p-5 border-b border-border">
+              <Text className="text-xl font-semibold text-foreground">
+                {title}
+              </Text>
+              <View className="flex-row items-center gap-4">
                 {headerActions}
                 <TouchableOpacity onPress={closeBottomSheet}>
-                  <Ionicons name="close" size={24} color="#333" />
+                  <Ionicons name="close" size={24} color="hsl(0, 0%, 20%)" />
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-          <View style={styles.content} onLayout={handleContentLayout}>
+          <View className="min-h-[100px]" onLayout={handleContentLayout}>
             {children}
           </View>
         </Animated.View>
@@ -166,57 +174,3 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 };
 
 export default BottomSheet;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-  },
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  dragHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#ccc",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  bottomSheet: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  headerContainer: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  bottomSheetHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  bottomSheetTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#333",
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-  },
-  content: {
-    minHeight: 100,
-  },
-});

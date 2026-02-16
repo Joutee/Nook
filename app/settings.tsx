@@ -1,4 +1,4 @@
-import { View, Alert, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -12,13 +12,15 @@ import * as Clipboard from "expo-clipboard";
 import { useToast } from "../contexts/ToastContext";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
-const settings = () => {
+const Settings = () => {
   const router = useRouter();
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
   const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
   const [flatCode, setFlatCode] = useState<string | null>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchFlatCode = async () => {
@@ -46,22 +48,10 @@ const settings = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert("Odhlášení", "Opravdu se chcete odhlásit?", [
-      {
-        text: "Zrušit",
-        style: "cancel",
-      },
-      {
-        text: "Odhlásit",
-        style: "destructive",
-        onPress: async () => {
-          const { error } = await supabase.auth.signOut();
-          if (error) {
-            showToast("Nepodařilo se odhlásit", "error");
-          }
-        },
-      },
-    ]);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      showToast("Nepodařilo se odhlásit", "error");
+    }
   };
 
   const handleOpenMembers = () => {
@@ -201,7 +191,7 @@ const settings = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={handleLogout}
+              onPress={() => setLogoutDialogOpen(true)}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons
@@ -227,8 +217,20 @@ const settings = () => {
         onClose={() => setIsMembersModalVisible(false)}
         flatId={currentFlat?.id || null}
       />
+
+      {/* Alert Dialog pro odhlášení */}
+      <AlertDialog
+        open={logoutDialogOpen}
+        onOpenChange={setLogoutDialogOpen}
+        title="Odhlášení"
+        description="Opravdu se chcete odhlásit?"
+        cancelText="Zrušit"
+        actionText="Odhlásit"
+        onAction={handleLogout}
+        destructive
+      />
     </ScrollView>
   );
 };
 
-export default settings;
+export default Settings;

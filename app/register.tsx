@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -68,13 +69,15 @@ export default function Register() {
   }
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       className="flex-1 bg-background"
       contentContainerStyle={{
         flexGrow: 1,
         justifyContent: "center",
         padding: 20,
       }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
     >
       <Card className="border-border">
         <CardHeader>
@@ -197,6 +200,6 @@ export default function Register() {
           </Button>
         </CardContent>
       </Card>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }

@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -18,6 +18,7 @@ import { Profile } from "../types/profile";
 import { MemberSelector } from "./MemberSelector";
 import { ExpenseSplitSection } from "./ExpenseSplitSection";
 import { DatePickerInput } from "./DatePickerInput";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface ExpenseFormProps {
   mode: "create" | "edit";
@@ -390,7 +391,12 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        enableOnAndroid={true}
+        extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+        style={styles.scrollView}
+      >
         {/* Title Input */}
         <View style={styles.section}>
           <Text style={styles.label}>Název výdaje</Text>
@@ -475,7 +481,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           touchedMembers={touchedMembers}
           onTouchedMembersChange={setTouchedMembers}
         />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>

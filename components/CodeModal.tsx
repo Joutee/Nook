@@ -1,12 +1,14 @@
 import React from "react";
+import { Modal, View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 import {
-  Modal,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Pressable,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useToast } from "../contexts/ToastContext";
@@ -32,120 +34,61 @@ export default function CodeModal({ visible, code, onClose }: CodeModalProps) {
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
-          <View style={styles.header}>
-            <Ionicons name="checkmark-circle" size={48} color="#28a745" />
-          </View>
+      <Pressable
+        className="flex-1 bg-black/50 justify-center items-center p-5"
+        onPress={onClose}
+      >
+        <Pressable
+          className="w-full max-w-md"
+          onPress={(e) => e.stopPropagation()}
+        >
+          <Card>
+            <CardHeader className="items-center">
+              <View className="mb-4">
+                <Ionicons
+                  name="checkmark-circle"
+                  size={48}
+                  color="hsl(270, 89.1%, 49%)"
+                />
+              </View>
+              <CardTitle className="text-2xl text-center">
+                Byt byl úspěšně vytvořen!
+              </CardTitle>
+              <CardDescription className="text-center">
+                Sdílejte tento kód s ostatními, aby se mohli připojit k bytu.
+              </CardDescription>
+            </CardHeader>
 
-          <Text style={styles.title}>Byt byl úspěšně vytvořen!</Text>
-          <Text style={styles.description}>
-            Sdílejte tento kód s ostatními, aby se mohli připojit k bytu.
-          </Text>
+            <CardContent className="gap-4">
+              <View className="bg-muted border-2 border-primary rounded-xl p-5 items-center">
+                <Text className="text-xs text-muted-foreground mb-2 uppercase tracking-wide text-center w-full">
+                  Kód pro připojení
+                </Text>
+                <Text className="text-4xl font-bold text-primary tracking-[4px]">
+                  {code}
+                </Text>
+              </View>
 
-          <View style={styles.codeContainer}>
-            <Text style={styles.codeLabel}>Kód pro připojení</Text>
-            <Text style={styles.code}>{code}</Text>
-          </View>
+              <Button
+                variant="outline"
+                onPress={handleCopyCode}
+                className="flex-row gap-2"
+              >
+                <Ionicons
+                  name="copy-outline"
+                  size={20}
+                  color="hsl(270, 89.1%, 49%)"
+                />
+                <Text>Zkopírovat kód</Text>
+              </Button>
 
-          <TouchableOpacity style={styles.copyButton} onPress={handleCopyCode}>
-            <Ionicons name="copy-outline" size={20} color="#007AFF" />
-            <Text style={styles.copyButtonText}>Zkopírovat kód</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Zavřít</Text>
-          </TouchableOpacity>
+              <Button onPress={onClose}>
+                <Text>Zavřít</Text>
+              </Button>
+            </CardContent>
+          </Card>
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modal: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 400,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-    color: "#333",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  codeContainer: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#007AFF",
-  },
-  codeLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  code: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#007AFF",
-    letterSpacing: 4,
-  },
-  copyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-    gap: 8,
-  },
-  copyButtonText: {
-    color: "#007AFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  closeButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

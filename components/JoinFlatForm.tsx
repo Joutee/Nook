@@ -1,16 +1,22 @@
 import React, { useState } from "react";
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface JoinFlatFormProps {
   showCreateOption?: boolean;
@@ -29,7 +35,7 @@ export default function JoinFlatForm({
 
   const handleJoinFlat = async () => {
     if (!code.trim()) {
-      Alert.alert("Chyba", "Zadejte kód bytu");
+      showToast("Zadejte kód bytu", "error");
       return;
     }
 
@@ -44,7 +50,7 @@ export default function JoinFlatForm({
         .single();
 
       if (flatError || !flat) {
-        Alert.alert("Chyba", "Byt s tímto kódem neexistuje");
+        showToast("Byt s tímto kódem neexistuje", "error");
         setLoading(false);
         return;
       }
@@ -55,7 +61,7 @@ export default function JoinFlatForm({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Chyba", "Nejste přihlášeni");
+        showToast("Nejste přihlášeni", "error");
         setLoading(false);
         return;
       }
@@ -69,7 +75,7 @@ export default function JoinFlatForm({
         .maybeSingle();
 
       if (existingMembership) {
-        Alert.alert("Info", "Už jste členem tohoto bytu");
+        showToast("Už jste členem tohoto bytu", "info");
         setLoading(false);
         return;
       }
@@ -82,9 +88,9 @@ export default function JoinFlatForm({
       });
 
       if (joinError) {
-        Alert.alert(
-          "Chyba",
+        showToast(
           "Nepodařilo se přidat do bytu: " + joinError.message,
+          "error",
         );
         setLoading(false);
         return;
@@ -112,133 +118,60 @@ export default function JoinFlatForm({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Připojit se k bytu</Text>
-        <Text style={styles.description}>
-          Zadejte kód bytu, ke kterému se chcete připojit
-        </Text>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+    >
+      <View className="flex-1 bg-background justify-center p-5">
+        <Card className="max-w-md w-full mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              Připojit se k bytu
+            </CardTitle>
+            <CardDescription className="text-center">
+              Zadejte kód bytu, ke kterému se chcete připojit
+            </CardDescription>
+          </CardHeader>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Kód bytu"
-          value={code}
-          onChangeText={setCode}
-          autoCapitalize="none"
-          editable={!loading}
-        />
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleJoinFlat}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Připojování..." : "Připojit se"}
-          </Text>
-        </TouchableOpacity>
-
-        {showCreateOption && (
-          <>
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>nebo</Text>
-              <View style={styles.dividerLine} />
+          <CardContent className="gap-4">
+            <View className="gap-2">
+              <Label>Kód bytu</Label>
+              <Input
+                placeholder="Kód bytu"
+                value={code}
+                onChangeText={setCode}
+                autoCapitalize="none"
+                editable={!loading}
+              />
             </View>
 
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => router.push("/create-flat")}
-              disabled={loading}
-            >
-              <Text style={styles.secondaryButtonText}>
-                Vytvořit novou domácnost
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
+            <Button onPress={handleJoinFlat} disabled={loading}>
+              <Text>{loading ? "Připojování..." : "Připojit se"}</Text>
+            </Button>
+
+            {showCreateOption && (
+              <>
+                <View className="flex-row items-center gap-4">
+                  <Separator className="flex-1" />
+                  <Text className="text-muted-foreground text-sm shrink-0 px-1">
+                    nebo
+                  </Text>
+                  <Separator className="flex-1" />
+                </View>
+
+                <Button
+                  variant="outline"
+                  onPress={() => router.push("/create-flat")}
+                  disabled={loading}
+                >
+                  <Text>Vytvořit novou domácnost</Text>
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    justifyContent: "center",
-    padding: 20,
-  },
-  content: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 12,
-    borderRadius: 5,
-    fontSize: 16,
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ddd",
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: "#666",
-    fontSize: 14,
-  },
-  secondaryButton: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#007AFF",
-  },
-  secondaryButtonText: {
-    color: "#007AFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

@@ -17,6 +17,8 @@ import { DatePickerInput } from "../DatePickerInput";
 import { MemberSelector } from "../MemberSelector";
 import { MemberOrderList } from "./MemberOrderList";
 import { Member } from "../../types/members";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -264,7 +266,12 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container}>
+        <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+      style={styles.container}
+    >
       <View style={styles.form}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Název *</Text>
@@ -342,7 +349,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 };
 

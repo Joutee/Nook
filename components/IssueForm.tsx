@@ -7,7 +7,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
 import React, { useState, useEffect } from "react";
 import { router } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -21,6 +21,7 @@ import {
   uploadFile,
 } from "../utils/fileService";
 import DocumentViewerModal from "./DocumentViewerModal";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface IssueFormProps {
   mode: "create" | "edit";
@@ -192,7 +193,12 @@ export const IssueForm: React.FC<IssueFormProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+      style={styles.container}
+    >
       <Text style={styles.title}>
         {isEditMode ? "Upravit závadu" : "Nahlásit závadu"}
       </Text>
@@ -289,7 +295,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
         imageUri={imageUri}
         fileName="Náhled fotografie"
       />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 };
 

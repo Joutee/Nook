@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
 import { router } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
@@ -20,6 +20,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
 import DocumentViewerModal from "../components/DocumentViewerModal";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const DocumentAdd = () => {
   const { currentFlat } = useFlatContext();
@@ -118,115 +119,121 @@ const DocumentAdd = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Přidat dokument</Text>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Přidat dokument</Text>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Název dokumentu (volitelné)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="např. Nájemní smlouva"
-          value={documentName}
-          onChangeText={setDocumentName}
-          editable={!isUploading}
-        />
+        <View style={styles.form}>
+          <Text style={styles.label}>Název dokumentu (volitelné)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="např. Nájemní smlouva"
+            value={documentName}
+            onChangeText={setDocumentName}
+            editable={!isUploading}
+          />
 
-        <Text style={styles.label}>Popis (volitelné)</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Popis dokumentu..."
-          value={documentDescription}
-          onChangeText={setDocumentDescription}
-          multiline
-          numberOfLines={4}
-          editable={!isUploading}
-        />
+          <Text style={styles.label}>Popis (volitelné)</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Popis dokumentu..."
+            value={documentDescription}
+            onChangeText={setDocumentDescription}
+            multiline
+            numberOfLines={4}
+            editable={!isUploading}
+          />
 
-        <Text style={styles.sectionTitle}>Soubor (volitelné)</Text>
-        <View style={styles.fileSection}>
-          {file ? (
-            <View style={styles.filePreview}>
-              {file.mimeType.startsWith("image/") && (
+          <Text style={styles.sectionTitle}>Soubor (volitelné)</Text>
+          <View style={styles.fileSection}>
+            {file ? (
+              <View style={styles.filePreview}>
+                {file.mimeType.startsWith("image/") && (
+                  <TouchableOpacity
+                    onPress={() => setViewerVisible(true)}
+                    activeOpacity={0.8}
+                    style={{ width: "100%" }}
+                  >
+                    <Image source={{ uri: file.uri }} style={styles.image} />
+                  </TouchableOpacity>
+                )}
+                <View style={styles.fileInfo}>
+                  <Ionicons
+                    name={
+                      file.mimeType.startsWith("image/") ? "image" : "document"
+                    }
+                    size={24}
+                    color="#007AFF"
+                  />
+                  <Text style={styles.fileName}>{file.name}</Text>
+                </View>
                 <TouchableOpacity
-                  onPress={() => setViewerVisible(true)}
-                  activeOpacity={0.8}
-                  style={{ width: "100%" }}
+                  style={styles.removeFileButton}
+                  onPress={() => setFile(null)}
                 >
-                  <Image source={{ uri: file.uri }} style={styles.image} />
+                  <Ionicons name="close-circle" size={32} color="#FF3B30" />
                 </TouchableOpacity>
-              )}
-              <View style={styles.fileInfo}>
-                <Ionicons
-                  name={
-                    file.mimeType.startsWith("image/") ? "image" : "document"
-                  }
-                  size={24}
-                  color="#007AFF"
-                />
-                <Text style={styles.fileName}>{file.name}</Text>
               </View>
-              <TouchableOpacity
-                style={styles.removeFileButton}
-                onPress={() => setFile(null)}
-              >
-                <Ionicons name="close-circle" size={32} color="#FF3B30" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.fileButtons}>
-              <TouchableOpacity
-                style={styles.fileButton}
-                onPress={handleTakePhoto}
-                disabled={isUploading}
-              >
-                <Ionicons name="camera" size={32} color="#007AFF" />
-                <Text style={styles.fileButtonText}>Vyfotit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.fileButton}
-                onPress={handlePickFile}
-                disabled={isUploading}
-              >
-                <Ionicons name="document" size={32} color="#007AFF" />
-                <Text style={styles.fileButtonText}>Vybrat soubor</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+            ) : (
+              <View style={styles.fileButtons}>
+                <TouchableOpacity
+                  style={styles.fileButton}
+                  onPress={handleTakePhoto}
+                  disabled={isUploading}
+                >
+                  <Ionicons name="camera" size={32} color="#007AFF" />
+                  <Text style={styles.fileButtonText}>Vyfotit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.fileButton}
+                  onPress={handlePickFile}
+                  disabled={isUploading}
+                >
+                  <Ionicons name="document" size={32} color="#007AFF" />
+                  <Text style={styles.fileButtonText}>Vybrat soubor</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              (!file || isUploading) && styles.buttonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!file || isUploading}
+          >
+            {isUploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Nahrát dokument</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.cancelButton, isUploading && styles.buttonDisabled]}
+            onPress={() => router.back()}
+            disabled={isUploading}
+          >
+            <Text style={styles.cancelButtonText}>Zrušit</Text>
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.button,
-            (!file || isUploading) && styles.buttonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={!file || isUploading}
-        >
-          {isUploading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Nahrát dokument</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.cancelButton, isUploading && styles.buttonDisabled]}
-          onPress={() => router.back()}
-          disabled={isUploading}
-        >
-          <Text style={styles.cancelButtonText}>Zrušit</Text>
-        </TouchableOpacity>
+        {file?.mimeType.startsWith("image/") && (
+          <DocumentViewerModal
+            visible={viewerVisible}
+            onClose={() => setViewerVisible(false)}
+            imageUri={file.uri}
+            fileName={file.name}
+          />
+        )}
       </View>
-
-      {file?.mimeType.startsWith("image/") && (
-        <DocumentViewerModal
-          visible={viewerVisible}
-          onClose={() => setViewerVisible(false)}
-          imageUri={file.uri}
-          fileName={file.name}
-        />
-      )}
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 

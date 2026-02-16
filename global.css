@@ -69,7 +69,7 @@
     --chart-5: 27 87% 67%;
   }
 
-  .dark {
+  .dark:root {
     /* Tmavé pozadí aplikace */
     --background: 213 11% 9.4%;
 
@@ -92,7 +92,7 @@
     --primary: 270 89.1% 49%;
 
     /* Text na primárních tlačítkách v dark mode */
-    --primary-foreground: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
 
     /* Sekundární prvky v dark mode */
     --secondary: 0 0% 14.9%;
@@ -113,7 +113,7 @@
     --accent-foreground: 0 0% 98%;
 
     /* Destruktivní akce v dark mode */
-    --destructive: 0 70.9% 59.4%;
+    --destructive: 0 84.2% 60.2%;
 
     /* Bordery v dark mode - světlejší než background */
     --border: 0 0% 14.9%;

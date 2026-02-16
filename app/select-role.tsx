@@ -1,10 +1,20 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { Text } from "@/components/ui/text"
+import { View } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
+import { useColorScheme } from "nativewind";
 
 export default function SelectRole() {
   const [loading, setLoading] = useState(false);
@@ -56,82 +66,54 @@ export default function SelectRole() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Vyberte svou roli</Text>
-        <Text style={styles.description}>Jak se vztahujete k tomuto bytu?</Text>
+    <View className="flex-1 bg-background justify-center p-5">
+      <Card className="max-w-md w-full mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">
+            Vyberte svou roli
+          </CardTitle>
+          <CardDescription className="text-center">
+            Jak se vztahujete k tomuto bytu?
+          </CardDescription>
+        </CardHeader>
 
-        <TouchableOpacity
-          style={[styles.roleButton, loading && styles.buttonDisabled]}
-          onPress={() => handleSelectRole("najemce")}
-          disabled={loading}
-        >
-          <Text style={styles.roleTitle}>🏠 Bydlím zde</Text>
-          <Text style={styles.roleDescription}>Jsem nájemce tohoto bytu</Text>
-        </TouchableOpacity>
+        <CardContent className="gap-4">
+          <Button
+            onPress={() => handleSelectRole("najemce")}
+            disabled={loading}
+            className="h-auto py-6"
+          >
+            <View className="items-center gap-2">
+              <Ionicons name="home-outline" size={32} color="white" />
+              <Text className="text-lg font-semibold text-primary-foreground">
+                Bydlím zde
+              </Text>
+              <Text className="text-xs text-primary-foreground/80">
+                Jsem nájemce tohoto bytu
+              </Text>
+            </View>
+          </Button>
 
-        <TouchableOpacity
-          style={[styles.roleButton, loading && styles.buttonDisabled]}
-          onPress={() => handleSelectRole("pronajimatel")}
-          disabled={loading}
-        >
-          <Text style={styles.roleTitle}>🔑 Pronajímám</Text>
-          <Text style={styles.roleDescription}>Jsem pronajímatel/majitel</Text>
-        </TouchableOpacity>
-      </View>
+          <Button
+            variant="outline"
+            onPress={() => handleSelectRole("pronajimatel")}
+            disabled={loading}
+            className="h-auto py-6"
+          >
+            <View className="items-center gap-2">
+              <Ionicons
+                name="key-outline"
+                size={32}
+                color="hsl(270, 89.1%, 49%)"
+              />
+              <Text className="text-lg font-semibold">Pronajímám</Text>
+              <Text className="text-xs text-muted-foreground">
+                Jsem pronajímatel/majitel
+              </Text>
+            </View>
+          </Button>
+        </CardContent>
+      </Card>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    justifyContent: "center",
-    padding: 20,
-  },
-  content: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  roleButton: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#007AFF",
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  roleTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#007AFF",
-    marginBottom: 5,
-  },
-  roleDescription: {
-    fontSize: 14,
-    color: "#666",
-  },
-});

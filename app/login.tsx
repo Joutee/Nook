@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -49,99 +50,105 @@ export default function Login() {
   }
 
   return (
-    <View className="flex-1 bg-background justify-center p-5">
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">Přihlášení</CardTitle>
-          <CardDescription className="text-center">
-            Vítejte zpět! Přihlaste se prosím k pokračování
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="gap-6">
-          <View className="gap-6">
-            <View className="gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                className="bg-background"
-                id="email"
-                placeholder="email@address.com"
-                keyboardType="email-address"
-                autoComplete="email"
-                autoCapitalize="none"
-                onChangeText={setEmail}
-                value={email}
-                onSubmitEditing={onEmailSubmitEditing}
-                returnKeyType="next"
-              />
-            </View>
-
-            <View className="gap-1.5">
-              <View className="flex-row items-center justify-between">
-                <Label htmlFor="password">Heslo</Label>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0"
-                  onPress={() => {
-                    // TODO: Navigate to forgot password screen
-                  }}
-                >
-                  <Text className="text-xs text-primary">
-                    Zapomněli jste heslo?
-                  </Text>
-                </Button>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid={true}
+      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+    >
+      <View className="flex-1 bg-background justify-center p-5">
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl">Přihlášení</CardTitle>
+            <CardDescription className="text-center">
+              Vítejte zpět! Přihlaste se prosím k pokračování
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="gap-6">
+            <View className="gap-6">
+              <View className="gap-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  className="bg-background"
+                  id="email"
+                  placeholder="email@address.com"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  onChangeText={setEmail}
+                  value={email}
+                  onSubmitEditing={onEmailSubmitEditing}
+                  returnKeyType="next"
+                />
               </View>
-              <Input
-                className="bg-background"
-                ref={passwordInputRef}
-                id="password"
-                placeholder="Zadejte heslo"
-                secureTextEntry
-                autoCapitalize="none"
-                onChangeText={setPassword}
-                value={password}
-                returnKeyType="send"
-                onSubmitEditing={signInWithEmail}
-              />
+
+              <View className="gap-1.5">
+                <View className="flex-row items-center justify-between">
+                  <Label htmlFor="password">Heslo</Label>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0"
+                    onPress={() => {
+                      // TODO: Navigate to forgot password screen
+                    }}
+                  >
+                    <Text className="text-xs text-primary">
+                      Zapomněli jste heslo?
+                    </Text>
+                  </Button>
+                </View>
+                <Input
+                  className="bg-background"
+                  ref={passwordInputRef}
+                  id="password"
+                  placeholder="Zadejte heslo"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  onChangeText={setPassword}
+                  value={password}
+                  returnKeyType="send"
+                  onSubmitEditing={signInWithEmail}
+                />
+              </View>
+
+              <Button
+                className="w-full"
+                onPress={signInWithEmail}
+                disabled={buttonLoading}
+              >
+                <Text>Přihlásit se</Text>
+              </Button>
             </View>
 
             <Button
+              variant="ghost"
               className="w-full"
-              onPress={signInWithEmail}
-              disabled={buttonLoading}
+              onPress={() => router.push("/register")}
             >
-              <Text>Přihlásit se</Text>
+              <Text className="text-foreground">Registrovat se</Text>
             </Button>
-          </View>
 
-          <Button
-            variant="ghost"
-            className="w-full"
-            onPress={() => router.push("/register")}
-          >
-            <Text className="text-foreground">Registrovat se</Text>
-          </Button>
+            <View className="flex-row items-center gap-4">
+              <Separator className="flex-1" />
+              <Text className="text-muted-foreground text-sm shrink-0 px-1">
+                nebo
+              </Text>
+              <Separator className="flex-1" />
+            </View>
 
-          <View className="flex-row items-center gap-4">
-            <Separator className="flex-1" />
-            <Text className="text-muted-foreground text-sm shrink-0 px-1">
-              nebo
-            </Text>
-            <Separator className="flex-1" />
-          </View>
-
-          <Button
-            variant="outline"
-            className="w-full"
-            onPress={() => {
-              // TODO: Implement Google OAuth
-            }}
-          >
-            <Ionicons name="logo-google" size={20} color={iconColor} />
-            <Text>Pokračovat s Google</Text>
-          </Button>
-        </CardContent>
-      </Card>
-    </View>
+            <Button
+              variant="outline"
+              className="w-full"
+              onPress={() => {
+                // TODO: Implement Google OAuth
+              }}
+            >
+              <Ionicons name="logo-google" size={20} color={iconColor} />
+              <Text>Pokračovat s Google</Text>
+            </Button>
+          </CardContent>
+        </Card>
+      </View>
+    </KeyboardAwareScrollView>
   );
 }
