@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+import { View, ScrollView, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet from "./BottomSheet";
 import { Member } from "../types/members";
@@ -63,17 +58,17 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.selectButton}
+      <Pressable
+        className="flex-row items-center justify-between rounded-md p-3 border border-input dark:bg-input shadow-sm shadow-black/5"
         onPress={() => setShowBottomSheet(true)}
       >
-        <Text style={styles.selectButtonText}>{getButtonText()}</Text>
+        <Text className="text-base text-foreground">{getButtonText()}</Text>
         <Ionicons
           name={multiSelect ? "people" : "person"}
           size={20}
-          color="#007AFF"
+          className="text-primary"
         />
-      </TouchableOpacity>
+      </Pressable>
 
       <BottomSheet
         visible={showBottomSheet}
@@ -82,23 +77,24 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
           title || (multiSelect ? "Vyberte uživatele" : "Vyberte uživatele")
         }
       >
-        <ScrollView style={styles.bottomSheetContent}>
+        <ScrollView style={{ maxHeight: 400 }}>
           {members.map((member) => (
-            <TouchableOpacity
+            <Pressable
               key={member.id}
-              style={[
-                styles.memberItem,
-                isMemberSelected(member.id) && styles.memberItemSelected,
-              ]}
+              className={`flex-row items-center justify-between bg-background rounded-lg p-3 mb-2 mx-4 border ${
+                isMemberSelected(member.id)
+                  ? "bg-primary/10 border-primary"
+                  : "border-border"
+              }`}
               onPress={() => handleMemberPress(member)}
             >
-              <View style={styles.memberInfo}>
-                <View style={styles.memberAvatar}>
-                  <Text style={styles.memberAvatarText}>
+              <View className="flex-row items-center">
+                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
+                  <Text className="text-primary-foreground text-sm font-semibold">
                     {member.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
-                <Text style={styles.memberName}>
+                <Text className="text-sm text-foreground font-medium">
                   {member.surname
                     ? `${member.name} ${member.surname}`
                     : member.name}
@@ -110,100 +106,29 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
                     isMemberSelected(member.id) ? "checkbox" : "square-outline"
                   }
                   size={24}
-                  color={isMemberSelected(member.id) ? "#007AFF" : "#ccc"}
+                  className={
+                    isMemberSelected(member.id)
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }
                 />
               ) : (
                 <View
-                  style={[
-                    styles.radioButton,
-                    isMemberSelected(member.id) && styles.radioButtonSelected,
-                  ]}
+                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                    isMemberSelected(member.id)
+                      ? "border-primary"
+                      : "border-border"
+                  }`}
                 >
                   {isMemberSelected(member.id) && (
-                    <View style={styles.radioButtonInner} />
+                    <View className="w-3 h-3 rounded-full bg-primary" />
                   )}
                 </View>
               )}
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </ScrollView>
       </BottomSheet>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  selectButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  selectButtonText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  bottomSheetContent: {
-    maxHeight: 400,
-  },
-  memberItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  memberItemSelected: {
-    backgroundColor: "#e3f2fd",
-    borderColor: "#007AFF",
-  },
-  memberInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  memberAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  memberAvatarText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  memberName: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
-  },
-  radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#ddd",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioButtonSelected: {
-    borderColor: "#007AFF",
-  },
-  radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#007AFF",
-  },
-});

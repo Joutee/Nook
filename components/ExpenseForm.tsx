@@ -1,13 +1,10 @@
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Platform,
-} from "react-native";
+import { View, ScrollView, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -40,7 +37,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   initialData,
 }) => {
   const [title, setTitle] = useState(initialData?.title || "");
-  const [amount, setAmount] = useState(initialData?.amount || "");
+  const [amount, setAmount] = useState(initialData?.amount || "0");
   const [date, setDate] = useState(initialData?.date || new Date());
   const [selectedPayer, setSelectedPayer] = useState<Profile[]>(
     initialData?.selectedPayer || [],
@@ -51,6 +48,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [flatMembers, setFlatMembers] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [splitMode, setSplitMode] = useState<"auto" | "manual">(
     initialData?.splitMode || "auto",
@@ -154,6 +153,36 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       month: "long",
       year: "numeric",
     });
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseId) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete expense (shares will be deleted automatically due to CASCADE)
+      const { error } = await supabase
+        .from("expenses")
+        .delete()
+        .eq("id", expenseId);
+
+      if (error) {
+        showToast("Nepodařilo se smazat výdaj: " + error.message, "error");
+      } else {
+        showToast("Výdaj byl smazán", "success");
+        router.back();
+      }
+    } catch (error: any) {
+      console.error("Error deleting expense:", error);
+      showToast("Nepodařilo se smazat výdaj: " + error.message, "error");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
   };
 
   const handleSave = async () => {
@@ -382,223 +411,171 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Načítám...</Text>
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <Text className="mt-3 text-base text-muted-foreground">Načítám...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        enableOnAndroid={true}
-        extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
-        style={styles.scrollView}
-      >
-        {/* Title Input */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Název výdaje</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="např. Nákup v Albertu"
-            value={title}
-            onChangeText={setTitle}
-            placeholderTextColor="#999"
-          />
-        </View>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingBottom: 10,
+        paddingTop: 10,
+      }}
+      enableOnAndroid={true}
+      extraScrollHeight={20}
+      className="flex-1"
+    >
+      {/* Title Input */}
+      <Card className="mb-4">
+        <CardContent className="gap-4">
+          <View className="gap-2">
+            <Label>Název výdaje</Label>
+            <Input
+              placeholder="např. Nákup v Albertu"
+              value={title}
+              onChangeText={setTitle}
+            />
+          </View>
 
-        {/* Amount Input */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Částka (Kč)</Text>
-          <TextInput
-            style={[
-              styles.input,
-              splitMode === "manual" &&
-                selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                  .length === 0 &&
-                selectedMembers.length > 0 &&
-                styles.inputReadOnly,
-            ]}
-            placeholder="0.00"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-            placeholderTextColor="#999"
-            editable={
-              !(
+          {/* Amount Input */}
+
+          <View className="gap-2">
+            <Label>Částka (Kč)</Label>
+            <Input
+              placeholder="0.00"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              editable={
+                !(
+                  splitMode === "manual" &&
+                  selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                    .length === 0 &&
+                  selectedMembers.length > 0
+                )
+              }
+              className={
                 splitMode === "manual" &&
                 selectedMembers.filter((m) => !touchedMembers.has(m.id))
                   .length === 0 &&
                 selectedMembers.length > 0
-              )
-            }
-          />
-          {splitMode === "manual" &&
-            selectedMembers.filter((m) => !touchedMembers.has(m.id)).length ===
-              0 &&
-            selectedMembers.length > 0 && (
-              <Text style={styles.readOnlyHint}>
-                Částka se počítá automaticky z rozdělení
-              </Text>
-            )}
-        </View>
+                  ? "bg-muted"
+                  : ""
+              }
+            />
+            {splitMode === "manual" &&
+              selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                .length === 0 &&
+              selectedMembers.length > 0 && (
+                <Text className="text-xs text-muted-foreground italic">
+                  Částka se počítá automaticky z rozdělení
+                </Text>
+              )}
+          </View>
 
-        {/* Date Picker */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Datum</Text>
-          <DatePickerInput
-            value={date}
-            onChange={setDate}
-            maximumDate={new Date()}
-          />
-        </View>
+          {/* Date Picker */}
 
-        {/* Who Paid */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Kdo zaplatil</Text>
-          <MemberSelector
-            members={flatMembers}
-            selectedMembers={selectedPayer}
-            onToggleMember={handlePayerSelect}
-            multiSelect={false}
-            title="Vyberte plátce"
-          />
-        </View>
+          <View className="gap-2">
+            <Label>Datum</Label>
+            <DatePickerInput
+              value={date}
+              onChange={setDate}
+              maximumDate={new Date()}
+            />
+          </View>
 
-        {/* For Whom (Split) */}
-        <ExpenseSplitSection
-          flatMembers={flatMembers}
-          selectedMembers={selectedMembers}
-          onSelectedMembersChange={setSelectedMembers}
-          splitMode={splitMode}
-          onSplitModeChange={setSplitMode}
-          amount={amount}
-          onAmountChange={setAmount}
-          manualAmounts={manualAmounts}
-          onManualAmountsChange={setManualAmounts}
-          touchedMembers={touchedMembers}
-          onTouchedMembersChange={setTouchedMembers}
-        />
-      </KeyboardAwareScrollView>
+          {/* Who Paid */}
 
-      {/* Bottom Actions */}
-      <View style={styles.bottomActions}>
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => router.back()}
-          disabled={isSaving}
-        >
-          <Text style={styles.cancelButtonText}>Zrušit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.saveButtonText}>
-              {mode === "edit" ? "Upravit" : "Uložit"}
-            </Text>
+          <View className="gap-2">
+            <Label>Kdo zaplatil</Label>
+            <MemberSelector
+              members={flatMembers}
+              selectedMembers={selectedPayer}
+              onToggleMember={handlePayerSelect}
+              multiSelect={false}
+              title="Vyberte plátce"
+            />
+          </View>
+
+          {/* For Whom (Split) */}
+          <Card className="mb-5 bg-subcard">
+            <CardContent>
+              <ExpenseSplitSection
+                flatMembers={flatMembers}
+                selectedMembers={selectedMembers}
+                onSelectedMembersChange={setSelectedMembers}
+                splitMode={splitMode}
+                onSplitModeChange={setSplitMode}
+                amount={amount}
+                onAmountChange={setAmount}
+                manualAmounts={manualAmounts}
+                onManualAmountsChange={setManualAmounts}
+                touchedMembers={touchedMembers}
+                onTouchedMembersChange={setTouchedMembers}
+              />
+            </CardContent>
+          </Card>
+          {/* Bottom Actions */}
+          <View className="flex-row p-4 gap-3">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onPress={() => router.back()}
+              disabled={isSaving || isDeleting}
+            >
+              <Text>Zrušit</Text>
+            </Button>
+            <Button
+              className="flex-1"
+              onPress={handleSave}
+              disabled={isSaving || isDeleting}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text>{mode === "edit" ? "Upravit" : "Uložit"}</Text>
+              )}
+            </Button>
+          </View>
+
+          {/* Delete Button (only in edit mode) */}
+          {mode === "edit" && expenseId && (
+            <View className="p-4 pt-0">
+              <Button
+                variant="destructive"
+                onPress={handleDelete}
+                disabled={isDeleting || isSaving}
+                className="flex-row gap-2"
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="trash-outline" size={20} color="#fff" />
+                    <Text>Smazat výdaj</Text>
+                  </>
+                )}
+              </Button>
+            </View>
           )}
-        </TouchableOpacity>
-      </View>
-    </View>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Smazat výdaj"
+        description="Opravdu chcete smazat tento výdaj? Tuto akci nelze vrátit zpět."
+        cancelText="Zrušit"
+        actionText="Smazat"
+        onAction={confirmDelete}
+        destructive
+      />
+    </KeyboardAwareScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-  },
-  section: {
-    backgroundColor: "#fff",
-    marginBottom: 16,
-    padding: 16,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
-  },
-  helperText: {
-    fontSize: 14,
-    color: "#28a745",
-    marginBottom: 12,
-    fontWeight: "500",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: "#333",
-    backgroundColor: "#fff",
-  },
-  inputReadOnly: {
-    backgroundColor: "#f0f0f0",
-    color: "#666",
-  },
-  readOnlyHint: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-    fontStyle: "italic",
-  },
-  bottomActions: {
-    flexDirection: "row",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#666",
-  },
-  saveButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-});

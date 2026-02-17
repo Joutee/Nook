@@ -16,6 +16,8 @@
     /* Text na kartách - používej pro text uvnitř card komponent */
     --card-foreground: 0 0% 3.9%;
 
+    --subcard: 0 0% 96.1%;
+
     /* Pozadí pro vyskakovací menu, dropdown, tooltip */
     --popover: 0 0% 100%;
 
@@ -55,6 +57,7 @@
     /* Border u input polí - může být stejný jako border nebo lehce odlišný */
     --input: 0 0% 89.8%;
 
+    --input-placeholeder: 0 0% 45.1%;
     /* Focus ring - zvýraznění při focusu na interaktivní prvky */
     --ring: 0 0% 63%;
 
@@ -81,6 +84,8 @@
 
     /* Text na kartách v dark mode */
     --card-foreground: 0 0% 98%;
+
+    --subcard: 213 11% 15%;
 
     /* Pozadí pro popover v dark mode */
     --popover: 0 0% 3.9%;
@@ -119,7 +124,9 @@
     --border: 0 0% 14.9%;
 
     /* Border u input polí v dark mode */
-    --input: 0 0% 14.9%;
+    --input: 0 0% 8.5%;
+
+    --input-placeholeder: 0 0% 23.8%;
 
     /* Focus ring v dark mode */
     --ring: 300 0% 45%;

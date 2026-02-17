@@ -1,11 +1,9 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+import { View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
 import { Profile } from "../types/profile";
 
@@ -179,31 +177,90 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
   };
 
   return (
-    <View style={styles.section}>
-      <View style={styles.splitHeader}>
-        <Text style={styles.label}>Rozdělit mezi</Text>
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchLabel}>Automaticky</Text>
-          <TouchableOpacity
-            style={[
-              styles.switch,
-              splitMode === "manual" && styles.switchActive,
-            ]}
+    <View>
+      <View className="flex-row justify-between items-center mb-2">
+        <Label>Rozdělit mezi</Label>
+        <View className="flex-row items-center gap-2">
+          <Ionicons
+            name="calculator-outline"
+            size={16}
+            className="text-muted-foreground"
+          />
+          <Pressable
+            className={`w-11 h-6 rounded-full p-0.5 justify-center ${
+              splitMode === "manual" ? "bg-primary" : "bg-border"
+            }`}
             onPress={handleSplitModeChange}
           >
             <View
-              style={[
-                styles.switchThumb,
-                splitMode === "manual" && styles.switchThumbActive,
-              ]}
+              className={`w-5 h-5 rounded-full bg-white ${
+                splitMode === "manual" ? "self-end" : "self-start"
+              }`}
             />
-          </TouchableOpacity>
-          <Text style={styles.switchLabel}>Manuálně</Text>
+          </Pressable>
+          <Ionicons
+            name="hand-right-outline"
+            size={16}
+            className="text-muted-foreground"
+          />
         </View>
       </View>
 
+      {flatMembers.map((member) => {
+        const isSelected = selectedMembers.some((m) => m.id === member.id);
+        return (
+          <View key={member.id} className="mb-2">
+            <Pressable
+              className={`flex-row justify-between items-center py-3 px-3 rounded-lg ${
+                isSelected ? "bg-primary/10 border border-primary" : "bg-muted"
+              }`}
+              onPress={() => handleMemberToggle(member)}
+            >
+              <View className="flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+                  <Text className="text-primary-foreground text-base font-semibold">
+                    {member.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <Text className="text-base text-foreground font-medium">
+                  {member.surname
+                    ? `${member.name} ${member.surname}`
+                    : member.name}
+                </Text>
+              </View>
+            </Pressable>
+
+            {splitMode === "manual" && isSelected && (
+              <View className="mt-2 relative">
+                <Input
+                  placeholder="0.00"
+                  value={manualAmounts[member.id] || ""}
+                  onChangeText={(value) =>
+                    handleManualAmountChange(member.id, value)
+                  }
+                  onBlur={() => handleAmountBlur(member.id)}
+                  keyboardType="decimal-pad"
+                  className={`${
+                    touchedMembers.has(member.id)
+                      ? "border-2 border-primary"
+                      : "border-primary"
+                  }`}
+                />
+                {!touchedMembers.has(member.id) && (
+                  <View className="absolute -top-2 right-2 bg-primary px-1.5 py-0.5 rounded">
+                    <Text className="text-primary-foreground text-[10px] font-semibold">
+                      Auto
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        );
+      })}
+
       {splitMode === "auto" && selectedMembers.length > 0 && (
-        <Text style={styles.helperText}>
+        <Text className="text-sm text-muted-foreground mb-3 font-light italic">
           {(() => {
             const amountNum = parseFloat(amount) || 0;
             if (selectedMembers.length === 1) {
@@ -222,7 +279,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
       )}
 
       {splitMode === "manual" && (
-        <Text style={styles.helperText}>
+        <Text className="text-sm text-muted-foreground mb-3 font-light italic">
           {(() => {
             const total = calculateTotalManualAmount();
             const targetAmount = parseFloat(amount) || 0;
@@ -231,208 +288,13 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
             ).length;
 
             if (untouchedCount > 0) {
-              return `Součet: ${total.toFixed(2)} Kč / ${targetAmount.toFixed(2)} Kč (${untouchedCount} automaticky přepočítáno)`;
+              return `Součet: ${total.toFixed(2)} Kč / ${targetAmount.toFixed(2)} Kč`;
             } else {
               return `Součet: ${total.toFixed(2)} Kč (celková částka se upravuje automaticky)`;
             }
           })()}
         </Text>
       )}
-
-      {flatMembers.map((member) => {
-        const isSelected = selectedMembers.some((m) => m.id === member.id);
-        return (
-          <View key={member.id} style={styles.memberRow}>
-            <TouchableOpacity
-              style={[
-                styles.memberItem,
-                isSelected && styles.memberItemSelected,
-              ]}
-              onPress={() => handleMemberToggle(member)}
-            >
-              <View style={styles.memberLeft}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <Text style={styles.memberName}>
-                  {member.surname
-                    ? `${member.name} ${member.surname}`
-                    : member.name}
-                </Text>
-              </View>
-              <View
-                style={[styles.checkbox, isSelected && styles.checkboxSelected]}
-              >
-                {isSelected && (
-                  <Ionicons name="checkmark" size={16} color="#fff" />
-                )}
-              </View>
-            </TouchableOpacity>
-
-            {splitMode === "manual" && isSelected && (
-              <View style={styles.amountInputContainer}>
-                <TextInput
-                  style={[
-                    styles.amountInput,
-                    touchedMembers.has(member.id) && styles.amountInputTouched,
-                  ]}
-                  placeholder="0.00"
-                  value={manualAmounts[member.id] || ""}
-                  onChangeText={(value) =>
-                    handleManualAmountChange(member.id, value)
-                  }
-                  onBlur={() => handleAmountBlur(member.id)}
-                  keyboardType="decimal-pad"
-                  placeholderTextColor="#999"
-                />
-                {!touchedMembers.has(member.id) && (
-                  <Text style={styles.autoLabel}>Auto</Text>
-                )}
-              </View>
-            )}
-          </View>
-        );
-      })}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  section: {
-    backgroundColor: "#fff",
-    marginBottom: 16,
-    padding: 16,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
-  },
-  helperText: {
-    fontSize: 14,
-    color: "#28a745",
-    marginBottom: 12,
-    fontWeight: "500",
-  },
-  splitHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  switchLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-  switch: {
-    width: 44,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#ddd",
-    padding: 2,
-    justifyContent: "center",
-  },
-  switchActive: {
-    backgroundColor: "#007AFF",
-  },
-  switchThumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignSelf: "flex-start",
-  },
-  switchThumbActive: {
-    alignSelf: "flex-end",
-  },
-  memberRow: {
-    marginBottom: 8,
-  },
-  memberItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#f8f9fa",
-  },
-  memberItemSelected: {
-    backgroundColor: "#e7f3ff",
-    borderWidth: 1,
-    borderColor: "#007AFF",
-  },
-  memberLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  memberName: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#ddd",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkboxSelected: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
-  },
-  amountInputContainer: {
-    marginTop: 8,
-    position: "relative",
-  },
-  amountInput: {
-    borderWidth: 1,
-    borderColor: "#007AFF",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: "#333",
-    backgroundColor: "#fff",
-  },
-  amountInputTouched: {
-    borderColor: "#28a745",
-    borderWidth: 2,
-  },
-  autoLabel: {
-    position: "absolute",
-    top: -8,
-    right: 8,
-    backgroundColor: "#007AFF",
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "600",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-});

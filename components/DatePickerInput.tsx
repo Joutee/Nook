@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, Platform } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Platform, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -46,17 +46,21 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.dateButton}
+      <Pressable
+        className="flex-row items-center border border-input rounded-md p-3 dark:bg-input gap-2 shadow-sm shadow-black/5"
         onPress={() => setShowPicker(true)}
       >
         {showIcon && (
-          <Ionicons name="calendar-outline" size={20} color="#007AFF" />
+          <Ionicons
+            name="calendar-outline"
+            size={20}
+            className="text-foreground"
+          />
         )}
-        <Text style={styles.dateButtonText}>
+        <Text className="text-base text-foreground">
           {value ? formatDate(value) : placeholder}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
 
       {showPicker && (
         <DateTimePicker
@@ -70,20 +74,3 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  dateButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#fff",
-    gap: 8,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: "#333",
-  },
-});

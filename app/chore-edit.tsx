@@ -1,9 +1,9 @@
-import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { useToast } from "../contexts/ToastContext";
-import { ChoreForm } from "../components/CreateChore/ChoreForm";
+import { ChoreForm } from "../components/ChoreForm";
 import { Member } from "../types/members";
 
 const EditChore = () => {
@@ -77,8 +77,8 @@ const EditChore = () => {
 
   if (isLoadingData) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
       </View>
     );
   }
@@ -88,17 +88,10 @@ const EditChore = () => {
   }
 
   return (
-    <ChoreForm key={id} mode="edit" choreId={id} initialData={initialData} />
+    <View className="flex-1 bg-background">
+      <ChoreForm key={id} mode="edit" choreId={id} initialData={initialData} />
+    </View>
   );
 };
 
 export default EditChore;
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-});

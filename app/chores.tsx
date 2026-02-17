@@ -1,11 +1,7 @@
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -108,246 +104,132 @@ const Chores = () => {
     }
   };
 
-  const renderChoreItem = ({ item }: { item: Chore }) => {
+  const renderChoreItem = (item: Chore) => {
     const isMyTurn = item.assignee_user_id === currentUserId;
     const isCompleted = item.is_completed_current_cycle;
     const isFutureStart =
       item.start_date && new Date(item.start_date) > new Date();
 
     return (
-      <View
-        style={[styles.choreItem, isCompleted && styles.choreItemCompleted]}
+      <Card
+        key={item.id}
+        className={`mb-3 px-0 ${isCompleted ? "opacity-60" : ""}`}
       >
-        <TouchableOpacity
-          style={styles.choreInfo}
-          onPress={() => router.push(`/chore-detail?id=${item.id}`)}
-        >
-          <View style={styles.choreHeader}>
-            <Text style={styles.choreName}>{item.name}</Text>
-            {isCompleted && (
-              <Ionicons name="checkmark-circle" size={24} color="#28a745" />
-            )}
-          </View>
-          {item.description && (
-            <Text style={styles.choreDescription}>{item.description}</Text>
-          )}
-          <View style={styles.choreDetails}>
-            <View style={styles.assigneeInfo}>
-              <View style={styles.assigneeAvatar}>
-                <Text style={styles.assigneeAvatarText}>
-                  {item.assignee_name?.charAt(0).toUpperCase() || "?"}
-                </Text>
-              </View>
-              <Text style={styles.assigneeName}>
-                {item.assignee_name && item.assignee_surname
-                  ? `${item.assignee_name} ${item.assignee_surname}`
-                  : item.assignee_name || "Nepřiřazeno"}
+        <CardContent className="p-0">
+          <Pressable
+            className="p-4"
+            onPress={() => router.push(`/chore-detail?id=${item.id}`)}
+          >
+            <View className="flex-row items-start justify-between mb-3">
+              <Text className="text-lg font-semibold text-foreground flex-1">
+                {item.name}
               </Text>
-            </View>
-            <View>
-              <Text style={styles.intervalText}>
-                Každých {item.interval_days}{" "}
-                {item.interval_days === 1 ? "den" : "dní"}
-              </Text>
-              {isFutureStart && (
-                <Text style={styles.startDateText}>
-                  Začíná:{" "}
-                  {new Date(item.start_date!).toLocaleDateString("cs-CZ")}
-                </Text>
+              {isCompleted && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={24}
+                  color="hsl(142, 76%, 36%)"
+                />
               )}
             </View>
-          </View>
-        </TouchableOpacity>
-        {isMyTurn && !isCompleted && (
-          <TouchableOpacity
-            style={[
-              styles.completeButton,
-              completingChoreId === item.id && styles.completeButtonDisabled,
-            ]}
-            onPress={() => handleCompleteChore(item)}
-            disabled={completingChoreId === item.id}
-          >
-            {completingChoreId === item.id ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="checkmark" size={24} color="#fff" />
+
+            {item.description && (
+              <Text className="text-sm text-muted-foreground mb-3">
+                {item.description}
+              </Text>
             )}
-          </TouchableOpacity>
-        )}
-      </View>
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center">
+                  <Text className="text-primary-foreground text-sm font-semibold">
+                    {item.assignee_name?.charAt(0).toUpperCase() || "?"}
+                  </Text>
+                </View>
+                <Text className="text-sm text-foreground font-medium">
+                  {item.assignee_name && item.assignee_surname
+                    ? `${item.assignee_name} ${item.assignee_surname}`
+                    : item.assignee_name || "Nepřiřazeno"}
+                </Text>
+              </View>
+
+              <View className="items-end">
+                <Text className="text-xs text-muted-foreground">
+                  Každých {item.interval_days}{" "}
+                  {item.interval_days === 1 ? "den" : "dní"}
+                </Text>
+                {isFutureStart && (
+                  <Text className="text-xs text-primary font-medium mt-0.5">
+                    Začíná:{" "}
+                    {new Date(item.start_date!).toLocaleDateString("cs-CZ")}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </Pressable>
+
+          {isMyTurn && !isCompleted && (
+            <View className="px-4 pb-4">
+              <Button
+                variant="default"
+                className="w-full flex-row gap-2"
+                onPress={() => handleCompleteChore(item)}
+                disabled={completingChoreId === item.id}
+              >
+                {completingChoreId === item.id ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="checkmark" size={20} color="#fff" />
+                    <Text className="text-primary-foreground">
+                      Označit jako hotové
+                    </Text>
+                  </>
+                )}
+              </Button>
+            </View>
+          )}
+        </CardContent>
+      </Card>
     );
   };
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Domácí práce</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push("/chore-create")}
-        >
-          <Ionicons name="add" size={28} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-      {chores.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="list-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>Zatím žádné úkoly</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={chores}
-          keyExtractor={(item) => item.id}
-          renderItem={renderChoreItem}
-          contentContainerStyle={styles.listContainer}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      )}
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1 p-4">
+        {chores.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="list-outline"
+              size={64}
+              color="hsl(240, 5%, 64.9%)"
+            />
+            <Text className="text-base text-muted-foreground mt-4">
+              Zatím žádné úkoly
+            </Text>
+          </View>
+        ) : (
+          <>{chores.map(renderChoreItem)}</>
+        )}
+      </ScrollView>
+
+      {/* Add Chore Button */}
+      <Pressable
+        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
+        onPress={() => router.push("/chore-create")}
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </Pressable>
     </View>
   );
 };
 
 export default Chores;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    padding: 20,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  listContainer: {
-    padding: 16,
-  },
-  choreItem: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  choreItemCompleted: {
-    opacity: 0.6,
-  },
-  choreInfo: {
-    flex: 1,
-  },
-  choreHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  choreHeaderIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  historyButton: {
-    padding: 4,
-  },
-  choreName: {
-    fontSize: 18,
-    fontWeight: "600",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  assigneeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  assigneeAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  assigneeAvatarText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  assigneeName: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
-  },
-  intervalText: {
-    fontSize: 12,
-    color: "#999",
-  },
-  startDateText: {
-    fontSize: 11,
-    color: "#007AFF",
-    marginTop: 2,
-    fontWeight: "500",
-  },
-  completeButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#28a745",
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 12,
-  },
-  completeButtonDisabled: {
-    opacity: 0.6,
-  },
-  separator: {
-    height: 12,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#999",
-    marginTop: 16,
-  },
-});

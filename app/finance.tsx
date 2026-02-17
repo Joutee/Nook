@@ -1,12 +1,13 @@
 import {
-  StyleSheet,
   View,
   FlatList,
   ActivityIndicator,
-  TouchableOpacity,
   ScrollView,
+  Pressable,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -112,22 +113,29 @@ const Finance = () => {
     const isZero = Math.abs(balance.net_balance) < 0.01;
 
     return (
-      <View key={balance.profile_id} style={styles.balanceItem}>
-        <View style={styles.balanceLeft}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+      <View
+        key={balance.profile_id}
+        className="flex-row justify-between items-center py-3 border-b border-border"
+      >
+        <View className="flex-row items-center gap-3">
+          <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+            <Text className="text-primary-foreground text-base font-semibold">
               {balance.name.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.balanceName}>{balance.name}</Text>
+          <Text className="text-base text-foreground font-medium">
+            {balance.name}
+          </Text>
         </View>
-        <View style={styles.balanceRight}>
+        <View className="items-end">
           <Text
-            style={[
-              styles.balanceAmount,
-              isPositive && styles.balancePositive,
-              isZero && styles.balanceZero,
-            ]}
+            className={`text-base font-semibold ${
+              isPositive
+                ? "text-green-600"
+                : isZero
+                  ? "text-muted-foreground"
+                  : "text-red-600"
+            }`}
           >
             {isPositive && "+"}
             {formatCurrency(balance.net_balance)}
@@ -139,12 +147,15 @@ const Finance = () => {
 
   const renderSettlementItem = (item: Settlement, index: number) => {
     return (
-      <View key={index} style={styles.settlementItem}>
-        <Ionicons name="arrow-forward" size={20} color="#007AFF" />
-        <Text style={styles.settlementText}>
-          <Text style={styles.settlementName}>{item.from}</Text> dluží{" "}
-          <Text style={styles.settlementName}>{item.to}</Text>{" "}
-          <Text style={styles.settlementAmount}>
+      <View
+        key={index}
+        className="flex-row items-center py-3 px-3 bg-muted rounded-lg mb-2 gap-3"
+      >
+        <Ionicons name="arrow-forward" size={20} color="hsl(270, 89.1%, 49%)" />
+        <Text className="text-sm text-foreground flex-1">
+          <Text className="font-semibold text-primary">{item.from}</Text> dluží{" "}
+          <Text className="font-semibold text-primary">{item.to}</Text>{" "}
+          <Text className="font-bold text-foreground">
             {formatCurrency(item.amount)}
           </Text>
         </Text>
@@ -154,274 +165,118 @@ const Finance = () => {
 
   const renderExpenseItem = ({ item }: { item: ExpenseWithDetails }) => {
     return (
-      <TouchableOpacity
-        style={styles.expenseItem}
+      <Pressable
+        className="flex-row justify-between items-center py-3"
         onPress={() => router.push(`/expense-edit?id=${item.id}`)}
-        activeOpacity={0.7}
       >
-        <View style={styles.expenseLeft}>
+        <View className="flex-row items-center gap-3 flex-1">
           {item.is_settlement ? (
-            <View style={[styles.expenseIcon, styles.settlementIcon]}>
+            <View className="w-10 h-10 rounded-full bg-green-600 items-center justify-center">
               <Ionicons name="swap-horizontal" size={20} color="#fff" />
             </View>
           ) : (
-            <View style={styles.expenseIcon}>
+            <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
               <Ionicons name="cart-outline" size={20} color="#fff" />
             </View>
           )}
-          <View style={styles.expenseDetails}>
-            <Text style={styles.expenseTitle}>
+          <View className="flex-1">
+            <Text className="text-base font-medium text-foreground mb-1">
               {item.is_settlement ? "🔄 Vyrovnání" : item.title}
             </Text>
-            <Text style={styles.expenseSubtitle}>
+            <Text className="text-xs text-muted-foreground">
               Zaplatil: {item.payer_name} • {formatDate(item.happened_at)}
             </Text>
           </View>
         </View>
-        <Text style={styles.expenseAmount}>{formatCurrency(item.amount)}</Text>
-      </TouchableOpacity>
+        <Text className="text-base font-semibold text-foreground">
+          {formatCurrency(item.amount)}
+        </Text>
+      </Pressable>
     );
   };
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1">
         {/* Balances Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="wallet-outline" size={24} color="#007AFF" />
-            <Text style={styles.sectionTitle}>Zůstatky</Text>
-          </View>
-          {balances.length === 0 ? (
-            <Text style={styles.emptyText}>Zatím žádné zůstatky</Text>
-          ) : (
-            <>{balances.map(renderBalanceItem)}</>
-          )}
-        </View>
+        <Card className="mb-4 mx-4 mt-4">
+          <CardHeader className="flex-row items-center gap-2">
+            <Ionicons
+              name="wallet-outline"
+              size={24}
+              className="text-primary"
+            />
+            <CardTitle>Zůstatky</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {balances.length === 0 ? (
+              <Text className="text-sm text-muted-foreground text-center py-5">
+                Zatím žádné zůstatky
+              </Text>
+            ) : (
+              <>{balances.map(renderBalanceItem)}</>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Settlements Section */}
         {settlements.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="git-compare-outline" size={24} color="#28a745" />
-              <Text style={styles.sectionTitle}>Doporučená vyrovnání</Text>
-            </View>
-            {settlements.map(renderSettlementItem)}
-          </View>
+          <Card className="mb-4 mx-4">
+            <CardHeader className="flex-row items-center gap-2">
+              <Ionicons
+                name="git-compare-outline"
+                size={24}
+                className="text-primary"
+              />
+              <CardTitle>Doporučená vyrovnání</CardTitle>
+            </CardHeader>
+            <CardContent>{settlements.map(renderSettlementItem)}</CardContent>
+          </Card>
         )}
 
         {/* History Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="time-outline" size={24} color="#666" />
-            <Text style={styles.sectionTitle}>Historie</Text>
-          </View>
-          {expenses.length === 0 ? (
-            <Text style={styles.emptyText}>Zatím žádné výdaje</Text>
-          ) : (
-            <FlatList
-              data={expenses}
-              renderItem={renderExpenseItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-            />
-          )}
-        </View>
+        <Card className="mb-4 mx-4">
+          <CardHeader className="flex-row items-center gap-2">
+            <Ionicons name="time-outline" size={24} className="text-primary" />
+            <CardTitle>Historie</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {expenses.length === 0 ? (
+              <Text className="text-sm text-muted-foreground text-center py-5">
+                Zatím žádné výdaje
+              </Text>
+            ) : (
+              <FlatList
+                data={expenses}
+                renderItem={renderExpenseItem}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+                ItemSeparatorComponent={() => (
+                  <View className="h-px bg-border" />
+                )}
+              />
+            )}
+          </CardContent>
+        </Card>
       </ScrollView>
 
       {/* Add Expense Button */}
-      <TouchableOpacity
-        style={styles.addButton}
+      <Pressable
+        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/expense-create")}
       >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+        <Ionicons name="add" size={28} className="text-foreground" />
+      </Pressable>
     </View>
   );
 };
 
 export default Finance;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-  },
-  section: {
-    backgroundColor: "#fff",
-    marginBottom: 16,
-    padding: 16,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#333",
-  },
-  balanceItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  balanceLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  balanceName: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  balanceRight: {
-    alignItems: "flex-end",
-  },
-  balanceAmount: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#dc3545",
-  },
-  balancePositive: {
-    color: "#28a745",
-  },
-  balanceZero: {
-    color: "#999",
-  },
-  settlementItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 8,
-    marginBottom: 8,
-    gap: 12,
-  },
-  settlementText: {
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-  },
-  settlementName: {
-    fontWeight: "600",
-    color: "#007AFF",
-  },
-  settlementAmount: {
-    fontWeight: "700",
-    color: "#28a745",
-  },
-  expenseItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  expenseLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  expenseIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  settlementIcon: {
-    backgroundColor: "#28a745",
-  },
-  expenseDetails: {
-    flex: 1,
-  },
-  expenseTitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 4,
-  },
-  expenseSubtitle: {
-    fontSize: 12,
-    color: "#999",
-  },
-  expenseAmount: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#f0f0f0",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#999",
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-});

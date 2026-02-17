@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { ChoreForm } from "../components/CreateChore/ChoreForm";
+import { ChoreForm } from "../components/ChoreForm";
 
 const CreateChore = () => {
   return <ChoreForm mode="create" />;

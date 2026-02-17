@@ -159,7 +159,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
               <View className="flex-row items-center gap-4">
                 {headerActions}
                 <TouchableOpacity onPress={closeBottomSheet}>
-                  <Ionicons name="close" size={24} color="hsl(0, 0%, 20%)" />
+                  <Ionicons name="close" size={24} className="text-foreground" />
                 </TouchableOpacity>
               </View>
             </View>

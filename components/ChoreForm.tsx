@@ -1,24 +1,22 @@
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+import { View, ActivityIndicator } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../utils/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { useToast } from "../../contexts/ToastContext";
-import { DatePickerInput } from "../DatePickerInput";
-import { MemberSelector } from "../MemberSelector";
+import { supabase } from "../utils/supabase";
+import { useFlatContext } from "../contexts/FlatContext";
+import { useToast } from "../contexts/ToastContext";
+import { DatePickerInput } from "./DatePickerInput";
+import { MemberSelector } from "./MemberSelector";
 import { MemberOrderList } from "./MemberOrderList";
-import { Member } from "../../types/members";
+import { Member } from "../types/members";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -48,6 +46,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     initialData?.startDate || new Date(),
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>(
     initialData?.selectedMembers || [],
@@ -265,161 +265,154 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     }
   };
 
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!choreId) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete chore (assignments and completions will be deleted automatically due to CASCADE)
+      const { error } = await supabase
+        .from("chores")
+        .delete()
+        .eq("id", choreId);
+
+      if (error) {
+        showToast("Nepodařilo se smazat úkol: " + error.message, "error");
+      } else {
+        showToast("Úkol byl smazán", "success");
+        router.replace("/chores");
+      }
+    } catch (error: any) {
+      console.error("Error deleting chore:", error);
+      showToast("Nepodařilo se smazat úkol: " + error.message, "error");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
-        <KeyboardAwareScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 ,paddingTop: 10,paddingBottom: 10}}
       enableOnAndroid={true}
-      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
-      style={styles.container}
+      extraScrollHeight={20}
+      className="flex-1 bg-background"
     >
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Název *</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder="např. Vytřít podlahu"
-            placeholderTextColor="#999"
-          />
-        </View>
+      <Card className="mb-4">
+        <CardContent className="gap-4">
+          <View className="gap-2">
+            <Label>Název *</Label>
+            <Input
+              value={name}
+              onChangeText={setName}
+              placeholder="např. Vytřít podlahu"
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Popis</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Volitelný popis úkolu"
-            placeholderTextColor="#999"
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
+          <View className="gap-2">
+            <Label>Popis</Label>
+            <Textarea
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Volitelný popis úkolu"
+              numberOfLines={4}
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Interval (dnů) *</Text>
-          <TextInput
-            style={styles.input}
-            value={intervalDays}
-            onChangeText={setIntervalDays}
-            placeholder="např. 7"
-            placeholderTextColor="#999"
-            keyboardType="number-pad"
-          />
-        </View>
+          <View className="gap-2">
+            <Label>Interval (dnů) *</Label>
+            <Input
+              value={intervalDays}
+              onChangeText={setIntervalDays}
+              placeholder="např. 7"
+              keyboardType="number-pad"
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Datum začátku *</Text>
-          <DatePickerInput
-            value={startDate}
-            onChange={setStartDate}
-            showIcon={false}
-          />
-        </View>
+          <View className="gap-2">
+            <Label>Datum začátku *</Label>
+            <DatePickerInput
+              value={startDate}
+              onChange={setStartDate}
+              showIcon={false}
+            />
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Přiřazení uživatelé *</Text>
-          <MemberSelector
-            members={members}
-            selectedMembers={selectedMembers}
-            onToggleMember={toggleMember}
-          />
-          <MemberOrderList
-            members={selectedMembers}
-            onMoveUp={moveMemberUp}
-            onMoveDown={moveMemberDown}
-          />
-        </View>
+          <View className="gap-2">
+            <Label>Přiřazení uživatelé *</Label>
+            <MemberSelector
+              members={members}
+              selectedMembers={selectedMembers}
+              onToggleMember={toggleMember}
+            />
+            <MemberOrderList
+              members={selectedMembers}
+              onMoveUp={moveMemberUp}
+              onMoveDown={moveMemberDown}
+            />
+          </View>
 
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading
-              ? mode === "create"
-                ? "Vytváření..."
-                : "Ukládání..."
-              : mode === "create"
-                ? "Vytvořit úkol"
-                : "Uložit změny"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+          {/* Bottom Actions */}
+          <View className="flex-row p-4 gap-3">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onPress={() => router.back()}
+              disabled={isLoading || isDeleting}
+            >
+              <Text>Zrušit</Text>
+            </Button>
+            <Button
+              className="flex-1"
+              onPress={handleSubmit}
+              disabled={isLoading || isDeleting}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text>{mode === "edit" ? "Upravit" : "Vytvořit úkol"}</Text>
+              )}
+            </Button>
+          </View>
+
+          {/* Delete Button (only in edit mode) */}
+          {mode === "edit" && choreId && (
+            <View className="p-4 pt-0">
+              <Button
+                variant="destructive"
+                onPress={handleDelete}
+                disabled={isDeleting || isLoading}
+                className="flex-row gap-2"
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="trash-outline" size={20} color="#fff" />
+                    <Text>Smazat úkol</Text>
+                  </>
+                )}
+              </Button>
+            </View>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Smazat úkol"
+        description="Opravdu chcete smazat tento úkol? Tuto akci nelze vrátit zpět."
+        cancelText="Zrušit"
+        actionText="Smazat"
+        onAction={confirmDelete}
+        destructive
+      />
     </KeyboardAwareScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  header: {
-    padding: 20,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  placeholder: {
-    width: 40,
-  },
-  form: {
-    padding: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 12,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

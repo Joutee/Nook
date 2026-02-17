@@ -57,7 +57,7 @@ export function AlertDialog({
             {/* Footer - Buttons */}
             <View className="px-6 flex-row gap-3 justify-end">
               <Button
-                variant="outline"
+                variant="secondary"
                 onPress={() => onOpenChange(false)}
                 className="flex-1"
               >
