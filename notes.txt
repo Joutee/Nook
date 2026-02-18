@@ -7,6 +7,7 @@ chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se
 profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
 u edit screen povolit odeslani pouze pokud se neco zmenilo
 reset password
+pridat padding ze strany na scroll views
 
 
 kdyz zbyde cas:

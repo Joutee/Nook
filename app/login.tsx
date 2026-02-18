@@ -24,6 +24,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
   const passwordInputRef = useRef<TextInput>(null);
@@ -97,18 +98,30 @@ export default function Login() {
                     </Text>
                   </Button>
                 </View>
-                <Input
-                  className="bg-background"
-                  ref={passwordInputRef}
-                  id="password"
-                  placeholder="Zadejte heslo"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  onChangeText={setPassword}
-                  value={password}
-                  returnKeyType="send"
-                  onSubmitEditing={signInWithEmail}
-                />
+                <View className="relative">
+                  <Input
+                    className="bg-background pr-12"
+                    ref={passwordInputRef}
+                    id="password"
+                    placeholder="Zadejte heslo"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    onChangeText={setPassword}
+                    value={password}
+                    returnKeyType="send"
+                    onSubmitEditing={signInWithEmail}
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-0 bottom-0 justify-center"
+                  >
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color="hsl(240, 5%, 64.9%)"
+                    />
+                  </Pressable>
+                </View>
               </View>
 
               <Button

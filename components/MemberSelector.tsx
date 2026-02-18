@@ -88,13 +88,13 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
               }`}
               onPress={() => handleMemberPress(member)}
             >
-              <View className="flex-row items-center">
+              <View className="flex-row items-center flex-1">
                 <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
                   <Text className="text-primary-foreground text-sm font-semibold">
                     {member.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
-                <Text className="text-sm text-foreground font-medium">
+                <Text className="text-sm text-foreground font-medium flex-1">
                   {member.surname
                     ? `${member.name} ${member.surname}`
                     : member.name}

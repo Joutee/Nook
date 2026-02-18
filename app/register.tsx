@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { supabase } from "../utils/supabase";
 import { getErrorMessage } from "../utils/errorTranslations";
-import { View, TextInput, ScrollView } from "react-native";
+import { View, TextInput, ScrollView, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,8 @@ export default function Register() {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
   const { colorScheme } = useColorScheme();
@@ -133,32 +135,58 @@ export default function Register() {
 
             <View className="gap-1.5">
               <Label htmlFor="password">Heslo</Label>
-              <Input
-                ref={passwordInputRef}
-                id="password"
-                placeholder="Zadejte heslo"
-                secureTextEntry
-                autoCapitalize="none"
-                onChangeText={setPassword}
-                value={password}
-                returnKeyType="next"
-                onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
-              />
+              <View className="relative">
+                <Input
+                  ref={passwordInputRef}
+                  id="password"
+                  placeholder="Zadejte heslo"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  onChangeText={setPassword}
+                  value={password}
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
+                  className="pr-12"
+                />
+                <Pressable
+                  onPress={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-0 bottom-0 justify-center"
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="hsl(240, 5%, 64.9%)"
+                  />
+                </Pressable>
+              </View>
             </View>
 
             <View className="gap-1.5">
               <Label htmlFor="confirmPassword">Potvrzení hesla</Label>
-              <Input
-                ref={confirmPasswordInputRef}
-                id="confirmPassword"
-                placeholder="Zadejte heslo znovu"
-                secureTextEntry
-                autoCapitalize="none"
-                onChangeText={setConfirmPassword}
-                value={confirmPassword}
-                returnKeyType="send"
-                onSubmitEditing={signUpWithEmail}
-              />
+              <View className="relative">
+                <Input
+                  ref={confirmPasswordInputRef}
+                  id="confirmPassword"
+                  placeholder="Zadejte heslo znovu"
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  onChangeText={setConfirmPassword}
+                  value={confirmPassword}
+                  returnKeyType="send"
+                  onSubmitEditing={signUpWithEmail}
+                  className="pr-12"
+                />
+                <Pressable
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-0 bottom-0 justify-center"
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="hsl(240, 5%, 64.9%)"
+                  />
+                </Pressable>
+              </View>
             </View>
 
             <Button

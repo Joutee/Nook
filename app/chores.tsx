@@ -2,6 +2,7 @@ import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -113,7 +114,7 @@ const Chores = () => {
     return (
       <Card
         key={item.id}
-        className={`mb-3 px-0 ${isCompleted ? "opacity-60" : ""}`}
+        className={`mb-4 py-0 ${isCompleted ? "opacity-60" : ""}`}
       >
         <CardContent className="p-0">
           <Pressable
@@ -134,19 +135,22 @@ const Chores = () => {
             </View>
 
             {item.description && (
-              <Text className="text-sm text-muted-foreground mb-3">
-                {item.description}
-              </Text>
+              <>
+                <Text className="text-sm text-muted-foreground mb-3">
+                  {item.description}
+                </Text>
+                <Separator className="mb-3" />
+              </>
             )}
 
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-2 flex-1">
                 <View className="w-8 h-8 rounded-full bg-primary items-center justify-center">
                   <Text className="text-primary-foreground text-sm font-semibold">
                     {item.assignee_name?.charAt(0).toUpperCase() || "?"}
                   </Text>
                 </View>
-                <Text className="text-sm text-foreground font-medium">
+                <Text className="text-sm text-foreground font-medium flex-1">
                   {item.assignee_name && item.assignee_surname
                     ? `${item.assignee_name} ${item.assignee_surname}`
                     : item.assignee_name || "Nepřiřazeno"}
@@ -169,25 +173,32 @@ const Chores = () => {
           </Pressable>
 
           {isMyTurn && !isCompleted && (
-            <View className="px-4 pb-4">
-              <Button
-                variant="default"
-                className="w-full flex-row gap-2"
-                onPress={() => handleCompleteChore(item)}
-                disabled={completingChoreId === item.id}
-              >
-                {completingChoreId === item.id ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="checkmark" size={20} color="#fff" />
-                    <Text className="text-primary-foreground">
-                      Označit jako hotové
-                    </Text>
-                  </>
-                )}
-              </Button>
-            </View>
+            <>
+              <Separator className="my-3" />
+              <View className="px-4 pb-4">
+                <Button
+                  variant="default"
+                  className="w-full flex-row gap-2 py-2 shadow-lg"
+                  onPress={() => handleCompleteChore(item)}
+                  disabled={completingChoreId === item.id}
+                >
+                  {completingChoreId === item.id ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        className="text-foreground"
+                      />
+                      <Text className="text-primary-foreground font-semibold text-base">
+                        Označit jako hotové
+                      </Text>
+                    </>
+                  )}
+                </Button>
+              </View>
+            </>
           )}
         </CardContent>
       </Card>
@@ -203,8 +214,8 @@ const Chores = () => {
   }
 
   return (
-    <View className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-4">
+    <View className="flex-1">
+      <ScrollView className="flex-1 p-4 ">
         {chores.length === 0 ? (
           <View className="flex-1 justify-center items-center py-20">
             <Ionicons
@@ -212,7 +223,7 @@ const Chores = () => {
               size={64}
               color="hsl(240, 5%, 64.9%)"
             />
-            <Text className="text-base text-muted-foreground mt-4">
+            <Text className="text-base text-muted-foreground mt-4 w-full text-center text-wrap">
               Zatím žádné úkoly
             </Text>
           </View>
