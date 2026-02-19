@@ -17,7 +17,7 @@ const NavBar = () => {
   // Definice navigačních položek s ikonami
   const tenantNavItems = [
     {
-      name: "Home",
+      name: "Domů",
       path: "/",
       icon: "home" as const,
       iconOutline: "home-outline" as const,
@@ -29,13 +29,13 @@ const NavBar = () => {
       iconOutline: "wallet-outline" as const,
     },
     {
-      name: "Chores",
+      name: "Úkoly",
       path: "/chores",
       icon: "list" as const,
       iconOutline: "list-outline" as const,
     },
     {
-      name: "Flat",
+      name: "Byt",
       path: "/flat",
       icon: "business" as const,
       iconOutline: "business-outline" as const,
@@ -44,25 +44,25 @@ const NavBar = () => {
 
   const landlordNavItems = [
     {
-      name: "Home",
+      name: "Domů",
       path: "/",
       icon: "home" as const,
       iconOutline: "home-outline" as const,
     },
     {
-      name: "Issues",
+      name: "Závady",
       path: "/issues",
       icon: "alert-circle" as const,
       iconOutline: "alert-circle-outline" as const,
     },
     {
-      name: "Keys",
+      name: "Klíče",
       path: "/keys",
       icon: "key" as const,
       iconOutline: "key-outline" as const,
     },
     {
-      name: "Documents",
+      name: "Dokumenty",
       path: "/documents",
       icon: "document" as const,
       iconOutline: "document-outline" as const,

@@ -62,7 +62,9 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
         className="flex-row items-center justify-between rounded-md p-3 border border-input dark:bg-input shadow-sm shadow-black/5"
         onPress={() => setShowBottomSheet(true)}
       >
-        <Text className="text-base text-foreground">{getButtonText()}</Text>
+        <Text className="text-base text-foreground flex-1 mr-2">
+          {getButtonText()}
+        </Text>
         <Ionicons
           name={multiSelect ? "people" : "person"}
           size={20}

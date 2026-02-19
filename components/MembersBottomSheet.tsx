@@ -230,8 +230,15 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                       disabled={!isCurrentUserAdmin}
                     >
                       <View className="flex-row items-center gap-1">
+                        {isCurrentUserAdmin && (
+                          <Ionicons
+                            name="swap-horizontal"
+                            size={16}
+                            className="text-primary"
+                          />
+                        )}
                         <Text
-                          className={`text-sm w-auto ${
+                          className={`text-sm flex-1 ${
                             isCurrentUserAdmin
                               ? "text-primary font-medium"
                               : "text-muted-foreground"
@@ -241,13 +248,6 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                             ? "Pronajímatel"
                             : "Nájemce"}
                         </Text>
-                        {isCurrentUserAdmin && (
-                          <Ionicons
-                            name="swap-horizontal"
-                            size={16}
-                            className="text-primary"
-                          />
-                        )}
                       </View>
                     </Pressable>
                   </View>
