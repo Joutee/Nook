@@ -66,34 +66,59 @@ export default function JoinFlatForm({
         return;
       }
 
-      // Zkontrolovat, jestli uživatel už není v tomto bytě
+      // Zkontrolovat, jestli uživatel už má záznam v tomto bytě
       const { data: existingMembership } = await supabase
         .from("flat_profile")
-        .select("id")
+        .select("id, active, role")
         .eq("flat_id", flat.id)
         .eq("profile_id", user.id)
         .maybeSingle();
 
+      let isRejoining = false;
+
       if (existingMembership) {
-        showToast("Už jste členem tohoto bytu", "info");
-        setLoading(false);
-        return;
-      }
+        // Pokud už je aktivní člen, zobrazit info
+        if (existingMembership.active) {
+          showToast("Už jste aktivním členem tohoto bytu", "info");
+          setLoading(false);
+          return;
+        }
 
-      // Přidat uživatele do bytu (flat_profile)
-      const { error: joinError } = await supabase.from("flat_profile").insert({
-        flat_id: flat.id,
-        profile_id: user.id,
-        role: null, // Nastaví se na další obrazovce
-      });
+        // Pokud existuje záznam, ale není aktivní, aktualizovat na active = true
+        const { error: updateError } = await supabase
+          .from("flat_profile")
+          .update({ active: true })
+          .eq("id", existingMembership.id);
 
-      if (joinError) {
-        showToast(
-          "Nepodařilo se přidat do bytu: " + joinError.message,
-          "error",
-        );
-        setLoading(false);
-        return;
+        if (updateError) {
+          showToast(
+            "Nepodařilo se znovu připojit k bytu: " + updateError.message,
+            "error",
+          );
+          setLoading(false);
+          return;
+        }
+
+        isRejoining = true;
+      } else {
+        // Vytvořit nový záznam s active = true
+        const { error: insertError } = await supabase
+          .from("flat_profile")
+          .insert({
+            flat_id: flat.id,
+            profile_id: user.id,
+            role: null, // Nastaví se na další obrazovce
+            active: true,
+          });
+
+        if (insertError) {
+          showToast(
+            "Nepodařilo se přidat do bytu: " + insertError.message,
+            "error",
+          );
+          setLoading(false);
+          return;
+        }
       }
 
       // Načíst kompletní info o bytu a nastavit jako currentFlat
@@ -110,7 +135,12 @@ export default function JoinFlatForm({
       // Obnovit kontext - layout se postará o přesměrování
       await refreshFlats();
       setLoading(false);
-      showToast("Úspěšně jste se připojili k bytu!", "success");
+      showToast(
+        isRejoining
+          ? "Úspěšně jste se znovu připojili k bytu!"
+          : "Úspěšně jste se připojili k bytu!",
+        "success",
+      );
     } catch (error: any) {
       showToast(error.message, "error");
       setLoading(false);

@@ -10,6 +10,7 @@ import {
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { supabase } from "../utils/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
@@ -33,6 +34,8 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
   const { showToast } = useToast();
   const { refreshFlats } = useFlatContext();
 
@@ -60,6 +63,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           .select("is_admin")
           .eq("flat_id", flatId)
           .eq("profile_id", user.id)
+          .eq("active", true)
           .single();
 
         setIsCurrentUserAdmin(userProfile?.is_admin || false);
@@ -79,7 +83,8 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           )
         `,
         )
-        .eq("flat_id", flatId);
+        .eq("flat_id", flatId)
+        .eq("active", true);
 
       if (error) {
         console.error("Error fetching members:", error);
@@ -110,30 +115,37 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     if (!flatId) return;
 
     try {
-      // Nejdřív zkontrolovat, jestli řádek existuje
+      // Nejdřív zkontrolovat, jestli řádek existuje a je aktivní
       const { data: existing, error: checkError } = await supabase
         .from("flat_profile")
-        .select("*")
+        .select("active")
         .eq("flat_id", flatId)
-        .eq("profile_id", memberId);
+        .eq("profile_id", memberId)
+        .maybeSingle();
 
-      if (!existing || existing.length === 0) {
+      if (!existing) {
         showToast("Člen nebyl nalezen v databázi", "error");
         return;
       }
 
+      if (!existing.active) {
+        showToast("Člen už není aktivní v tomto bytě", "info");
+        return;
+      }
+
+      // Nastavit active na false místo smazání
       const { data, error } = await supabase
         .from("flat_profile")
-        .delete()
+        .update({ active: false })
         .eq("flat_id", flatId)
         .eq("profile_id", memberId)
         .select();
 
       if (error) {
-        console.error("Delete error:", error);
+        console.error("Update error:", error);
         showToast("Nepodařilo se odebrat člena: " + error.message, "error");
       } else if (data && data.length > 0) {
-        showToast("Člen byl odebrán z bytu", "success");
+        showToast("Člen byl odpojen z bytu", "success");
 
         // Pokud uživatel odstranil sám sebe, zavrít bottom sheet
         if (memberId === currentUserId) {
@@ -146,12 +158,24 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
         // Znovu načíst členy (pokud uživatel stále vidí tento byt)
         loadMembers();
       } else {
-        showToast("Člen nebyl smazán (RLS policy?)", "error");
+        showToast("Člen nebyl odpojen (RLS policy?)", "error");
       }
     } catch (error: any) {
       console.error("Catch error:", error);
       showToast("Nepodařilo se odebrat člena: " + error.message, "error");
     }
+  };
+
+  const confirmRemoveMember = () => {
+    if (memberToRemove) {
+      handleRemoveMember(memberToRemove);
+      setMemberToRemove(null);
+    }
+  };
+
+  const openRemoveDialog = (memberId: string) => {
+    setMemberToRemove(memberId);
+    setShowDeleteDialog(true);
   };
 
   const handleChangeRole = async (memberId: string, currentRole: string) => {
@@ -164,7 +188,8 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
         .from("flat_profile")
         .update({ role: newRole })
         .eq("flat_id", flatId)
-        .eq("profile_id", memberId);
+        .eq("profile_id", memberId)
+        .eq("active", true);
 
       if (error) {
         showToast("Nepodařilo se změnit roli: " + error.message, "error");
@@ -253,7 +278,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                   </View>
                   {showDeleteButton && (
                     <TouchableOpacity
-                      onPress={() => handleRemoveMember(item.id)}
+                      onPress={() => openRemoveDialog(item.id)}
                       className="p-2"
                     >
                       <Ionicons
@@ -272,6 +297,20 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           />
         </View>
       )}
+      <AlertDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Odebrat člena"
+        description={
+          memberToRemove === currentUserId
+            ? "Opravdu se chcete odpojit z tohoto bytu?"
+            : "Opravdu chcete odebrat tohoto člena z bytu?"
+        }
+        cancelText="Zrušit"
+        actionText="Odebrat"
+        onAction={confirmRemoveMember}
+        destructive
+      />
     </BottomSheet>
   );
 };

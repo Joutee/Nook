@@ -78,7 +78,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       const { data, error } = await supabase
         .from("flat_profile")
         .select("profile_id, profiles(id, name, surname, avatar_url)")
-        .eq("flat_id", currentFlat.id);
+        .eq("flat_id", currentFlat.id)
+        .eq("active", true);
 
       if (error) {
         console.error("Error loading members:", error);
@@ -297,7 +298,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
   return (
     <KeyboardAwareScrollView
-      contentContainerStyle={{ flexGrow: 1 ,paddingTop: 10,paddingBottom: 10}}
+      contentContainerStyle={{ flexGrow: 1, paddingTop: 10, paddingBottom: 10 }}
       enableOnAndroid={true}
       extraScrollHeight={20}
       className="flex-1 bg-background"

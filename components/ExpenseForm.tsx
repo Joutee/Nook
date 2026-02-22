@@ -109,7 +109,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         )
       `,
         )
-        .eq("flat_id", currentFlat.id);
+        .eq("flat_id", currentFlat.id)
+        .eq("active", true);
 
       if (error) {
         console.error("Error loading flat members:", error);

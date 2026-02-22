@@ -1,6 +1,5 @@
 TODO:
 nakonec to projit i ve white modu a zkontrolovat
-odesilat soubory šifrovane do supabase storage
 je potreba zamezit leavnuti bytu pokud clovek nekomu dluzi nebo je v nejakem ukolu
 Keys
 OCR

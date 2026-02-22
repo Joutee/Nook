@@ -140,6 +140,7 @@ export default function CreateFlatForm({
         flat_id: createdFlat.id,
         profile_id: user.id,
         role: null,
+        active: true,
       });
 
       if (joinError) {

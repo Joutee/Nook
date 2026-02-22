@@ -273,7 +273,7 @@ const Finance = () => {
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/expense-create")}
       >
-        <Ionicons name="add" size={28} className="text-foreground" />
+        <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>
     </View>
   );

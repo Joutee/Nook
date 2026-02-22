@@ -237,7 +237,7 @@ const Chores = () => {
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/chore-create")}
       >
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>
     </View>
   );

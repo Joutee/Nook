@@ -10,16 +10,22 @@ const THEME_STORAGE_KEY = "@theme_mode";
 
 export function ThemeToggle() {
   const { setColorScheme } = useColorScheme();
-  
+
   // Vlastní stav pro sledování vybrané volby
-  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">("system");
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
+    "system",
+  );
 
   // Načíst uložené nastavení při startu
   useEffect(() => {
     const loadTheme = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-        if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
+        if (
+          savedTheme === "light" ||
+          savedTheme === "dark" ||
+          savedTheme === "system"
+        ) {
           setThemeMode(savedTheme);
           setColorScheme(savedTheme);
         }
@@ -32,7 +38,7 @@ export function ThemeToggle() {
 
   const handleThemeChange = async () => {
     let newMode: "light" | "dark" | "system";
-    
+
     if (themeMode === "system") {
       newMode = "light";
     } else if (themeMode === "light") {
@@ -40,10 +46,10 @@ export function ThemeToggle() {
     } else {
       newMode = "system";
     }
-    
+
     setThemeMode(newMode);
     setColorScheme(newMode);
-    
+
     // Uložit nastavení
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
@@ -73,16 +79,18 @@ export function ThemeToggle() {
       <View className="flex-row items-center gap-3">
         {/* Přetypování as any pro případ, že TypeScript nezná přesný název ikony */}
         <Ionicons
-          name={getThemeIcon() as any} 
+          name={getThemeIcon() as any}
           size={24}
           className="text-foreground"
         />
-        <Text className="text-base">
-          {getThemeText()}
-        </Text>
+        <Text className="text-base">{getThemeText()}</Text>
       </View>
       <View className="flex-row items-center gap-2">
-        <Ionicons name="chevron-forward" size={20} className="text-muted-foreground" />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          className="text-muted-foreground"
+        />
       </View>
     </Button>
   );

@@ -46,7 +46,8 @@ export default function SelectRole() {
         .from("flat_profile")
         .update({ role })
         .eq("flat_id", currentFlat.id)
-        .eq("profile_id", user.id);
+        .eq("profile_id", user.id)
+        .eq("active", true);
 
       if (error) {
         showToast("Nepodařilo se nastavit roli: " + error.message, "error");

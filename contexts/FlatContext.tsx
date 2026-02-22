@@ -68,7 +68,8 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
         .select("flat_id, role, flat:flats(id, name, address)")
-        .eq("profile_id", session.user.id);
+        .eq("profile_id", session.user.id)
+        .eq("active", true);
       console.log("ended Fetching flats");
       if (error) {
         console.error("Error fetching flats:", error);
@@ -135,6 +136,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
         .select("role")
         .eq("profile_id", session.user.id)
         .eq("flat_id", flat.id)
+        .eq("active", true)
         .single();
 
       if (data) {
