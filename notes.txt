@@ -1,18 +1,32 @@
 TODO:
-OCR
-Finance
+nakonec to projit i ve white modu a zkontrolovat
+odesilat soubory šifrovane do supabase storage
+je potreba zamezit leavnuti bytu pokud clovek nekomu dluzi nebo je v nejakem ukolu
 Keys
+OCR
 
-chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se pritahl z db
-profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
-u edit screen povolit odeslani pouze pokud se neco zmenilo
 reset password
-pridat padding ze strany na scroll views
+email change
+
+pridat padding ze strany na scroll views na takovych tech edit create strankach hlavne
+chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se pritahl z db
+u edit screen povolit odeslani pouze pokud se neco zmenilo
+vypsat hlasku a znepristupnit moduly ktere jsou na komunikaci s pronajimatelem pokud zadny pronajimatel v byte neni
 
 
 kdyz zbyde cas:
+profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
+pridat do clenu bytu asi i telefonni cislo by davalo smysl
 system theme
 pridat vic intervalu repetetivnosti u chores (tyden, mesic,...)
 o auth
 otisk prstu
 opakujici se vydaje (najem)
+nejake misto kam ulozit bankovni ucet kazdeho uzivatele a moznost pak zobrazeni ve finance, ten by mohl mit i pronajimatel mohl by se zobrazovat nekde v zalozce byt kam by pak mohli najemci posilat najem
+
+
+
+
+featury do budoucna:
+nejake kontrola pro pronajimatele jestli byl zaplacen najem, mozna nejak napojeni na bankovni ucet
+ruzne notifikace pro najemci i pronajimatele
