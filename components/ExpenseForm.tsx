@@ -431,7 +431,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       className="flex-1"
     >
       {/* Title Input */}
-      <Card className="mb-4">
+      <Card className="mb-4 mx-4">
         <CardContent className="gap-4">
           <View className="gap-2">
             <Label>Název výdaje</Label>
@@ -521,7 +521,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             </CardContent>
           </Card>
           {/* Bottom Actions */}
-          <View className="flex-row p-4 gap-3">
+          <View className="flex-row gap-3">
             <Button
               variant="secondary"
               className="flex-1"
@@ -545,7 +545,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
           {/* Delete Button (only in edit mode) */}
           {mode === "edit" && expenseId && (
-            <View className="p-4 pt-0">
+            <View className="pt-0">
               <Button
                 variant="destructive"
                 onPress={handleDelete}
@@ -553,10 +553,17 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
                 className="flex-row gap-2"
               >
                 {isDeleting ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator
+                    size="small"
+                    className="text-primary-foreground"
+                  />
                 ) : (
                   <>
-                    <Ionicons name="trash-outline" size={20} color="#fff" />
+                    <Ionicons
+                      name="trash-outline"
+                      size={20}
+                      className="text-primary-foreground"
+                    />
                     <Text>Smazat výdaj</Text>
                   </>
                 )}

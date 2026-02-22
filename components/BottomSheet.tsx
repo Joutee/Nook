@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MAX_HEIGHT_PERCENTAGE = 0.85; // Maximálně 85% obrazovky
+const MIN_HEIGHT_PERCENTAGE = 0.35; // Minimálně 30% obrazovky
 const HEADER_HEIGHT = 80; // Přibližná výška headeru + drag handle
 
 interface BottomSheetProps {
@@ -36,14 +37,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   const isAnimating = useRef(false);
   const startPosition = useRef(0);
   const [contentHeight, setContentHeight] = useState(0);
-  const [sheetHeight, setSheetHeight] = useState(SCREEN_HEIGHT * 0.5);
+  const [sheetHeight, setSheetHeight] = useState(
+    SCREEN_HEIGHT * MIN_HEIGHT_PERCENTAGE,
+  );
 
   // Vypočítat optimální výšku podle obsahu
   useEffect(() => {
     if (contentHeight > 0 && visible) {
       const totalHeight = contentHeight + HEADER_HEIGHT + (insets.bottom || 20);
       const maxHeight = SCREEN_HEIGHT * MAX_HEIGHT_PERCENTAGE;
-      const optimalHeight = Math.min(totalHeight, maxHeight);
+      const minHeight = SCREEN_HEIGHT * MIN_HEIGHT_PERCENTAGE;
+      const optimalHeight = Math.max(
+        minHeight,
+        Math.min(totalHeight, maxHeight),
+      );
       setSheetHeight(optimalHeight);
     }
   }, [contentHeight, insets.bottom, visible]);
@@ -103,7 +110,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       // Zavřít sheet a resetovat
       translateY.setValue(sheetHeight);
       setContentHeight(0);
-      setSheetHeight(SCREEN_HEIGHT * 0.5);
+      setSheetHeight(SCREEN_HEIGHT * MIN_HEIGHT_PERCENTAGE);
     }
   }, [visible]);
 
@@ -159,7 +166,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
               <View className="flex-row items-center gap-4">
                 {headerActions}
                 <TouchableOpacity onPress={closeBottomSheet}>
-                  <Ionicons name="close" size={24} className="text-foreground" />
+                  <Ionicons
+                    name="close"
+                    size={24}
+                    className="text-foreground"
+                  />
                 </TouchableOpacity>
               </View>
             </View>

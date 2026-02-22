@@ -145,7 +145,9 @@ export default function Register() {
                   onChangeText={setPassword}
                   value={password}
                   returnKeyType="next"
-                  onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
+                  onSubmitEditing={() =>
+                    confirmPasswordInputRef.current?.focus()
+                  }
                   className="pr-12"
                 />
                 <Pressable
@@ -181,7 +183,9 @@ export default function Register() {
                   className="absolute right-3 top-0 bottom-0 justify-center"
                 >
                   <Ionicons
-                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                    name={
+                      showConfirmPassword ? "eye-off-outline" : "eye-outline"
+                    }
                     size={20}
                     color="hsl(240, 5%, 64.9%)"
                   />

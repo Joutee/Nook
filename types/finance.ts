@@ -21,6 +21,7 @@ export interface ExpenseShare {
 export interface Balance {
   profile_id: string;
   name: string;
+  surname: string;
   avatar_url: string | null;
   flat_id: string;
   net_balance: number;

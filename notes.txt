@@ -1,6 +1,6 @@
 TODO:
 nakonec to projit i ve white modu a zkontrolovat
-je potreba zamezit leavnuti bytu pokud clovek nekomu dluzi nebo je v nejakem ukolu
+je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny updat takze si muze zmenit is_admin
 Keys
 OCR
 

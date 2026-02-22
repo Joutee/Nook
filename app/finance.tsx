@@ -40,7 +40,7 @@ const Finance = () => {
     try {
       // Load balances from the view
       const { data: balancesData, error: balancesError } = await supabase
-        .from("flat_balances")
+        .from("view_flat_balances")
         .select("*")
         .eq("flat_id", currentFlat.id);
 
@@ -117,26 +117,26 @@ const Finance = () => {
         key={balance.profile_id}
         className="flex-row justify-between items-center py-3 border-b border-border"
       >
-        <View className="flex-row items-center gap-3">
+        <View className="flex-row items-center gap-3 flex-1">
           <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
             <Text className="text-primary-foreground text-base font-semibold">
               {balance.name.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <Text className="text-base text-foreground font-medium">
-            {balance.name}
+          <Text className="text-base text-foreground font-medium flex-1">
+            {balance.name} {balance.surname}
           </Text>
         </View>
-        <View className="items-end">
-          <Text
-            className={`text-base font-semibold ${
-              isPositive
-                ? "text-green-600"
-                : isZero
-                  ? "text-muted-foreground"
-                  : "text-red-600"
-            }`}
-          >
+        <View
+          className={`items-end py-1 px-3 rounded-3xl  ${
+            isPositive
+              ? "bg-success"
+              : isZero
+                ? "bg-muted-foreground"
+                : "bg-destructive"
+          } `}
+        >
+          <Text className={"text-sm font-semibold text-primary-foreground"}>
             {isPositive && "+"}
             {formatCurrency(balance.net_balance)}
           </Text>
@@ -151,7 +151,7 @@ const Finance = () => {
         key={index}
         className="flex-row items-center py-3 px-3 bg-muted rounded-lg mb-2 gap-3"
       >
-        <Ionicons name="arrow-forward" size={20} color="hsl(270, 89.1%, 49%)" />
+        <Ionicons name="arrow-forward" size={20} className="text-primary" />
         <Text className="text-sm text-foreground flex-1">
           <Text className="font-semibold text-primary">{item.from}</Text> dluží{" "}
           <Text className="font-semibold text-primary">{item.to}</Text>{" "}
@@ -205,9 +205,11 @@ const Finance = () => {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1 px-4 py-4">
+        <Text className="text-3xl font-bold text-foreground mb-4">Finance</Text>
+
         {/* Balances Section */}
-        <Card className="mb-4 mx-4 mt-4">
+        <Card className="mb-3">
           <CardHeader className="flex-row items-center gap-2">
             <Ionicons
               name="wallet-outline"
@@ -229,7 +231,7 @@ const Finance = () => {
 
         {/* Settlements Section */}
         {settlements.length > 0 && (
-          <Card className="mb-4 mx-4">
+          <Card className="mb-3">
             <CardHeader className="flex-row items-center gap-2">
               <Ionicons
                 name="git-compare-outline"
@@ -243,7 +245,7 @@ const Finance = () => {
         )}
 
         {/* History Section */}
-        <Card className="mb-4 mx-4">
+        <Card className="mb-4">
           <CardHeader className="flex-row items-center gap-2">
             <Ionicons name="time-outline" size={24} className="text-primary" />
             <CardTitle>Historie</CardTitle>

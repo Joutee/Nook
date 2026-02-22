@@ -71,7 +71,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     "/issues",
     "/keys",
     "/documents",
-    "/flat",
+    "/more",
   ];
   const showNavigation = showNavigationPaths.includes(pathname);
   console.log("showNavigation:", showNavigation);
@@ -159,12 +159,12 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
         <Stack.Screen
-          name="flat"
-          options={{ title: "Flat", headerShown: false }}
+          name="more"
+          options={{ title: "Další", headerShown: false }}
         />
         <Stack.Screen
           name="chores"
-          options={{ title: "Chores", headerShown: false }}
+          options={{ title: "Úkoly", headerShown: false }}
         />
         <Stack.Screen name="chore-detail" options={{ title: "Detail úkolu" }} />
         <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
@@ -175,7 +175,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         <Stack.Screen name="chore-edit" options={{ title: "Upravit úkol" }} />
         <Stack.Screen
           name="issues"
-          options={{ title: "issues", headerShown: false }}
+          options={{ title: "Závady", headerShown: false }}
         />
         <Stack.Screen
           name="issue-create"
@@ -187,11 +187,11 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen
           name="keys"
-          options={{ title: "Keys", headerShown: false }}
+          options={{ title: "Klíče", headerShown: false }}
         />
         <Stack.Screen
           name="documents"
-          options={{ title: "Documents", headerShown: false }}
+          options={{ title: "Dokumenty", headerShown: false }}
         />
         <Stack.Screen
           name="document-add"

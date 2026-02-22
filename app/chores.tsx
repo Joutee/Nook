@@ -114,7 +114,7 @@ const Chores = () => {
     return (
       <Card
         key={item.id}
-        className={`mb-4 py-0 ${isCompleted ? "opacity-60" : ""}`}
+        className={`mb-3 py-0 ${isCompleted ? "opacity-60" : ""}`}
       >
         <CardContent className="p-0">
           <Pressable
@@ -216,6 +216,8 @@ const Chores = () => {
   return (
     <View className="flex-1">
       <ScrollView className="flex-1 p-4 ">
+        <Text className="text-3xl font-bold text-foreground mb-4">Úkoly</Text>
+
         {chores.length === 0 ? (
           <View className="flex-1 justify-center items-center py-20">
             <Ionicons

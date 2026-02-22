@@ -31,14 +31,14 @@ const NavBar = () => {
     {
       name: "Úkoly",
       path: "/chores",
-      icon: "list" as const,
-      iconOutline: "list-outline" as const,
+      icon: "reader" as const,
+      iconOutline: "reader-outline" as const,
     },
     {
-      name: "Byt",
-      path: "/flat",
-      icon: "business" as const,
-      iconOutline: "business-outline" as const,
+      name: "Další",
+      path: "/more",
+      icon: "menu" as const,
+      iconOutline: "menu-outline" as const,
     },
   ];
 

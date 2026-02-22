@@ -1,16 +1,13 @@
-import React, { useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  Pressable,
-} from "react-native";
+import React, { useState, Fragment } from "react";
+import { View, TouchableOpacity,  } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useRouter, usePathname } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheet from "./BottomSheet";
 
 const TopBar = () => {
   const router = useRouter();
@@ -63,19 +60,19 @@ const TopBar = () => {
           onPress={handleFlatPress}
           disabled={flats.length <= 1}
         >
+          {flats.length > 1 && (
+            <Ionicons
+              name="chevron-expand-outline"
+              size={24}
+              className="ml-1 text-foreground"
+            />
+          )}
           <Text
-            className="flex-1 text-lg font-semibold text-foreground"
+            className="ml-1 flex-1 text-lg font-semibold text-foreground"
             numberOfLines={1}
           >
             {currentFlat?.name || currentFlat?.address || "Žádný byt"}
           </Text>
-          {flats.length > 1 && (
-            <Ionicons
-              name="chevron-down"
-              size={20}
-              className="ml-1 text-foreground"
-            />
-          )}
         </TouchableOpacity>
 
         {/* Pravá strana - tlačítko nastavení */}
@@ -88,62 +85,44 @@ const TopBar = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal pro výběr bytu */}
-      <Modal
+      {/* BottomSheet pro výběr bytu */}
+      <BottomSheet
         visible={isModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsModalVisible(false)}
+        onClose={() => setIsModalVisible(false)}
+        title="Vyberte byt"
       >
-        <Pressable
-          className="flex-1 justify-center items-center"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          onPress={() => setIsModalVisible(false)}
-        >
-          <View className="bg-card rounded-xl w-[80%] max-h-[60%] overflow-hidden">
-            <View className="flex-row justify-between items-center p-4 border-b border-border">
-              <Text className="text-lg font-semibold text-foreground">
-                Vyberte byt
-              </Text>
-              <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                <Ionicons name="close" size={24} color="hsl(0, 0%, 20%)" />
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={flats}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  className={`flex-row justify-between items-center p-4 gap-3 ${
-                    currentFlat?.id === item.id ? "bg-muted" : ""
+        <View className="px-2">
+          {flats.map((item, index) => (
+            <Fragment key={item.id}>
+              <Button
+                variant="ghost"
+                className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+                onPress={() => handleSelectFlat(item)}
+              >
+                <Text
+                  className={`flex-1 text-base ${
+                    currentFlat?.id === item.id
+                      ? "font-semibold text-primary"
+                      : "text-foreground"
                   }`}
-                  onPress={() => handleSelectFlat(item)}
+                  numberOfLines={2}
                 >
-                  <Text
-                    className={`flex-1 text-base ${
-                      currentFlat?.id === item.id
-                        ? "font-semibold text-primary"
-                        : "text-foreground"
-                    }`}
-                    numberOfLines={2}
-                  >
-                    {item.name}
-                  </Text>
-                  {currentFlat?.id === item.id && (
-                    <Ionicons
-                      name="checkmark"
-                      size={20}
-                      color="hsl(0, 0%, 9%)"
-                    />
-                  )}
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View className="h-px bg-border" />}
-            />
-          </View>
-        </Pressable>
-      </Modal>
+                  {item.name}
+                </Text>
+
+                {currentFlat?.id === item.id && (
+                  <Ionicons
+                    name="checkmark"
+                    size={20}
+                    className="text-primary"
+                  />
+                )}
+              </Button>
+              {index < flats.length - 1 && <Separator />}
+            </Fragment>
+          ))}
+        </View>
+      </BottomSheet>
     </>
   );
 };

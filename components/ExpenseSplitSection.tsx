@@ -222,10 +222,8 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
                     {member.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
-                <Text className="text-base text-foreground font-medium">
-                  {member.surname
-                    ? `${member.name} ${member.surname}`
-                    : member.name}
+                <Text className="text-base text-foreground font-medium flex-1">
+                  {member.name} {member.surname}
                 </Text>
               </View>
             </Pressable>

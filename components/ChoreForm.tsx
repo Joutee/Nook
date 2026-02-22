@@ -303,7 +303,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       extraScrollHeight={20}
       className="flex-1 bg-background"
     >
-      <Card className="mb-4">
+      <Card className="mx-4">
         <CardContent className="gap-4">
           <View className="gap-2">
             <Label>Název *</Label>
@@ -358,7 +358,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
           </View>
 
           {/* Bottom Actions */}
-          <View className="flex-row p-4 gap-3">
+          <View className="flex-row gap-3">
             <Button
               variant="secondary"
               className="flex-1"
@@ -382,7 +382,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
           {/* Delete Button (only in edit mode) */}
           {mode === "edit" && choreId && (
-            <View className="p-4 pt-0">
+            <View className=" pt-0">
               <Button
                 variant="destructive"
                 onPress={handleDelete}
