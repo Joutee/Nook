@@ -413,7 +413,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-muted-foreground" />
         <Text className="mt-3 text-base text-muted-foreground">Načítám...</Text>
       </View>
     );
@@ -521,31 +521,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             </CardContent>
           </Card>
           {/* Bottom Actions */}
-          <View className="flex-row gap-3">
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onPress={() => router.back()}
-              disabled={isSaving || isDeleting}
-            >
-              <Text>Zrušit</Text>
-            </Button>
-            <Button
-              className="flex-1"
-              onPress={handleSave}
-              disabled={isSaving || isDeleting}
-            >
-              {isSaving ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text>{mode === "edit" ? "Upravit" : "Uložit"}</Text>
-              )}
-            </Button>
-          </View>
-
-          {/* Delete Button (only in edit mode) */}
-          {mode === "edit" && expenseId && (
-            <View className="pt-0">
+          <View className="flex-col gap-3">
+            {mode === "edit" && expenseId && (
               <Button
                 variant="destructive"
                 onPress={handleDelete}
@@ -559,17 +536,33 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
                   />
                 ) : (
                   <>
-                    <Ionicons
-                      name="trash-outline"
-                      size={20}
-                      className="text-primary-foreground"
-                    />
                     <Text>Smazat výdaj</Text>
                   </>
                 )}
               </Button>
-            </View>
-          )}
+            )}
+            <Button
+              className="flex-1"
+              onPress={handleSave}
+              disabled={isSaving || isDeleting}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text>{mode === "edit" ? "Upravit" : "Uložit"}</Text>
+              )}
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onPress={() => router.back()}
+              disabled={isSaving || isDeleting}
+            >
+              <Text>Zrušit</Text>
+            </Button>
+
+            {/* Delete Button (only in edit mode) */}
+          </View>
         </CardContent>
       </Card>
 

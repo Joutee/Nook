@@ -358,15 +358,23 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
           </View>
 
           {/* Bottom Actions */}
-          <View className="flex-row gap-3">
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onPress={() => router.back()}
-              disabled={isLoading || isDeleting}
-            >
-              <Text>Zrušit</Text>
-            </Button>
+          <View className="flex-col gap-3">
+            {mode === "edit" && choreId && (
+              <Button
+                variant="destructive"
+                onPress={handleDelete}
+                disabled={isDeleting || isLoading}
+                className="flex-row gap-2"
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Text>Smazat úkol</Text>
+                  </>
+                )}
+              </Button>
+            )}
             <Button
               className="flex-1"
               onPress={handleSubmit}
@@ -378,28 +386,17 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
                 <Text>{mode === "edit" ? "Upravit" : "Vytvořit úkol"}</Text>
               )}
             </Button>
-          </View>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onPress={() => router.back()}
+              disabled={isLoading || isDeleting}
+            >
+              <Text>Zrušit</Text>
+            </Button>
 
-          {/* Delete Button (only in edit mode) */}
-          {mode === "edit" && choreId && (
-            <View className=" pt-0">
-              <Button
-                variant="destructive"
-                onPress={handleDelete}
-                disabled={isDeleting || isLoading}
-                className="flex-row gap-2"
-              >
-                {isDeleting ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="trash-outline" size={20} color="#fff" />
-                    <Text>Smazat úkol</Text>
-                  </>
-                )}
-              </Button>
-            </View>
-          )}
+            {/* Delete Button (only in edit mode) */}
+          </View>
         </CardContent>
       </Card>
 

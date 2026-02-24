@@ -1,14 +1,15 @@
 import {
-  StyleSheet,
-  TouchableOpacity,
   View,
-  FlatList,
+  ScrollView,
   ActivityIndicator,
-  Linking,
-  Platform,
+  Pressable,
   Alert,
+  Linking,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -138,62 +139,116 @@ const documents = () => {
     );
   };
 
-  const renderDocument = ({ item }: { item: Document }) => (
-    <View style={styles.documentItem}>
-      <TouchableOpacity
-        style={styles.documentInfo}
-        onPress={() => handleOpenDocument(item.document_path, item.name)}
-      >
-        <Text style={styles.documentName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.documentDescription}>{item.description}</Text>
-        )}
-        <Text style={styles.documentDate}>
-          Přidáno: {formatDate(item.created_at)}
-        </Text>
-      </TouchableOpacity>
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => handleDownloadDocument(item.document_path, item.name)}
+  const renderDocument = (item: Document) => (
+    <Card key={item.id} className="mb-3 py-1">
+      <CardContent className="flex-row items-center p-2 gap-3">
+        {/* Ikona dokumentu */}
+        <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+          <Ionicons
+            name="document-text"
+            size={24}
+            className="text-primary-foreground"
+          />
+        </View>
+
+        {/* Obsah dokumentu */}
+        <Pressable
+          className="flex-1"
+          onPress={() => handleOpenDocument(item.document_path, item.name)}
         >
-          <Ionicons name="download-outline" size={24} color="#007AFF" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() =>
-            handleDeleteDocument(item.id, item.document_path, item.name)
-          }
-        >
-          <Ionicons name="trash-outline" size={24} color="#FF3B30" />
-        </TouchableOpacity>
-      </View>
-    </View>
+          <Text className="text-base font-semibold text-foreground mb-0.5">
+            {item.name}
+          </Text>
+          {item.description && (
+            <Text
+              className="text-xs text-muted-foreground mb-1"
+              numberOfLines={1}
+            >
+              {item.description}
+            </Text>
+          )}
+          <View className="flex-row items-center gap-1">
+            <Ionicons
+              name="calendar-outline"
+              size={11}
+              className="text-muted-foreground"
+            />
+            <Text className="text-xs text-muted-foreground flex-1">
+              {formatDate(item.created_at)}
+            </Text>
+          </View>
+        </Pressable>
+
+        {/* Akční tlačítka */}
+        <View className="flex-row gap-1">
+          <Pressable
+            className="w-10 h-10 items-center justify-center"
+            onPress={() =>
+              handleDownloadDocument(item.document_path, item.name)
+            }
+          >
+            <Ionicons
+              name="download-outline"
+              size={22}
+              className="text-foreground"
+            />
+          </Pressable>
+
+          <Pressable
+            className="w-10 h-10 items-center justify-center"
+            onPress={() =>
+              handleDeleteDocument(item.id, item.document_path, item.name)
+            }
+          >
+            <Ionicons
+              name="trash-outline"
+              size={22}
+              className="text-destructive"
+            />
+          </Pressable>
+        </View>
+      </CardContent>
+    </Card>
   );
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dokumenty</Text>
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" className="text-primary" />
+      </View>
+    );
+  }
 
-      <TouchableOpacity
-        style={styles.addButton}
+  return (
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1 p-4">
+        <Text className="text-3xl font-bold text-foreground mb-4">
+          Dokumenty
+        </Text>
+        {documents.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="document-text-outline"
+              size={64}
+              className="text-muted-foreground"
+            />
+            <Text className="text-base text-muted-foreground mt-4 text-center w-full">
+              Zatím žádné dokumenty
+            </Text>
+          </View>
+        ) : (
+          <>{documents.map(renderDocument)}</>
+        )}
+      </ScrollView>
+
+      {/* Floating Action Button */}
+      <Pressable
+        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/document-add")}
       >
-        <Text style={styles.addButtonText}>+ Přidat dokument</Text>
-      </TouchableOpacity>
+        <Ionicons name="add" size={28} className="text-primary-foreground" />
+      </Pressable>
 
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-      ) : documents.length === 0 ? (
-        <Text style={styles.emptyText}>Žádné dokumenty</Text>
-      ) : (
-        <FlatList
-          data={documents}
-          renderItem={renderDocument}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-        />
-      )}
       <DocumentViewerModal
         visible={viewerVisible}
         onClose={() => setViewerVisible(false)}
@@ -205,75 +260,3 @@ const documents = () => {
 };
 
 export default documents;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  addButton: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  loader: {
-    marginTop: 40,
-  },
-  emptyText: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "#666",
-    marginTop: 40,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  documentItem: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  documentInfo: {
-    flex: 1,
-  },
-  buttonGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  iconButton: {
-    padding: 8,
-  },
-  documentName: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
-    color: "#333",
-  },
-  documentDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  documentDate: {
-    fontSize: 12,
-    color: "#999",
-  },
-});

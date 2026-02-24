@@ -129,7 +129,7 @@ const Chores = () => {
                 <Ionicons
                   name="checkmark-circle"
                   size={24}
-                  color="hsl(142, 76%, 36%)"
+                  className="text-success"
                 />
               )}
             </View>
@@ -158,7 +158,7 @@ const Chores = () => {
               </View>
 
               <View className="items-end">
-                <Text className="text-xs text-muted-foreground">
+                <Text className="text-xs text-muted-foreground min-w-24 text-right">
                   Každých {item.interval_days}{" "}
                   {item.interval_days === 1 ? "den" : "dní"}
                 </Text>
@@ -189,7 +189,7 @@ const Chores = () => {
                       <Ionicons
                         name="checkmark-circle"
                         size={24}
-                        className="text-foreground"
+                        className="text-primary-foreground"
                       />
                       <Text className="text-primary-foreground font-semibold text-base">
                         Označit jako hotové
@@ -223,7 +223,7 @@ const Chores = () => {
             <Ionicons
               name="list-outline"
               size={64}
-              color="hsl(240, 5%, 64.9%)"
+              className="text-muted-foreground"
             />
             <Text className="text-base text-muted-foreground mt-4 w-full text-center text-wrap">
               Zatím žádné úkoly

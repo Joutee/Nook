@@ -176,7 +176,11 @@ const Finance = () => {
             </View>
           ) : (
             <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-              <Ionicons name="cart-outline" size={20} color="#fff" />
+              <Ionicons
+                name="cart"
+                size={20}
+                className="text-primary-foreground"
+              />
             </View>
           )}
           <View className="flex-1">
