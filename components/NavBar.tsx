@@ -52,8 +52,8 @@ const NavBar = () => {
     {
       name: "Závady",
       path: "/issues",
-      icon: "alert-circle" as const,
-      iconOutline: "alert-circle-outline" as const,
+      icon: "warning" as const,
+      iconOutline: "warning-outline" as const,
     },
     {
       name: "Klíče",

@@ -48,7 +48,7 @@ export default function CodeModal({ visible, code, onClose }: CodeModalProps) {
                 <Ionicons
                   name="checkmark-circle"
                   size={48}
-                  color="hsl(270, 89.1%, 49%)"
+                  className="text-primary"
                 />
               </View>
               <CardTitle className="text-2xl text-center">
@@ -77,7 +77,7 @@ export default function CodeModal({ visible, code, onClose }: CodeModalProps) {
                 <Ionicons
                   name="copy-outline"
                   size={20}
-                  color="hsl(270, 89.1%, 49%)"
+                  className="text-primary"
                 />
                 <Text>Zkopírovat kód</Text>
               </Button>

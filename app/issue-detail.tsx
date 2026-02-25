@@ -1,13 +1,14 @@
 import {
-  StyleSheet,
   View,
   ScrollView,
   ActivityIndicator,
   Image,
-  TouchableOpacity,
-  Alert,
+  Pressable,
 } from "react-native";
-import { Text } from "@/components/ui/text"
+import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -15,9 +16,9 @@ import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import DocumentViewerModal from "../components/DocumentViewerModal";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Issue } from "../types/issues";
 import { Profile } from "../types/profile";
-const isDeletedRef = useRef(false);
 
 const IssueDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +33,9 @@ const IssueDetail = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const isDeletedRef = useRef(false);
 
   // 1. ČÁST: Načtení dat (Text + Profil)
   const loadIssueData = useCallback(async () => {
@@ -143,15 +147,15 @@ const IssueDetail = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "#1953ff";
+        return "hsl(217, 91%, 60%)";
       case "in_progress":
-        return "#FF9500";
+        return "hsl(38, 92%, 50%)";
       case "resolved":
-        return "#34C759";
+        return "hsl(142, 71%, 45%)";
       case "cancelled":
-        return "#FF3B30";
+        return "hsl(0, 84%, 60%)";
       default:
-        return "#999";
+        return "hsl(240, 5%, 64.9%)";
     }
   };
 
@@ -213,21 +217,7 @@ const IssueDetail = () => {
   };
 
   const handleDeleteIssue = () => {
-    Alert.alert(
-      "Smazat závadu",
-      "Opravdu chcete smazat tuto závadu? Tato akce je nevratná.",
-      [
-        {
-          text: "Zrušit",
-          style: "cancel",
-        },
-        {
-          text: "Smazat",
-          style: "destructive",
-          onPress: deleteIssue,
-        },
-      ],
-    );
+    setDeleteDialogOpen(true);
   };
 
   const deleteIssue = async () => {
@@ -265,152 +255,161 @@ const IssueDetail = () => {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
       </View>
     );
   }
 
   if (!issue) {
     return (
-      <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>Závada nebyla nalezena</Text>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Zpět</Text>
-        </TouchableOpacity>
+      <View className="flex-1 justify-center items-center bg-background">
+        <Text className="text-base text-muted-foreground mb-5">
+          Závada nebyla nalezena
+        </Text>
+        <Button onPress={() => router.back()}>
+          <Text className="text-primary-foreground font-semibold">Zpět</Text>
+        </Button>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        {/* Status Badge a tlačítka */}
-        <View style={styles.statusRow}>
+    <ScrollView className="flex-1 bg-background">
+      <View className="p-5">
+        {/* Název závady + Status Badge */}
+        <View className="flex-row items-center justify-between mb-5">
+          <Text className="text-3xl font-bold text-foreground flex-1 mr-3">
+            {issue.title}
+          </Text>
           <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(issue.status) },
-            ]}
+            className="px-4 py-2 rounded-full"
+            style={{ backgroundColor: getStatusColor(issue.status) }}
           >
-            <Text style={styles.statusText}>{getStatusText(issue.status)}</Text>
-          </View>
-
-          <View style={styles.actionButtons}>
-            {userRole === "najemce" && (
-              <>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => router.push(`/issue-edit?id=${issue.id}`)}
-                  disabled={isDeleting}
-                >
-                  <Ionicons name="pencil" size={18} color="#007AFF" />
-                  <Text style={styles.editButtonText}>Upravit</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={handleDeleteIssue}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? (
-                    <ActivityIndicator size="small" color="#FF3B30" />
-                  ) : (
-                    <>
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color="#FF3B30"
-                      />
-                      <Text style={styles.deleteButtonText}>Smazat</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </>
-            )}
-
-            {userRole === "pronajimatel" && (
-              <TouchableOpacity
-                style={styles.changeStatusButton}
-                onPress={handleChangeStatus}
-                disabled={isUpdatingStatus}
-              >
-                {isUpdatingStatus ? (
-                  <ActivityIndicator size="small" color="#007AFF" />
-                ) : (
-                  <>
-                    <Ionicons
-                      name="swap-horizontal"
-                      size={18}
-                      color="#007AFF"
-                    />
-                    <Text style={styles.changeStatusText}>Změnit stav</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
+            <Text className="text-white text-sm font-semibold">
+              {getStatusText(issue.status)}
+            </Text>
           </View>
         </View>
 
-        {/* Název závady */}
-        <Text style={styles.issueTitle}>{issue.title}</Text>
-
         {/* Obrázek */}
         {imageUri && (
-          <TouchableOpacity
+          <Pressable
             onPress={() => setViewerVisible(true)}
-            activeOpacity={0.8}
-            style={styles.imageContainer}
+            className="mb-6 rounded-xl overflow-hidden"
           >
-            <Image source={{ uri: imageUri }} style={styles.image} />
-          </TouchableOpacity>
+            <Image
+              source={{ uri: imageUri }}
+              className="w-full h-72 bg-muted"
+            />
+          </Pressable>
         )}
 
         {/* Popis */}
         {issue.description && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Popis</Text>
-            <Text style={styles.descriptionText}>{issue.description}</Text>
-          </View>
+          <Card className="mb-4">
+            <CardContent className="px-4">
+              <Text className="text-base font-semibold text-foreground mb-2">
+                Popis:
+              </Text>
+              <Text className="text-base text-muted-foreground leading-6">
+                {issue.description}
+              </Text>
+            </CardContent>
+          </Card>
         )}
 
         {/* Informace */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Informace</Text>
+        <Card className="mb-4">
+          <CardContent className="px-4">
+            <Text className="text-base font-semibold text-foreground mb-3">
+              Informace
+            </Text>
 
-          <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={20} color="#666" />
-            <View style={styles.infoTextContainer}>
-              <Text style={styles.infoLabel}>Vytvořena</Text>
-              <Text style={styles.infoValue}>
-                {formatDate(issue.created_at)}
-              </Text>
-            </View>
-          </View>
-
-          {profile && (
-            <View style={styles.infoRow}>
-              <Ionicons name="person-outline" size={20} color="#666" />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Nahlásil</Text>
-                <Text style={styles.infoValue}>
-                  {profile.name} {profile.surname}
+            <View className="flex-row items-center mb-3">
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                className="text-muted-foreground"
+              />
+              <View className="ml-3 flex-1">
+                <Text className="text-xs text-muted-foreground mb-0.5">
+                  Vytvořena
+                </Text>
+                <Text className="text-base text-foreground font-medium">
+                  {formatDate(issue.created_at)}
                 </Text>
               </View>
             </View>
-          )}
-        </View>
 
-        {/* Tlačítko zpět */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Zpět na seznam</Text>
-        </TouchableOpacity>
+            {profile && (
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="person-outline"
+                  size={20}
+                  className="text-muted-foreground"
+                />
+                <View className="ml-3 flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Nahlásil
+                  </Text>
+                  <Text className="text-base text-foreground font-medium">
+                    {profile.name} {profile.surname}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tlačítka */}
+        {userRole === "najemce" && issue.status === "new" && (
+          <View className="gap-3 mt-2">
+            <Button
+              onPress={() => router.push(`/issue-edit?id=${issue.id}`)}
+              disabled={isDeleting}
+              className="w-full"
+            >
+              <Text>Upravit závadu</Text>
+            </Button>
+
+            <Button
+              variant="destructive"
+              onPress={handleDeleteIssue}
+              disabled={isDeleting}
+              className="w-full"
+            >
+              {isDeleting ? (
+                <ActivityIndicator className="text-primary-foreground" />
+              ) : (
+                <Text>Smazat závadu</Text>
+              )}
+            </Button>
+          </View>
+        )}
+
+        {userRole === "pronajimatel" && (
+          <Button
+            onPress={handleChangeStatus}
+            disabled={isUpdatingStatus}
+            className="w-full mt-2"
+          >
+            {isUpdatingStatus ? (
+              <ActivityIndicator className="text-primary-foreground" />
+            ) : (
+              <View className="flex-row items-center gap-2">
+                <Ionicons
+                  name="swap-horizontal"
+                  size={18}
+                  className="text-primary-foreground"
+                />
+                <Text className="text-base font-semibold text-primary-foreground">
+                  Změnit stav
+                </Text>
+              </View>
+            )}
+          </Button>
+        )}
       </View>
 
       <DocumentViewerModal
@@ -419,179 +418,18 @@ const IssueDetail = () => {
         imageUri={imageUri}
         fileName={issue.title}
       />
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Smazat závadu"
+        description="Opravdu chcete smazat tuto závadu? Tato akce je nevratná."
+        actionText="Smazat"
+        onAction={deleteIssue}
+        destructive
+      />
     </ScrollView>
   );
 };
 
 export default IssueDetail;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  centered: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  backIconButton: {
-    marginRight: 15,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    flex: 1,
-  },
-  content: {
-    padding: 20,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  statusBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  editButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#007AFF",
-    backgroundColor: "#F0F8FF",
-  },
-  editButtonText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "600",
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FF3B30",
-    backgroundColor: "#FFF0F0",
-  },
-  deleteButtonText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: "#FF3B30",
-    fontWeight: "600",
-  },
-  changeStatusButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#007AFF",
-    backgroundColor: "#F0F8FF",
-  },
-  changeStatusText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "600",
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  issueTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
-  },
-  imageContainer: {
-    marginBottom: 24,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  image: {
-    width: "100%",
-    height: 300,
-    backgroundColor: "#f0f0f0",
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
-  },
-  descriptionText: {
-    fontSize: 16,
-    color: "#666",
-    lineHeight: 24,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-  },
-  infoTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 2,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  infoEmail: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 2,
-  },
-  backButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  backButtonText: {
-    color: "#007AFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

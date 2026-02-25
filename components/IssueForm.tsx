@@ -1,13 +1,9 @@
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, Image, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import React, { useState, useEffect } from "react";
 import { router } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -196,208 +192,126 @@ export const IssueForm: React.FC<IssueFormProps> = ({
     <KeyboardAwareScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       enableOnAndroid={true}
-      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
-      style={styles.container}
+      extraScrollHeight={20}
     >
-      <Text style={styles.title}>
-        {isEditMode ? "Upravit závadu" : "Nahlásit závadu"}
-      </Text>
+      <View className="flex-1 p-5 bg-background">
+        <Card>
+          <CardContent className="px-5">
+            <Label nativeID="title" className="mb-2">
+              Název závady *
+            </Label>
+            <Input
+              aria-labelledby="title"
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Např. Nefunguje topení"
+              className="mb-5"
+            />
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Název závady *</Text>
-        <TextInput
-          style={styles.input}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Např. Nefunguje topení"
-          placeholderTextColor="#999"
-        />
+            <Label nativeID="description" className="mb-2">
+              Popis (volitelné)
+            </Label>
+            <Input
+              aria-labelledby="description"
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Popište problém..."
+              multiline
+              numberOfLines={4}
+              className="mb-5 h-24"
+              style={{ textAlignVertical: "top" }}
+            />
 
-        <Text style={styles.label}>Popis</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Popište problém..."
-          placeholderTextColor="#999"
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-        />
-
-        <Text style={styles.label}>Fotografie (volitelné)</Text>
-        <View style={styles.imageSection}>
-          {imageUri ? (
-            <View style={styles.imagePreview}>
-              <TouchableOpacity
-                onPress={() => setViewerVisible(true)}
-                activeOpacity={0.8}
-                style={{ width: "100%" }}
-              >
-                <Image source={{ uri: imageUri }} style={styles.image} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => setImageUri(null)}
-              >
-                <Ionicons name="close-circle" size={32} color="#FF3B30" />
-              </TouchableOpacity>
+            <Label nativeID="photo" className="mb-4 mt-2">
+              Fotografie (volitelné)
+            </Label>
+            <View className="mb-5">
+              {imageUri ? (
+                <Card className="bg-input">
+                  <CardContent className="p-3">
+                    <Pressable
+                      onPress={() => setViewerVisible(true)}
+                      className="w-full mb-3"
+                    >
+                      <Image
+                        source={{ uri: imageUri }}
+                        className="w-full h-64 rounded-lg bg-background"
+                      />
+                    </Pressable>
+                    <Pressable
+                      className="absolute top-2 right-2 bg-input rounded-full"
+                      onPress={() => setImageUri(null)}
+                    >
+                      <Ionicons
+                        name="close-circle"
+                        size={32}
+                        className="text-destructive"
+                      />
+                    </Pressable>
+                  </CardContent>
+                </Card>
+              ) : (
+                <View className="flex-row justify-between">
+                  <Pressable
+                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center bg-secondary active:opacity-60"
+                    onPress={handleTakePhoto}
+                  >
+                    <Ionicons
+                      name="camera"
+                      size={32}
+                      className="text-primary"
+                    />
+                    <Text className="mt-2 text-base text-primary font-semibold">
+                      Vyfotit
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center bg-secondary active:opacity-60"
+                    onPress={handlePickImage}
+                  >
+                    <Ionicons
+                      name="images"
+                      size={32}
+                      className="text-primary"
+                    />
+                    <Text className="mt-2 text-base text-primary font-semibold">
+                      Z galerie
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
             </View>
-          ) : (
-            <View style={styles.imageButtons}>
-              <TouchableOpacity
-                style={styles.imageButton}
-                onPress={handleTakePhoto}
-              >
-                <Ionicons name="camera" size={32} color="#007AFF" />
-                <Text style={styles.imageButtonText}>Vyfotit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.imageButton}
-                onPress={handlePickImage}
-              >
-                <Ionicons name="images" size={32} color="#007AFF" />
-                <Text style={styles.imageButtonText}>Z galerie</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
 
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isUploading && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={isUploading}
-        >
-          {isUploading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.submitButtonText}>
-              {isEditMode ? "Uložit změny" : "Odeslat"}
-            </Text>
-          )}
-        </TouchableOpacity>
+            <Button
+              onPress={handleSubmit}
+              disabled={isUploading}
+              className="mb-3 bg-primary"
+            >
+              {isUploading ? (
+                <ActivityIndicator className="text-foreground" />
+              ) : (
+                <Text>{isEditMode ? "Uložit změny" : "Odeslat"}</Text>
+              )}
+            </Button>
 
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => router.back()}
-          disabled={isUploading}
-        >
-          <Text style={styles.cancelButtonText}>Zrušit</Text>
-        </TouchableOpacity>
+            <Button
+              variant="outline"
+              onPress={() => router.back()}
+              disabled={isUploading}
+              className="mt-2"
+            >
+              <Text>Zrušit</Text>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <DocumentViewerModal
+          visible={viewerVisible}
+          onClose={() => setViewerVisible(false)}
+          imageUri={imageUri}
+          fileName="Náhled fotografie"
+        />
       </View>
-
-      <DocumentViewerModal
-        visible={viewerVisible}
-        onClose={() => setViewerVisible(false)}
-        imageUri={imageUri}
-        fileName="Náhled fotografie"
-      />
     </KeyboardAwareScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-    marginTop: 20,
-  },
-  form: {
-    padding: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: "#fff",
-  },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 12,
-  },
-  imageSection: {
-    marginBottom: 20,
-  },
-  imageButtons: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
-  },
-  imageButton: {
-    width: "48%",
-    borderWidth: 2,
-    borderColor: "#007AFF",
-    borderRadius: 8,
-    padding: 20,
-    alignItems: "center",
-    backgroundColor: "#F0F8FF",
-  },
-  imageButtonText: {
-    marginTop: 8,
-    fontSize: 16,
-    color: "#007AFF",
-    fontWeight: "600",
-  },
-  imagePreview: {
-    position: "relative",
-    alignItems: "center",
-  },
-  image: {
-    width: "100%",
-    height: 250,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-  },
-  submitButton: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  submitButtonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  cancelButton: {
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#007AFF",
-  },
-  cancelButtonText: {
-    color: "#007AFF",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-});

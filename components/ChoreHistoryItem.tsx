@@ -14,8 +14,8 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
   const completedDate = item.completed_at ? new Date(item.completed_at) : null;
 
   return (
-    <Card className={item.is_done ? "border-l-4 border-l-green-600" : ""}>
-      <CardContent className="p-3">
+    <Card>
+      <CardContent className="px-3">
         <View className="flex-row justify-between items-center mb-2">
           <View className="flex-1">
             <Text className="text-sm font-semibold text-foreground">

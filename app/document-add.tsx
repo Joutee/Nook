@@ -184,7 +184,7 @@ const DocumentAdd = () => {
                       </Text>
                     </View>
                     <Pressable
-                      className="absolute top-2 right-2 bg-background rounded-full"
+                      className="absolute top-2 right-2 bg-input rounded-full"
                       onPress={() => setFile(null)}
                     >
                       <Ionicons

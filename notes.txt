@@ -1,11 +1,11 @@
 TODO:
-nakonec to projit i ve white modu a zkontrolovat
 je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny updat takze si muze zmenit is_admin
 Keys
 OCR
 
 reset password
 email change
+name change
 
 pridat padding ze strany na scroll views na takovych tech edit create strankach hlavne
 chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se pritahl z db

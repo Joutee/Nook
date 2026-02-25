@@ -3,13 +3,13 @@ import {
   ScrollView,
   ActivityIndicator,
   Pressable,
-  Alert,
   Linking,
 } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -27,6 +27,12 @@ const documents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
+    document_path: string;
+    name: string;
+  } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<{
+    id: string;
     document_path: string;
     name: string;
   } | null>(null);
@@ -102,46 +108,37 @@ const documents = () => {
     }
   };
 
-  const handleDeleteDocument = async (
+  const handleDeleteDocument = (
     id: string,
     document_path: string,
     name: string,
   ) => {
-    Alert.alert(
-      "Smazat dokument",
-      `Opravdu chcete smazat dokument "${name}"?`,
-      [
-        {
-          text: "Zrušit",
-          style: "cancel",
-        },
-        {
-          text: "Smazat",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFile({
-                bucket: "documents",
-                path: document_path,
-                tableName: "documents",
-                recordId: id,
-              });
+    setDocumentToDelete({ id, document_path, name });
+    setDeleteDialogOpen(true);
+  };
 
-              showToast("Dokument smazán", "success");
-              loadDocuments(); // Refresh seznamu
-            } catch (error: any) {
-              showToast("Chyba při mazání: " + error.message, "error");
-              console.error(error);
-            }
-          },
-        },
-      ],
-    );
+  const confirmDelete = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      await deleteFile({
+        bucket: "documents",
+        path: documentToDelete.document_path,
+        tableName: "documents",
+        recordId: documentToDelete.id,
+      });
+
+      showToast("Dokument smazán", "success");
+      loadDocuments();
+    } catch (error: any) {
+      showToast("Chyba při mazání: " + error.message, "error");
+      console.error(error);
+    }
   };
 
   const renderDocument = (item: Document) => (
-    <Card key={item.id} className="mb-3 py-1">
-      <CardContent className="flex-row items-center p-2 gap-3">
+    <Card key={item.id} className="mb-3">
+      <CardContent className="flex-row items-center px-3 gap-3">
         {/* Ikona dokumentu */}
         <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
           <Ionicons
@@ -254,6 +251,16 @@ const documents = () => {
         onClose={() => setViewerVisible(false)}
         filePath={selectedDocument?.document_path || null}
         fileName={selectedDocument?.name}
+      />
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Smazat dokument"
+        description={`Opravdu chcete smazat dokument "${documentToDelete?.name}"?`}
+        actionText="Smazat"
+        onAction={confirmDelete}
+        destructive
       />
     </View>
   );

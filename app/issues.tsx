@@ -1,12 +1,6 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  FlatList,
-  ActivityIndicator,
-  Image,
-} from "react-native";
-import { Text } from "@/components/ui/text"
+import { View, ActivityIndicator, Pressable, ScrollView } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../utils/supabase";
@@ -58,15 +52,15 @@ const Issues = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "#1953ff";
+        return "hsl(217, 91%, 60%)";
       case "in_progress":
-        return "#FF9500";
+        return "hsl(38, 92%, 50%)";
       case "resolved":
-        return "#34C759";
+        return "hsl(142, 71%, 45%)";
       case "cancelled":
-        return "#FF3B30";
+        return "hsl(0, 84%, 60%)";
       default:
-        return "#999";
+        return "hsl(240, 5%, 64.9%)";
     }
   };
 
@@ -85,147 +79,94 @@ const Issues = () => {
     }
   };
 
-  const renderIssue = ({ item }: { item: Issue }) => (
-    <View style={styles.issueItem}>
-      <TouchableOpacity
-        onPress={() => router.push(`/issue-detail?id=${item.id}`)}
-      >
-        <View style={styles.issueHeader}>
-          <Text style={styles.issueTitle}>{item.title}</Text>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(item.status) },
-            ]}
-          >
-            <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+  const renderIssue = (item: Issue) => (
+    <Card key={item.id} className="mb-3 ">
+      <Pressable onPress={() => router.push(`/issue-detail?id=${item.id}`)}>
+        <CardContent className="px-4">
+          <View className="flex-row justify-between items-start mb-2">
+            <Text className="text-lg font-semibold text-foreground flex-1 mr-2">
+              {item.title}
+            </Text>
+            <View
+              className="px-3 py-1 rounded-full"
+              style={{ backgroundColor: getStatusColor(item.status) }}
+            >
+              <Text className="text-white text-xs font-semibold">
+                {getStatusText(item.status)}
+              </Text>
+            </View>
           </View>
-        </View>
-        {item.description && (
-          <Text style={styles.issueDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-        <View style={styles.issueFooter}>
-          <Text style={styles.issueDate}>
-            Vytvořena: {formatDate(item.created_at)}
-          </Text>
-          {item.image_path && (
-            <Ionicons name="image-outline" size={16} color="#666" />
+          {item.description && (
+            <Text
+              className="text-sm text-muted-foreground mb-2"
+              numberOfLines={2}
+            >
+              {item.description}
+            </Text>
           )}
-        </View>
-      </TouchableOpacity>
-    </View>
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center gap-1">
+              <Ionicons
+                name="calendar-outline"
+                size={12}
+                className="text-muted-foreground"
+              />
+              <Text className="text-xs text-muted-foreground w-6/12">
+                {formatDate(item.created_at)}
+              </Text>
+            </View>
+            {item.image_path && (
+              <Ionicons
+                name="image-outline"
+                size={16}
+                className="text-muted-foreground"
+              />
+            )}
+          </View>
+        </CardContent>
+      </Pressable>
+    </Card>
   );
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Závady</Text>
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" className="text-primary" />
+      </View>
+    );
+  }
 
+  return (
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1 p-4">
+        <Text className="text-3xl font-bold text-foreground mb-4">Závady</Text>
+        {issues.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="warning-outline"
+              size={64}
+              className="text-muted-foreground"
+            />
+            <Text className="text-base text-muted-foreground mt-4 text-center w-full">
+              Žádné závady
+            </Text>
+          </View>
+        ) : (
+          <>{issues.map(renderIssue)}</>
+        )}
+      </ScrollView>
+
+      {/* Floating Action Button pro nájemce */}
       {userRole === "najemce" && (
-        <TouchableOpacity
-          style={styles.addButton}
+        <Pressable
+          className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
           onPress={() => router.push("/issue-create")}
         >
-          <Text style={styles.addButtonText}>+ Nahlásit závadu</Text>
-        </TouchableOpacity>
-      )}
-
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-      ) : issues.length === 0 ? (
-        <Text style={styles.emptyText}>Žádné závady</Text>
-      ) : (
-        <FlatList
-          data={issues}
-          renderItem={renderIssue}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-        />
+          <Ionicons name="add" size={28} className="text-primary-foreground" />
+        </Pressable>
       )}
     </View>
   );
 };
 
 export default Issues;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-  },
-  addButton: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  loader: {
-    marginTop: 40,
-  },
-  emptyText: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "#666",
-    marginTop: 40,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  issueItem: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    marginBottom: 12,
-    padding: 16,
-  },
-  issueHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  issueTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    flex: 1,
-    marginRight: 8,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  issueDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  issueFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  issueDate: {
-    fontSize: 12,
-    color: "#999",
-  },
-});

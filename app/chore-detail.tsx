@@ -3,6 +3,7 @@ import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import { ChoreHistoryItem } from "@/components/ChoreHistoryItem";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,8 @@ const ChoreDetail = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [completingChore, setCompletingChore] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -116,6 +119,32 @@ const ChoreDetail = () => {
       showToast("Nepodařilo se označit jako hotové: " + error.message, "error");
     } finally {
       setCompletingChore(false);
+    }
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!id) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.from("chores").delete().eq("id", id);
+
+      if (error) {
+        showToast("Nepodařilo se smazat úkol: " + error.message, "error");
+      } else {
+        showToast("Úkol byl smazán", "success");
+        router.replace("/chores");
+      }
+    } catch (error: any) {
+      console.error("Error deleting chore:", error);
+      showToast("Nepodařilo se smazat úkol: " + error.message, "error");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -222,35 +251,55 @@ const ChoreDetail = () => {
 
           <Separator className="my-4" />
 
-          <View className="flex-row gap-3">
-            <Button
-              variant="outline"
-              className="flex-1 flex-row gap-2"
-              onPress={() => router.push(`/chore-edit?id=${chore.id}`)}
-            >
-              <Ionicons
-                name="pencil-outline"
-                size={20}
-                className="text-primary"
-              />
-              <Text className="text-primary font-semibold">Upravit</Text>
-            </Button>
+          <View className="gap-3">
+            <View className="flex-row gap-3">
+              <Button
+                variant="secondary"
+                className="flex-1 flex-row gap-2"
+                onPress={() => router.push(`/chore-edit?id=${chore.id}`)}
+                disabled={isDeleting}
+              >
+                <Text>Upravit</Text>
+              </Button>
 
+              <Button
+                variant="destructive"
+                className="flex-1 flex-row gap-3"
+                onPress={handleDelete}
+                disabled={isDeleting || completingChore}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator
+                    size="small"
+                    className="text-primary-foreground"
+                  />
+                ) : (
+                  <>
+                    <Text>Smazat úkol</Text>
+                  </>
+                )}
+              </Button>
+            </View>
             {isMyTurn && !isCompleted && (
               <Button
                 variant="default"
                 className="flex-1 flex-row gap-2"
                 onPress={handleCompleteChore}
-                disabled={completingChore}
+                disabled={completingChore || isDeleting}
               >
                 {completingChore ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator
+                    size="small"
+                    className="text-primary-foreground"
+                  />
                 ) : (
                   <>
-                    <Ionicons name="checkmark-circle" size={22} color="#fff" />
-                    <Text className="text-primary-foreground font-semibold">
-                      Splnit
-                    </Text>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={22}
+                      className="text-primary-foreground"
+                    />
+                    <Text>Splnit</Text>
                   </>
                 )}
               </Button>
@@ -303,6 +352,17 @@ const ChoreDetail = () => {
           </View>
         )}
       </View>
+
+      <AlertDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Smazat úkol"
+        description="Opravdu chcete smazat tento úkol? Tuto akci nelze vrátit zpět."
+        cancelText="Zrušit"
+        actionText="Smazat"
+        onAction={confirmDelete}
+        destructive
+      />
     </ScrollView>
   );
 };

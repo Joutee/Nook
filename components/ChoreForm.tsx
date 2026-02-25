@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,8 +45,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     initialData?.startDate || new Date(),
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>(
     initialData?.selectedMembers || [],
@@ -266,36 +263,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     }
   };
 
-  const handleDelete = () => {
-    setShowDeleteDialog(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!choreId) return;
-
-    setIsDeleting(true);
-    try {
-      // Delete chore (assignments and completions will be deleted automatically due to CASCADE)
-      const { error } = await supabase
-        .from("chores")
-        .delete()
-        .eq("id", choreId);
-
-      if (error) {
-        showToast("Nepodařilo se smazat úkol: " + error.message, "error");
-      } else {
-        showToast("Úkol byl smazán", "success");
-        router.replace("/chores");
-      }
-    } catch (error: any) {
-      console.error("Error deleting chore:", error);
-      showToast("Nepodařilo se smazat úkol: " + error.message, "error");
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
-    }
-  };
-
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={{ flexGrow: 1, paddingTop: 10, paddingBottom: 10 }}
@@ -359,26 +326,10 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
           {/* Bottom Actions */}
           <View className="flex-col gap-3">
-            {mode === "edit" && choreId && (
-              <Button
-                variant="destructive"
-                onPress={handleDelete}
-                disabled={isDeleting || isLoading}
-                className="flex-row gap-2"
-              >
-                {isDeleting ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <>
-                    <Text>Smazat úkol</Text>
-                  </>
-                )}
-              </Button>
-            )}
             <Button
               className="flex-1"
               onPress={handleSubmit}
-              disabled={isLoading || isDeleting}
+              disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#fff" />
@@ -390,27 +341,13 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
               variant="secondary"
               className="flex-1"
               onPress={() => router.back()}
-              disabled={isLoading || isDeleting}
+              disabled={isLoading}
             >
               <Text>Zrušit</Text>
             </Button>
-
-            {/* Delete Button (only in edit mode) */}
           </View>
         </CardContent>
       </Card>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title="Smazat úkol"
-        description="Opravdu chcete smazat tento úkol? Tuto akci nelze vrátit zpět."
-        cancelText="Zrušit"
-        actionText="Smazat"
-        onAction={confirmDelete}
-        destructive
-      />
     </KeyboardAwareScrollView>
   );
 };
