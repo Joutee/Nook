@@ -25,9 +25,26 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   //useEffect(() => {console.log(isLoading)}, [isLoading]);
 
   useEffect(() => {
-    const onSignInPage = segments[0] === "login" || segments[0] === "register";
+    console.log("=== LAYOUT USEEFFECT ===", {
+      segment: segments[0],
+      hasSession: !!session,
+      isLoading,
+      hasFlat,
+      hasRole,
+    });
+
+    const onSignInPage =
+      segments[0] === "login" ||
+      segments[0] === "register" ||
+      segments[0] === "forgot-password";
+
+    const onResetPasswordPage = segments[0] === "reset-password";
+    if (onResetPasswordPage) {
+      return;
+    }
 
     // Není přihlášený -> redirect na login
+
     if (!session && !onSignInPage) {
       router.replace("/login");
       console.log("redirect to login");
@@ -59,7 +76,8 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
       (onJoinFlatPage || onSelectRolePage || onSignInPage)
     ) {
       console.log("redirect to home");
-      router.replace("/");
+      // Použít push místo replace aby se předešlo problémům s navigací
+      setTimeout(() => router.replace("/"), 0);
       return;
     }
   }, [session, segments, isLoading, hasFlat, hasRole]);
@@ -119,6 +137,18 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen
           name="register"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="forgot-password"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="reset-password"
           options={{
             headerShown: false,
           }}

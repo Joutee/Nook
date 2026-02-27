@@ -30,9 +30,6 @@ export default function Login() {
   const passwordInputRef = useRef<TextInput>(null);
   const { colorScheme } = useColorScheme();
 
-  const iconColor =
-    colorScheme === "dark" ? "hsl(0, 0%, 98%)" : "hsl(0, 0%, 3.9%)";
-
   function onEmailSubmitEditing() {
     passwordInputRef.current?.focus();
   }
@@ -90,7 +87,7 @@ export default function Login() {
                     size="sm"
                     className="h-auto p-0"
                     onPress={() => {
-                      // TODO: Navigate to forgot password screen
+                      router.push("/forgot-password");
                     }}
                   >
                     <Text className="text-xs text-primary">
@@ -118,7 +115,7 @@ export default function Login() {
                     <Ionicons
                       name={showPassword ? "eye-off-outline" : "eye-outline"}
                       size={20}
-                      color="hsl(240, 5%, 64.9%)"
+                      className="text-muted-foreground"
                     />
                   </Pressable>
                 </View>
@@ -134,7 +131,7 @@ export default function Login() {
             </View>
 
             <Button
-              variant="ghost"
+              variant="secondary"
               className="w-full"
               onPress={() => router.push("/register")}
             >
@@ -156,7 +153,11 @@ export default function Login() {
                 // TODO: Implement Google OAuth
               }}
             >
-              <Ionicons name="logo-google" size={20} color={iconColor} />
+              <Ionicons
+                name="logo-google"
+                size={20}
+                className="text-foreground"
+              />
               <Text>Pokračovat s Google</Text>
             </Button>
           </CardContent>

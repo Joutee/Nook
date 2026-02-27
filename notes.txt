@@ -1,9 +1,10 @@
 TODO:
-je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny updat takze si muze zmenit is_admin
+je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny update takze si muze zmenit is_admin
 Keys
 OCR
 
-reset password
+prestylovat toaster
+reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
 email change
 name change
 
