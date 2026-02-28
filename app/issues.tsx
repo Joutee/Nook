@@ -8,6 +8,7 @@ import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Issue } from "../types/issues";
+import { getStatusColor, getStatusText } from "../utils/issueUtils";
 
 const Issues = () => {
   const { currentFlat, userRole } = useFlatContext();
@@ -47,36 +48,6 @@ const Issues = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("cs-CZ");
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "hsl(217, 91%, 60%)";
-      case "in_progress":
-        return "hsl(38, 92%, 50%)";
-      case "resolved":
-        return "hsl(142, 71%, 45%)";
-      case "cancelled":
-        return "hsl(0, 84%, 60%)";
-      default:
-        return "hsl(240, 5%, 64.9%)";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "new":
-        return "Nová";
-      case "in_progress":
-        return "Řeší se";
-      case "resolved":
-        return "Vyřešená";
-      case "cancelled":
-        return "Zrušená";
-      default:
-        return status;
-    }
   };
 
   const renderIssue = (item: Issue) => (

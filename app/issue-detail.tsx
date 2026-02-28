@@ -19,6 +19,7 @@ import DocumentViewerModal from "../components/DocumentViewerModal";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Issue } from "../types/issues";
 import { Profile } from "../types/profile";
+import { getStatusColor, getStatusText } from "../utils/issueUtils";
 
 const IssueDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -142,36 +143,6 @@ const IssueDetail = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "hsl(217, 91%, 60%)";
-      case "in_progress":
-        return "hsl(38, 92%, 50%)";
-      case "resolved":
-        return "hsl(142, 71%, 45%)";
-      case "cancelled":
-        return "hsl(0, 84%, 60%)";
-      default:
-        return "hsl(240, 5%, 64.9%)";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "new":
-        return "Nová";
-      case "in_progress":
-        return "Řeší se";
-      case "resolved":
-        return "Vyřešená";
-      case "cancelled":
-        return "Zrušená";
-      default:
-        return status;
-    }
   };
 
   // --- Logika změny stavu ---
