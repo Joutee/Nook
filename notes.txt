@@ -3,6 +3,9 @@ je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze
 Keys
 OCR
 
+udelat modularni homescreenu s widgety
+na home screen by davalo smysl dat moznost dat nejakou dlazdici neco jako moje byty a mohl bych se tak pripojit do jineho bytu
+
 prestylovat toaster
 reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
 email change
@@ -30,3 +33,6 @@ nejake misto kam ulozit bankovni ucet kazdeho uzivatele a moznost pak zobrazeni 
 featury do budoucna:
 nejake kontrola pro pronajimatele jestli byl zaplacen najem, mozna nejak napojeni na bankovni ucet
 ruzne notifikace pro najemci i pronajimatele
+
+https://resend.com/emails
+https://www.name.com/account/domain/details/nookapp.dev/emailforwarding
