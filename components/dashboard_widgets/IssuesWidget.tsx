@@ -4,10 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../utils/supabase";
+import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { Issue } from "../../types/issues";
-import { getStatusColor, getStatusText } from "../../utils/issueUtils";
+import { getStatusColor, getStatusText } from "../../lib/issueUtils";
 import { Separator } from "../ui/separator";
 
 export const IssuesWidget = () => {

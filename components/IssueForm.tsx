@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState, useEffect } from "react";
 import { router } from "expo-router";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,7 +15,7 @@ import {
   takePhoto,
   pickGalleryPhoto,
   uploadFile,
-} from "../utils/fileService";
+} from "../lib/fileService";
 import DocumentViewerModal from "./DocumentViewerModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 

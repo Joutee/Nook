@@ -11,7 +11,7 @@ import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons"; // Pro křížek na zavření
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 
 type Props = {
   visible: boolean;

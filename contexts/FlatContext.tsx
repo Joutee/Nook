@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { Flat } from "../types/flat";
 import AsyncStorage from "@react-native-async-storage/async-storage";

@@ -4,7 +4,7 @@ import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import NavBar from "../components/NavBar";
 import TopBar from "../components/TopBar";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { FlatProvider, useFlatContext } from "../contexts/FlatContext";
 import { ToastProvider } from "../contexts/ToastContext";

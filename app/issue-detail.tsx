@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +19,7 @@ import DocumentViewerModal from "../components/DocumentViewerModal";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Issue } from "../types/issues";
 import { Profile } from "../types/profile";
-import { getStatusColor, getStatusText } from "../utils/issueUtils";
+import { getStatusColor, getStatusText } from "../lib/issueUtils";
 
 const IssueDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();

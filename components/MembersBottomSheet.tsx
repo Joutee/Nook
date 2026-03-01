@@ -11,7 +11,7 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Ionicons } from "@expo/vector-icons";
 import { AlertDialog } from "@/components/ui/alert-dialog";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";

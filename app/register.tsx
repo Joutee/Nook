@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
-import { supabase } from "../utils/supabase";
-import { getErrorMessage } from "../utils/errorTranslations";
+import { supabase } from "../lib/supabase";
+import { getErrorMessage } from "../lib/errorTranslations";
 import { View, TextInput, ScrollView, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import MembersBottomSheet from "../components/MembersBottomSheet";

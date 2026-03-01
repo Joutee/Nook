@@ -11,7 +11,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";

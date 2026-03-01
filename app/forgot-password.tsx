@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "../utils/supabase";
-import { getErrorMessage } from "../utils/errorTranslations";
+import { supabase } from "../lib/supabase";
+import { getErrorMessage } from "../lib/errorTranslations";
 import { useRouter } from "expo-router";
 import { useToast } from "../contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";

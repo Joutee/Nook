@@ -8,7 +8,7 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { Profile } from "../types/profile";

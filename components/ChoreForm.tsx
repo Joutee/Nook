@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { DatePickerInput } from "./DatePickerInput";

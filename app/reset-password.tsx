@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "../utils/supabase";
-import { getErrorMessage } from "../utils/errorTranslations";
+import { supabase } from "../lib/supabase";
+import { getErrorMessage } from "../lib/errorTranslations";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useToast } from "../contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -140,9 +140,7 @@ export default function ResetPassword() {
                     className="absolute right-3 top-0 bottom-0 justify-center"
                   >
                     <Ionicons
-                      name={
-                        showNewPassword ? "eye-off-outline" : "eye-outline"
-                      }
+                      name={showNewPassword ? "eye-off-outline" : "eye-outline"}
                       size={20}
                       className="text-muted-foreground"
                     />
@@ -166,16 +164,12 @@ export default function ResetPassword() {
                     onSubmitEditing={resetPassword}
                   />
                   <Pressable
-                    onPress={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-0 bottom-0 justify-center"
                   >
                     <Ionicons
                       name={
-                        showConfirmPassword
-                          ? "eye-off-outline"
-                          : "eye-outline"
+                        showConfirmPassword ? "eye-off-outline" : "eye-outline"
                       }
                       size={20}
                       className="text-muted-foreground"

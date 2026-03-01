@@ -1,17 +1,14 @@
 export const DEFAULT_WIDGETS = [
-  "chores_widget",
+  "my_chores_widget",
   "finance_widget",
-  "issues_widget",
-  "flats_widget",
-  "flat_members_widget",
-  "documents_widget",
+  "issues_widget"
 ];
 
 // Mapování klíčů na lidsky čitelné názvy
 export const WIDGET_NAMES: Record<string, string> = {
   finance_widget: "Přehled financí",
   issues_widget: "Poslední závady",
-  chores_widget: "Moje úkoly",
+  my_chores_widget: "Moje úkoly",
   flats_widget: "Moje byty",
   flat_members_widget: "Členové bytu",
   documents_widget: "Dokumenty",
@@ -21,7 +18,7 @@ export const WIDGET_NAMES: Record<string, string> = {
 export const WIDGET_ICONS: Record<string, any> = {
   finance_widget: "wallet-outline",
   issues_widget: "warning-outline",
-  chores_widget: "checkmark-circle-outline",
+  my_chores_widget: "checkmark-circle-outline",
   flats_widget: "home-outline",
   flat_members_widget: "people-outline",
   documents_widget: "folder-outline",
@@ -29,7 +26,7 @@ export const WIDGET_ICONS: Record<string, any> = {
 
 // Všechny dostupné widgety
 export const ALL_WIDGETS = [
-  "chores_widget",
+  "my_chores_widget",
   "finance_widget",
   "issues_widget",
   "flats_widget",

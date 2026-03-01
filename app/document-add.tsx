@@ -13,9 +13,9 @@ import {
   pickFile,
   uploadFile,
   compressImage,
-} from "../utils/fileService";
+} from "../lib/fileService";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 import DocumentViewerModal from "../components/DocumentViewerModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
