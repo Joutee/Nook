@@ -130,6 +130,12 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
         <Stack.Screen
+          name="reorder-widgets"
+          options={{
+            title: "Uspořádat widgety",
+          }}
+        />
+        <Stack.Screen
           name="login"
           options={{
             headerShown: false,

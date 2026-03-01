@@ -100,24 +100,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     }
   };
 
-  const moveMemberUp = (index: number) => {
-    if (index === 0) return;
-    const newOrder = [...selectedMembers];
-    [newOrder[index - 1], newOrder[index]] = [
-      newOrder[index],
-      newOrder[index - 1],
-    ];
-    setSelectedMembers(newOrder);
-  };
-
-  const moveMemberDown = (index: number) => {
-    if (index === selectedMembers.length - 1) return;
-    const newOrder = [...selectedMembers];
-    [newOrder[index], newOrder[index + 1]] = [
-      newOrder[index + 1],
-      newOrder[index],
-    ];
-    setSelectedMembers(newOrder);
+  const handleMemberReorder = (reorderedMembers: Member[]) => {
+    setSelectedMembers(reorderedMembers);
   };
 
   const validateForm = (): boolean => {
@@ -319,8 +303,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
             />
             <MemberOrderList
               members={selectedMembers}
-              onMoveUp={moveMemberUp}
-              onMoveDown={moveMemberDown}
+              onReorder={handleMemberReorder}
             />
           </View>
 

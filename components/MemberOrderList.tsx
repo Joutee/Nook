@@ -6,16 +6,34 @@ import { Member } from "../types/members";
 
 interface MemberOrderListProps {
   members: Member[];
-  onMoveUp: (index: number) => void;
-  onMoveDown: (index: number) => void;
+  onReorder: (members: Member[]) => void;
 }
 
 export const MemberOrderList: React.FC<MemberOrderListProps> = ({
   members,
-  onMoveUp,
-  onMoveDown,
+  onReorder,
 }) => {
   if (members.length === 0) return null;
+
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const newMembers = [...members];
+    [newMembers[index - 1], newMembers[index]] = [
+      newMembers[index],
+      newMembers[index - 1],
+    ];
+    onReorder(newMembers);
+  };
+
+  const moveDown = (index: number) => {
+    if (index === members.length - 1) return;
+    const newMembers = [...members];
+    [newMembers[index], newMembers[index + 1]] = [
+      newMembers[index + 1],
+      newMembers[index],
+    ];
+    onReorder(newMembers);
+  };
 
   return (
     <View className="mt-4 p-3 bg-subcard rounded-lg">
@@ -36,13 +54,13 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
                 {member.name.charAt(0).toUpperCase()}
               </Text>
             </View>
-            <Text className="text-sm text-foreground font-medium">
+            <Text className="text-sm text-foreground font-medium flex-1">
               {member.name} {member.surname}
             </Text>
           </View>
           <View className="flex-row gap-1">
             <Pressable
-              onPress={() => onMoveUp(index)}
+              onPress={() => moveUp(index)}
               disabled={index === 0}
               className="p-1"
             >
@@ -55,7 +73,7 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
               />
             </Pressable>
             <Pressable
-              onPress={() => onMoveDown(index)}
+              onPress={() => moveDown(index)}
               disabled={index === members.length - 1}
               className="p-1"
             >

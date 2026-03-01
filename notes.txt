@@ -33,6 +33,7 @@ nejake misto kam ulozit bankovni ucet kazdeho uzivatele a moznost pak zobrazeni 
 featury do budoucna:
 nejake kontrola pro pronajimatele jestli byl zaplacen najem, mozna nejak napojeni na bankovni ucet
 ruzne notifikace pro najemci i pronajimatele
+skenovani vice stranek dokumentu za sebou a vytvoreni pak pdf z toho
 
 https://resend.com/emails
 https://www.name.com/account/domain/details/nookapp.dev/emailforwarding
