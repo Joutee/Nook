@@ -10,7 +10,7 @@ import { Balance, Settlement } from "../../types/finance";
 import { calculateSettlements } from "../../lib/financeUtils";
 import { Pressable } from "react-native";
 
-export const FinanceWidget = () => {
+export const RepaymentWidget = () => {
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentFlat } = useFlatContext();
@@ -54,7 +54,7 @@ export const FinanceWidget = () => {
       <Pressable onPress={() => router.push("/finance")}>
         <CardHeader>
           <View className="flex-row items-center justify-between">
-            <CardTitle>Přehled financí</CardTitle>
+            <CardTitle>Vyrovnání dluhů</CardTitle>
             <Ionicons name="wallet-outline" size={24} color="#3b82f6" />
           </View>
         </CardHeader>

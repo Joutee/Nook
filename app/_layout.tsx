@@ -2,6 +2,7 @@ import { StyleSheet, View, TouchableOpacity, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import NavBar from "../components/NavBar";
 import TopBar from "../components/TopBar";
 import { supabase } from "../lib/supabase";
@@ -105,6 +106,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
 
   return (
     <View className="flex-1 bg-background">
+      <StatusBar style={isDark ? "light" : "dark"} />
       {showNavigation && <TopBar />}
       <Stack
         screenOptions={{

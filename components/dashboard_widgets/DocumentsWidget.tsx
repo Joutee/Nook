@@ -76,7 +76,7 @@ export const DocumentsWidget = () => {
         <CardHeader>
           <View className="flex-row items-center justify-between">
             <CardTitle>Dokumenty</CardTitle>
-            <Ionicons name="folder-outline" size={24} color="#6366f1" />
+            <Ionicons name="document-text-outline" size={24} color="#6366f1" />
           </View>
         </CardHeader>
         <CardContent>

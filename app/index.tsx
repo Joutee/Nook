@@ -6,34 +6,23 @@ import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
-import { FinanceWidget } from "@/components/dashboard_widgets/FinanceWidget";
-import { IssuesWidget } from "@/components/dashboard_widgets/IssuesWidget";
-import { ChoresWidget } from "@/components/dashboard_widgets/MyChoresWidget";
-import { FlatsWidget } from "@/components/dashboard_widgets/FlatsWidget";
-import { FlatMembersWidget } from "@/components/dashboard_widgets/FlatMembersWidget";
-import { DocumentsWidget } from "@/components/dashboard_widgets/DocumentsWidget";
 import { Profile } from "../types/profile";
 import { Ionicons } from "@expo/vector-icons";
-import { DEFAULT_WIDGETS } from "../config/widgetConfig";
+import {
+  DEFAULT_WIDGETS,
+  WIDGET_COMPONENTS,
+  getWidgetsByRole,
+  getDefaultWidgetsByRole,
+} from "../config/widgetConfig";
 
 // Modulová proměnná pro sledování, zda už proběhl Supabase sync v této session
 let hasSupabaseSyncedInSession = false;
-
-// Mapování klíčů na komponenty
-const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
-  finance_widget: FinanceWidget,
-  issues_widget: IssuesWidget,
-  chores_widget: ChoresWidget,
-  flats_widget: FlatsWidget,
-  flat_members_widget: FlatMembersWidget,
-  documents_widget: DocumentsWidget,
-};
 
 export default function Home() {
   const [widgetKeys, setWidgetKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
-  const { currentFlat } = useFlatContext();
+  const { currentFlat, userRole } = useFlatContext();
 
   useFocusEffect(
     useCallback(() => {
@@ -103,7 +92,7 @@ export default function Home() {
             // Při chybě použij výchozí layout
             const layoutToUse = storedLayout
               ? JSON.parse(storedLayout)
-              : DEFAULT_WIDGETS;
+              : getDefaultWidgetsByRole(userRole);
             setWidgetKeys(layoutToUse);
             await AsyncStorage.setItem(
               DASHBOARD_LAYOUT_KEY,
@@ -111,7 +100,8 @@ export default function Home() {
             );
           } else {
             // Data ze Supabase přišla
-            const dbLayout = data?.dashboard_layout || DEFAULT_WIDGETS;
+            const dbLayout =
+              data?.dashboard_layout || getDefaultWidgetsByRole(userRole);
             setWidgetKeys(dbLayout);
             // Synchronizovat s AsyncStorage
             await AsyncStorage.setItem(
@@ -123,7 +113,7 @@ export default function Home() {
           // Pokud není user, použij výchozí layout
           const layoutToUse = storedLayout
             ? JSON.parse(storedLayout)
-            : DEFAULT_WIDGETS;
+            : getDefaultWidgetsByRole(userRole);
           setWidgetKeys(layoutToUse);
         }
 
@@ -133,7 +123,7 @@ export default function Home() {
     } catch (error) {
       console.error("Error in loadDashboardLayout:", error);
       // Použít výchozí layout při chybě
-      setWidgetKeys(DEFAULT_WIDGETS);
+      setWidgetKeys(getDefaultWidgetsByRole(userRole));
     } finally {
       setIsLoading(false);
     }
@@ -164,14 +154,20 @@ export default function Home() {
         </Text>
 
         {/* Dynamické vykreslení widgetů */}
-        {widgetKeys.map((key) => {
-          const WidgetComponent = WIDGET_COMPONENTS[key];
-          if (!WidgetComponent) {
-            console.warn(`Widget with key "${key}" not found`);
-            return null;
-          }
-          return <WidgetComponent key={key} />;
-        })}
+        {widgetKeys
+          .filter((key) => {
+            // Filtrovat widgety podle role
+            const allowedWidgets = getWidgetsByRole(userRole);
+            return allowedWidgets.includes(key);
+          })
+          .map((key) => {
+            const WidgetComponent = WIDGET_COMPONENTS[key];
+            if (!WidgetComponent) {
+              console.warn(`Widget with key "${key}" not found`);
+              return null;
+            }
+            return <WidgetComponent key={key} />;
+          })}
 
         {/* Tlačítko pro uspořádání widgetů */}
         <View className="mt-4 items-center">
@@ -180,7 +176,11 @@ export default function Home() {
             onPress={() => router.push("/reorder-widgets")}
             className="w-2/3"
           >
-            <Ionicons name="options-outline" size={20} color="#3b82f6" />
+            <Ionicons
+              name="options-outline"
+              size={20}
+              className="text-foreground"
+            />
             <Text>Uspořádat</Text>
           </Button>
         </View>

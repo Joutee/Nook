@@ -8,7 +8,7 @@ import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { Chore } from "../../types/chores";
 
-export const ChoresWidget = () => {
+export const MyChoresWidget = () => {
   const [myChores, setMyChores] = useState<Chore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentFlat } = useFlatContext();

@@ -12,7 +12,12 @@ import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { DEFAULT_WIDGETS, ALL_WIDGETS } from "../config/widgetConfig";
+import {
+  DEFAULT_WIDGETS,
+  ALL_WIDGETS,
+  getWidgetsByRole,
+  getDefaultWidgetsByRole,
+} from "../config/widgetConfig";
 import { WidgetReorderItem } from "@/components/WidgetReorderItem";
 
 export default function ReorderWidgets() {
@@ -20,12 +25,15 @@ export default function ReorderWidgets() {
   const [hiddenWidgets, setHiddenWidgets] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const { currentFlat } = useFlatContext();
+  const { currentFlat, userRole } = useFlatContext();
   const { showToast } = useToast();
+
+  // Získat widgety dostupné pro aktuální roli
+  const allowedWidgets = getWidgetsByRole(userRole);
 
   useEffect(() => {
     loadCurrentLayout();
-  }, []);
+  }, [userRole]); // Reload when role changes
 
   const loadCurrentLayout = async () => {
     if (!currentFlat?.id) {
@@ -44,16 +52,22 @@ export default function ReorderWidgets() {
       if (storedLayout) {
         active = JSON.parse(storedLayout);
       } else {
-        active = DEFAULT_WIDGETS;
+        active = getDefaultWidgetsByRole(userRole);
       }
 
-      // Rozdělit na aktivní a skryté
-      setActiveWidgets(active);
-      const hidden = ALL_WIDGETS.filter((w) => !active.includes(w));
+      // Filtrovat podle role - zobrazit jen widgety dostupné pro aktuální roli
+      const filteredActive = active.filter((w) => allowedWidgets.includes(w));
+
+      // Rozdělit na aktivní a skryté (pouze z povolených widgetů)
+      setActiveWidgets(filteredActive);
+      const hidden = allowedWidgets.filter((w) => !filteredActive.includes(w));
       setHiddenWidgets(hidden);
     } catch (error) {
       console.error("Error loading layout:", error);
-      setActiveWidgets(DEFAULT_WIDGETS);
+      const defaultFiltered = getDefaultWidgetsByRole(userRole).filter((w) =>
+        allowedWidgets.includes(w),
+      );
+      setActiveWidgets(defaultFiltered);
       setHiddenWidgets([]);
       showToast("Nepodařilo se načíst rozložení", "error");
     } finally {
