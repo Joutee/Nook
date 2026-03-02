@@ -1,8 +1,6 @@
-import React, { useState, Fragment } from "react";
-import { View, TouchableOpacity,  } from "react-native";
+import React, { useState } from "react";
+import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { useRouter, usePathname } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -91,37 +89,39 @@ const TopBar = () => {
         onClose={() => setIsModalVisible(false)}
         title="Vyberte byt"
       >
-        <View className="px-2">
-          {flats.map((item, index) => (
-            <Fragment key={item.id}>
-              <Button
-                variant="ghost"
-                className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-                onPress={() => handleSelectFlat(item)}
-              >
+        <ScrollView style={{ maxHeight: 400 }}>
+          {flats.map((item) => (
+            <Pressable
+              key={item.id}
+              className={`flex-row items-center justify-between bg-secondary rounded-lg p-3 mb-2 mx-4 border ${
+                currentFlat?.id === item.id
+                  ? "bg-primary/10 border-primary"
+                  : "border-border"
+              }`}
+              onPress={() => handleSelectFlat(item)}
+            >
+              <View className="flex-row items-center flex-1">
                 <Text
-                  className={`flex-1 text-base ${
-                    currentFlat?.id === item.id
-                      ? "font-semibold text-primary"
-                      : "text-foreground"
-                  }`}
+                  className="text-sm text-foreground font-medium flex-1"
                   numberOfLines={2}
                 >
                   {item.name}
                 </Text>
-
+              </View>
+              <View
+                className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                  currentFlat?.id === item.id
+                    ? "border-primary"
+                    : "border-muted-foreground"
+                }`}
+              >
                 {currentFlat?.id === item.id && (
-                  <Ionicons
-                    name="checkmark"
-                    size={20}
-                    className="text-primary"
-                  />
+                  <View className="w-3 h-3 rounded-full bg-primary" />
                 )}
-              </Button>
-              {index < flats.length - 1 && <Separator />}
-            </Fragment>
+              </View>
+            </Pressable>
           ))}
-        </View>
+        </ScrollView>
       </BottomSheet>
     </>
   );

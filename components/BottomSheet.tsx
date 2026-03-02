@@ -175,7 +175,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
               </View>
             </View>
           </View>
-          <View className="min-h-[100px]" onLayout={handleContentLayout}>
+          <View className="min-h-[100px] pt-3" onLayout={handleContentLayout}>
             {children}
           </View>
         </Animated.View>

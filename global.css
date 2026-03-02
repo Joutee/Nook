@@ -16,7 +16,6 @@
     /* Text na kartách - používej pro text uvnitř card komponent */
     --card-foreground: 0 0% 3.9%;
 
-    --subcard: 0 0% 96.1%;
 
     /* Pozadí pro vyskakovací menu, dropdown, tooltip */
     --popover: 0 0% 100%;
@@ -76,18 +75,16 @@
 
   .dark:root {
     /* Tmavé pozadí aplikace */
-    --background: 213 11% 9.4%;
+    --background: 0 0% 4%; 
 
     /* Světlý text pro tmavý režim */
     --foreground: 0 0% 98%;
 
     /* Pozadí karet navbaru a topbaru v dark mode - svetlejsi než background pro kontrast */
-    --card: 213 11% 18.5%;
+    --card: 0 0% 9%;
 
     /* Text na kartách v dark mode */
     --card-foreground: 0 0% 98%;
-
-    --subcard: 213 11% 15%;
 
     /* Pozadí pro popover v dark mode */
     --popover: 0 0% 3.9%;
@@ -102,7 +99,7 @@
     --primary-foreground: 0 0% 98%;
 
     /* Sekundární prvky v dark mode */
-    --secondary: 0 0% 14.9%;
+    --secondary: 0 0% 13%;
 
     /* Text na sekundárních prvcích v dark mode */
     --secondary-foreground: 0 0% 98%;
@@ -128,12 +125,14 @@
     --border: 0 0% 14.9%;
 
     /* Border u input polí v dark mode */
-    --input: 0 0% 8.5%;
+    --input: 0 0% 8%;
 
     --input-placeholder: 0 0% 23.8%;
 
     /* Focus ring v dark mode */
     --ring: 300 0% 45%;
+
+    --radius: 0.625rem;
 
     /* Barvy pro grafy v dark mode - upravené pro lepší viditelnost */
     --chart-1: 220 70% 50%;

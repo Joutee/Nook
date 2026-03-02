@@ -47,7 +47,7 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
   return (
     <>
       <Pressable
-        className="flex-row items-center border border-input rounded-md p-3 dark:bg-input gap-2 shadow-sm shadow-black/5"
+        className="flex-row items-center border border-border rounded-md p-3 dark:bg-input gap-2 shadow-sm shadow-black/5"
         onPress={() => setShowPicker(true)}
       >
         {showIcon && (

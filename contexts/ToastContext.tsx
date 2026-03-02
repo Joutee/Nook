@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { StyleSheet, Text, View, Animated } from "react-native";
+import { View, Animated, StyleSheet } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
-
-type ToastType = "success" | "error" | "info";
+import {
+  getToastIcon,
+  getToastStyles,
+  type ToastType,
+} from "@/lib/toastConfig";
 
 interface Toast {
   id: number;
@@ -69,28 +73,6 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     }, 3000);
   };
 
-  const getToastIcon = (type: ToastType) => {
-    switch (type) {
-      case "success":
-        return "checkmark-circle";
-      case "error":
-        return "alert-circle";
-      case "info":
-        return "information-circle";
-    }
-  };
-
-  const getToastColor = (type: ToastType) => {
-    switch (type) {
-      case "success":
-        return "#28a745";
-      case "error":
-        return "#ff3b30";
-      case "info":
-        return "#007AFF";
-    }
-  };
-
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
@@ -100,10 +82,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
           return (
             <Animated.View
               key={toast.id}
+              className={`flex-row items-center p-4 rounded-xl mb-2.5 gap-3 ${getToastStyles(toast.type)}`}
               style={[
                 styles.toast,
                 {
-                  backgroundColor: getToastColor(toast.type),
                   transform: [{ translateY: slideAnim }],
                 },
               ]}
@@ -111,9 +93,11 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
               <Ionicons
                 name={getToastIcon(toast.type)}
                 size={24}
-                color="#fff"
+                className="text-primary-foreground"
               />
-              <Text style={styles.toastText}>{toast.message}</Text>
+              <Text className="text-white text-base font-medium flex-1">
+                {toast.message}
+              </Text>
             </Animated.View>
           );
         })}
@@ -131,22 +115,10 @@ const styles = StyleSheet.create({
     zIndex: 9999,
   },
   toast: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    gap: 12,
-  },
-  toastText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-    flex: 1,
   },
 });

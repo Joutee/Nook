@@ -36,14 +36,14 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
   };
 
   return (
-    <View className="mt-4 p-3 bg-subcard rounded-lg">
+    <>
       <Text className="text-sm font-semibold text-foreground mb-3">
         Pořadí rotace:
       </Text>
       {members.map((member, index) => (
         <View
           key={member.id}
-          className="flex-row items-center justify-between bg-card rounded-lg p-3 mb-2"
+          className="flex-row items-center justify-between bg-secondary rounded-lg p-3 mb-2"
         >
           <View className="flex-row items-center flex-1 gap-2">
             <Text className="text-base font-semibold text-primary w-6">
@@ -67,8 +67,8 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
               <Ionicons
                 name="chevron-up"
                 size={20}
-                color={
-                  index === 0 ? "hsl(240, 5%, 64.9%)" : "hsl(270, 89.1%, 49%)"
+                className={
+                  index === 0 ? "text-muted-foreground" : "text-primary"
                 }
               />
             </Pressable>
@@ -80,16 +80,16 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
               <Ionicons
                 name="chevron-down"
                 size={20}
-                color={
+                className={
                   index === members.length - 1
-                    ? "hsl(240, 5%, 64.9%)"
-                    : "hsl(270, 89.1%, 49%)"
+                    ? "text-muted-foreground"
+                    : "text-primary"
                 }
               />
             </Pressable>
           </View>
         </View>
       ))}
-    </View>
+    </>
   );
 };

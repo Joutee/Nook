@@ -59,7 +59,7 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
   return (
     <>
       <Pressable
-        className="flex-row items-center justify-between rounded-md p-3 border border-input dark:bg-input shadow-sm shadow-black/5"
+        className="flex-row items-center justify-between rounded-md p-3 border border-border dark:bg-input shadow-sm shadow-black/5"
         onPress={() => setShowBottomSheet(true)}
       >
         <Text className="text-base text-foreground flex-1 mr-2">
@@ -83,7 +83,7 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
           {members.map((member) => (
             <Pressable
               key={member.id}
-              className={`flex-row items-center justify-between bg-background rounded-lg p-3 mb-2 mx-4 border ${
+              className={`flex-row items-center justify-between bg-secondary rounded-lg p-3 mb-2 mx-4 border ${
                 isMemberSelected(member.id)
                   ? "bg-primary/10 border-primary"
                   : "border-border"
@@ -119,7 +119,7 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
                   className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
                     isMemberSelected(member.id)
                       ? "border-primary"
-                      : "border-border"
+                      : "border-muted-foreground"
                   }`}
                 >
                   {isMemberSelected(member.id) && (

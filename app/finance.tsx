@@ -149,7 +149,7 @@ const Finance = () => {
     return (
       <View
         key={index}
-        className="flex-row items-center py-3 px-3 bg-muted rounded-lg mb-2 gap-3"
+        className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
       >
         <Ionicons name="arrow-forward" size={20} className="text-primary" />
         <Text className="text-sm text-foreground flex-1">
@@ -175,13 +175,11 @@ const Finance = () => {
               <Ionicons name="swap-horizontal" size={20} color="#fff" />
             </View>
           ) : (
-            <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-              <Ionicons
-                name="cart"
-                size={20}
-                className="text-primary-foreground"
-              />
-            </View>
+            <Ionicons
+              name="cart-outline"
+              size={24}
+              className="text-primary-foreground"
+            />
           )}
           <View className="flex-1">
             <Text className="text-base font-medium text-foreground mb-1">
@@ -218,7 +216,7 @@ const Finance = () => {
             <Ionicons
               name="wallet-outline"
               size={24}
-              className="text-primary"
+              className="text-foreground"
             />
             <CardTitle>Zůstatky</CardTitle>
           </CardHeader>
@@ -240,9 +238,9 @@ const Finance = () => {
               <Ionicons
                 name="git-compare-outline"
                 size={24}
-                className="text-primary"
+                className="text-foreground"
               />
-              <CardTitle>Doporučená vyrovnání</CardTitle>
+              <CardTitle className="flex-1">Doporučená vyrovnání</CardTitle>
             </CardHeader>
             <CardContent>{settlements.map(renderSettlementItem)}</CardContent>
           </Card>
@@ -251,7 +249,11 @@ const Finance = () => {
         {/* History Section */}
         <Card className="mb-4">
           <CardHeader className="flex-row items-center gap-2">
-            <Ionicons name="time-outline" size={24} className="text-primary" />
+            <Ionicons
+              name="time-outline"
+              size={24}
+              className="text-foreground"
+            />
             <CardTitle>Historie</CardTitle>
           </CardHeader>
           <CardContent>

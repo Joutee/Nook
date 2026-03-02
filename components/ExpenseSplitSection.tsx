@@ -212,7 +212,9 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
           <View key={member.id} className="mb-2">
             <Pressable
               className={`flex-row justify-between items-center py-3 px-3 rounded-lg ${
-                isSelected ? "bg-primary/10 border border-primary" : "bg-muted"
+                isSelected
+                  ? "bg-secondary border border-primary"
+                  : "bg-secondary"
               }`}
               onPress={() => handleMemberToggle(member)}
             >

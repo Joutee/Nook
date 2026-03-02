@@ -172,7 +172,7 @@ export default function Home() {
         {/* Tlačítko pro uspořádání widgetů */}
         <View className="mt-4 items-center">
           <Button
-            variant="secondary"
+            variant="outline"
             onPress={() => router.push("/reorder-widgets")}
             className="w-2/3"
           >

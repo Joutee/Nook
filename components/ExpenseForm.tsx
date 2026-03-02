@@ -503,23 +503,21 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           </View>
 
           {/* For Whom (Split) */}
-          <Card className="mb-5 bg-subcard">
-            <CardContent>
-              <ExpenseSplitSection
-                flatMembers={flatMembers}
-                selectedMembers={selectedMembers}
-                onSelectedMembersChange={setSelectedMembers}
-                splitMode={splitMode}
-                onSplitModeChange={setSplitMode}
-                amount={amount}
-                onAmountChange={setAmount}
-                manualAmounts={manualAmounts}
-                onManualAmountsChange={setManualAmounts}
-                touchedMembers={touchedMembers}
-                onTouchedMembersChange={setTouchedMembers}
-              />
-            </CardContent>
-          </Card>
+
+          <ExpenseSplitSection
+            flatMembers={flatMembers}
+            selectedMembers={selectedMembers}
+            onSelectedMembersChange={setSelectedMembers}
+            splitMode={splitMode}
+            onSplitModeChange={setSplitMode}
+            amount={amount}
+            onAmountChange={setAmount}
+            manualAmounts={manualAmounts}
+            onManualAmountsChange={setManualAmounts}
+            touchedMembers={touchedMembers}
+            onTouchedMembersChange={setTouchedMembers}
+          />
+
           {/* Bottom Actions */}
           <View className="flex-col gap-3">
             {mode === "edit" && expenseId && (

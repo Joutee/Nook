@@ -230,69 +230,72 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
                 isCurrentUserAdmin || item.id === currentUserId;
 
               return (
-                <View className="flex-row items-center py-3">
-                  <View className="w-12 h-12 rounded-full bg-primary items-center justify-center mr-3">
-                    <Text className="text-primary-foreground text-lg font-semibold">
-                      {item.name
-                        ? item.name.charAt(0).toUpperCase()
-                        : item.username
-                          ? item.username.charAt(0).toUpperCase()
-                          : "?"}
-                    </Text>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-base font-semibold text-foreground mb-0.5">
-                      {item.name && item.surname
-                        ? `${item.name} ${item.surname}`
-                        : item.name || item.username || "Neznámý uživatel"}
-                    </Text>
-                    <Pressable
-                      onPress={() =>
-                        isCurrentUserAdmin
-                          ? handleChangeRole(item.id, item.role)
-                          : null
-                      }
-                      disabled={!isCurrentUserAdmin}
-                    >
-                      <View className="flex-row items-center gap-1">
-                        {isCurrentUserAdmin && (
-                          <Ionicons
-                            name="swap-horizontal"
-                            size={16}
-                            className="text-primary"
-                          />
-                        )}
-                        <Text
-                          className={`text-sm flex-1 ${
-                            isCurrentUserAdmin
-                              ? "text-primary font-medium"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {item.role === "pronajimatel"
-                            ? "Pronajímatel"
-                            : "Nájemce"}
+                <View className="bg-secondary rounded-lg p-3 mb-2 mx-4 border border-border">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
+                        <Text className="text-primary-foreground text-sm font-semibold">
+                          {item.name
+                            ? item.name.charAt(0).toUpperCase()
+                            : item.username
+                              ? item.username.charAt(0).toUpperCase()
+                              : "?"}
                         </Text>
                       </View>
-                    </Pressable>
+                      <View className="flex-1">
+                        <Text className="text-sm text-foreground font-medium mb-0.5">
+                          {item.name && item.surname
+                            ? `${item.name} ${item.surname}`
+                            : item.name || item.username || "Neznámý uživatel"}
+                        </Text>
+                        <Pressable
+                          onPress={() =>
+                            isCurrentUserAdmin
+                              ? handleChangeRole(item.id, item.role)
+                              : null
+                          }
+                          disabled={!isCurrentUserAdmin}
+                        >
+                          <View className="flex-row items-center gap-1">
+                            {isCurrentUserAdmin && (
+                              <Ionicons
+                                name="swap-horizontal"
+                                size={14}
+                                className="text-primary"
+                              />
+                            )}
+                            <Text
+                              className={`text-xs ${
+                                isCurrentUserAdmin
+                                  ? "text-primary font-medium"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              {item.role === "pronajimatel"
+                                ? "Pronajímatel"
+                                : "Nájemce"}
+                            </Text>
+                          </View>
+                        </Pressable>
+                      </View>
+                    </View>
+                    {showDeleteButton && (
+                      <TouchableOpacity
+                        onPress={() => openRemoveDialog(item.id)}
+                        className="p-2 ml-2"
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={20}
+                          className="text-destructive"
+                        />
+                      </TouchableOpacity>
+                    )}
                   </View>
-                  {showDeleteButton && (
-                    <TouchableOpacity
-                      onPress={() => openRemoveDialog(item.id)}
-                      className="p-2"
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={24}
-                        className="text-destructive"
-                      />
-                    </TouchableOpacity>
-                  )}
                 </View>
               );
             }}
-            ItemSeparatorComponent={() => <View className="h-px bg-border" />}
-            contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+            contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
             scrollEnabled={members.length > 5}
           />
         </View>
