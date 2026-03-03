@@ -151,7 +151,7 @@ const ChoreDetail = () => {
   if (isLoading || !chore) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -171,11 +171,9 @@ const ChoreDetail = () => {
             </Text>
 
             {chore.description && (
-              <>
-                <Text className="text-base text-muted-foreground leading-6">
-                  {chore.description}
-                </Text>
-              </>
+              <Text className="text-base text-muted-foreground leading-6">
+                {chore.description}
+              </Text>
             )}
           </View>
 
@@ -183,71 +181,76 @@ const ChoreDetail = () => {
             <Ionicons
               name="checkmark-circle"
               size={32}
-              color="hsl(142, 76%, 36%)"
+              className="text-success"
             />
           )}
         </CardHeader>
         <Separator className="my-1" />
         <CardContent className="px-5 w-full">
-          <View className="mb-4">
-            <View className="flex-row items-center mb-2 gap-2">
-              <Ionicons
-                name="person-outline"
-                size={20}
-                className="text-muted-foreground"
-              />
-              <Text className="text-sm text-muted-foreground font-semibold">
-                Na řadě:
-              </Text>
-            </View>
-            <View className="flex-row items-center p-3 rounded-lg">
-              <View className="w-10 h-10 rounded-full bg-primary items-center justify-center mr-3">
-                <Text className="text-primary-foreground text-base font-semibold">
-                  {chore.assignee_name?.charAt(0).toUpperCase() || "?"}
-                </Text>
-              </View>
-              <Text className="text-base text-foreground font-medium flex-1">
-                {chore.assignee_name && chore.assignee_surname
-                  ? `${chore.assignee_name} ${chore.assignee_surname}`
-                  : chore.assignee_name || "Nepřiřazeno"}
-              </Text>
-            </View>
-          </View>
-
-          <View className="mb-4">
-            <View className="flex-row items-center mb-2 gap-2">
-              <Ionicons
-                name="time-outline"
-                size={20}
-                className="text-muted-foreground"
-              />
-              <Text className="text-sm text-muted-foreground font-semibold">
-                Interval:
-              </Text>
-            </View>
-            <Text className="text-base text-foreground ml-7">
-              Každých {chore.interval_days}{" "}
-              {chore.interval_days === 1 ? "den" : "dní"}
-            </Text>
-          </View>
-
-          {isFutureStart && (
-            <View className="mb-4">
+          <View className="flex-row flex-wrap gap-3">
+            <View className="flex-1 min-w-[150px] mb-2">
               <View className="flex-row items-center mb-2 gap-2">
                 <Ionicons
-                  name="calendar-outline"
+                  name="person-outline"
                   size={20}
                   className="text-muted-foreground"
                 />
                 <Text className="text-sm text-muted-foreground font-semibold">
-                  Začíná:
+                  Na řadě:
                 </Text>
               </View>
-              <Text className="text-base text-foreground ml-7">
-                {new Date(chore.start_date!).toLocaleDateString("cs-CZ")}
-              </Text>
+              <View className="flex-row items-center rounded-lg h-7 ">
+                <View className="w-7 h-7 rounded-full bg-primary items-center justify-center mr-3">
+                  <Text className="text-primary-foreground text-sm font-semibold">
+                    {chore.assignee_name?.charAt(0).toUpperCase() || "?"}
+                  </Text>
+                </View>
+                <Text className="text-sm text-foreground font-medium flex-1">
+                  {chore.assignee_name && chore.assignee_surname
+                    ? `${chore.assignee_name} ${chore.assignee_surname}`
+                    : chore.assignee_name || "Nepřiřazeno"}
+                </Text>
+              </View>
             </View>
-          )}
+
+            <View className="flex-1 min-w-[150px] mb-2">
+              <View className="flex-row items-center mb-2 gap-2">
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  className="text-muted-foreground"
+                />
+                <Text className="text-sm text-muted-foreground font-semibold">
+                  Interval:
+                </Text>
+              </View>
+              <View className="justify-center h-7">
+                <Text className="text-sm text-foreground ml-7">
+                  Každých {chore.interval_days}{" "}
+                  {chore.interval_days === 1 ? "den" : "dní"}
+                </Text>
+              </View>
+            </View>
+            {isFutureStart && (
+              <View className="flex-1 min-w-[150px] mb-2">
+                <View className="flex-row items-center mb-2 gap-2">
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    className="text-muted-foreground"
+                  />
+                  <Text className="text-sm text-muted-foreground font-semibold">
+                    Začíná:
+                  </Text>
+                </View>
+                <View className="justify-center h-7">
+                  <Text className="text-sm text-foreground ml-7">
+                    {new Date(chore.start_date!).toLocaleDateString("cs-CZ")}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
 
           <Separator className="my-4" />
 
@@ -334,9 +337,9 @@ const ChoreDetail = () => {
               <Ionicons
                 name="time-outline"
                 size={48}
-                color="hsl(240, 5%, 64.9%)"
+                className="text-muted-foreground"
               />
-              <Text className="text-sm text-muted-foreground mt-3">
+              <Text className="text-sm text-muted-foreground mt-3 w-full text-center">
                 Zatím žádná historie
               </Text>
             </CardContent>

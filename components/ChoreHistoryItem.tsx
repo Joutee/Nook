@@ -15,9 +15,9 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
 
   return (
     <Card>
-      <CardContent className="px-3">
-        <View className="flex-row justify-between items-center mb-2">
-          <View className="flex-1">
+      <CardContent className="px-6 flex-row items-center justify-between">
+        <View>
+          <View className="flex-1 mb-2">
             <Text className="text-sm font-semibold text-foreground">
               Cyklus #{item.cycle_index + 1}
             </Text>
@@ -25,22 +25,6 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
               {cycleDate.toLocaleDateString("cs-CZ")}
             </Text>
           </View>
-          {item.is_done ? (
-            <Ionicons
-              name="checkmark-circle"
-              size={20}
-              className="text-success"
-            />
-          ) : (
-            <Ionicons
-              name="close-circle"
-              size={20}
-              className="text-destructive"
-            />
-          )}
-        </View>
-
-        <View className="gap-1.5">
           {item.expected_profile_name && (
             <View className="flex-row items-center">
               <View className="w-6 h-6 rounded-full bg-primary items-center justify-center mr-2">
@@ -56,6 +40,20 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
             </View>
           )}
         </View>
+
+        {item.is_done ? (
+          <Ionicons
+            name="checkmark-circle"
+            size={24}
+            className="text-success"
+          />
+        ) : (
+          <Ionicons
+            name="close-circle"
+            size={24}
+            className="text-destructive"
+          />
+        )}
       </CardContent>
     </Card>
   );

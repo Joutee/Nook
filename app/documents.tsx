@@ -137,16 +137,14 @@ const documents = () => {
   };
 
   const renderDocument = (item: Document) => (
-    <Card key={item.id} className="mb-3">
-      <CardContent className="flex-row items-center px-3 gap-3">
+    <Card key={item.id} className="mb-3 py-4">
+      <CardContent className="flex-row items-center px-4 gap-3">
         {/* Ikona dokumentu */}
-        <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-          <Ionicons
-            name="document-text"
-            size={24}
-            className="text-primary-foreground"
-          />
-        </View>
+        <Ionicons
+          name="document-text-outline"
+          size={24}
+          className="text-primary-foreground"
+        />
 
         {/* Obsah dokumentu */}
         <Pressable

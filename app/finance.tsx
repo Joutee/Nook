@@ -8,7 +8,8 @@ import {
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import React, { useState, useCallback } from "react";
+import { Separator } from "@/components/ui/separator";
+import React, { useState, useCallback, Fragment } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../lib/supabase";
@@ -115,7 +116,7 @@ const Finance = () => {
     return (
       <View
         key={balance.profile_id}
-        className="flex-row justify-between items-center py-3 border-b border-border"
+        className="flex-row justify-between items-center py-3"
       >
         <View className="flex-row items-center gap-3 flex-1">
           <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
@@ -183,7 +184,7 @@ const Finance = () => {
           )}
           <View className="flex-1">
             <Text className="text-base font-medium text-foreground mb-1">
-              {item.is_settlement ? "🔄 Vyrovnání" : item.title}
+              {item.is_settlement ? " Vyrovnání" : item.title}
             </Text>
             <Text className="text-xs text-muted-foreground">
               Zaplatil: {item.payer_name} • {formatDate(item.happened_at)}
@@ -226,7 +227,14 @@ const Finance = () => {
                 Zatím žádné zůstatky
               </Text>
             ) : (
-              <>{balances.map(renderBalanceItem)}</>
+              <>
+                {balances.map((balance, index) => (
+                  <Fragment key={balance.profile_id}>
+                    {renderBalanceItem(balance)}
+                    {index < balances.length - 1 && <Separator />}
+                  </Fragment>
+                ))}
+              </>
             )}
           </CardContent>
         </Card>

@@ -6,7 +6,6 @@ OCR
 udelat modularni homescreenu s widgety
 na home screen by davalo smysl dat moznost dat nejakou dlazdici neco jako moje byty a mohl bych se tak pripojit do jineho bytu
 
-prestylovat toaster
 reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
 email change
 name change
