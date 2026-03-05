@@ -179,7 +179,7 @@ const Finance = () => {
             <Ionicons
               name="cart-outline"
               size={24}
-              className="text-primary-foreground"
+              className="text-foreground"
             />
           )}
           <View className="flex-1">
