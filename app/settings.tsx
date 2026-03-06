@@ -191,6 +191,28 @@ const Settings = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={() => router.push("/change-email")}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="mail-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <Text className="text-base">Změnit e-mail</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+
+            <Separator />
+
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
               onPress={() => setLogoutDialogOpen(true)}
             >
               <View className="flex-row items-center gap-3">

@@ -41,8 +41,19 @@ export default function Login() {
       email: email,
       password: password,
     });
-    if (error) showToast(getErrorMessage(error.message), "error");
-    else showToast("Přihlášení bylo úspěšné", "success");
+    if (error) {
+      // Kontrola, jestli email není ověřený
+      if (error.message.includes("Email not confirmed")) {
+        showToast("Email nebyl ověřen. Přesměrujeme vás na ověření.", "error");
+        setButtonLoading(false);
+        router.push(`verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+      showToast(getErrorMessage(error.message), "error");
+      console.log("Login error:", error);
+    } else {
+      showToast("Přihlášení bylo úspěšné", "success");
+    }
 
     setButtonLoading(false);
   }

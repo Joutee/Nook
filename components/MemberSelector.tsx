@@ -68,7 +68,9 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
         <Ionicons
           name={multiSelect ? "people" : "person"}
           size={20}
-          className="text-primary"
+          className={
+            selectedMembers.length > 0 ? "text-primary" : "text-foreground"
+          }
         />
       </Pressable>
 

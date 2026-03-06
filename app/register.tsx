@@ -38,9 +38,6 @@ export default function Register() {
   const passwordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  const iconColor =
-    colorScheme === "dark" ? "hsl(0, 0%, 98%)" : "hsl(0, 0%, 3.9%)";
-
   async function signUpWithEmail() {
     if (password !== confirmPassword) {
       showToast(getErrorMessage("PASSWORDS_DO_NOT_MATCH"), "error");
@@ -64,10 +61,13 @@ export default function Register() {
 
     if (error) {
       showToast(getErrorMessage(error.message), "error");
+      setLoading(false);
     } else {
-      showToast("Registrace úspěšná! Vítejte v aplikaci!", "success");
+      showToast("Ověřovací kód byl odeslán na váš e-mail", "success");
+      setLoading(false);
+      // Přesměrování na stránku pro ověření e-mailu
+      router.push(`verify-email?email=${encodeURIComponent(email)}`);
     }
-    setLoading(false);
   }
 
   return (
@@ -227,7 +227,11 @@ export default function Register() {
               // TODO: Implement Google OAuth
             }}
           >
-            <Ionicons name="logo-google" size={20} color={iconColor} />
+            <Ionicons
+              name="logo-google"
+              size={20}
+              className="text-foreground"
+            />
             <Text>Pokračovat s Google</Text>
           </Button>
         </CardContent>

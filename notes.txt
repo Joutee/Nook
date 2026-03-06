@@ -1,5 +1,4 @@
 iOS nekompatibility list:
-dark mode
 tlacitko zpet funguje kdyz jdu z choore detail do chore history ale nefunguje kdyz jdu z chores na chore-create
 
 TODO:

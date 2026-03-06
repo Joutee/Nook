@@ -3,6 +3,8 @@ export const getErrorMessage = (errorMessage: string): string => {
     // Auth errors
     "Invalid login credentials": "Zadali jste špatný e-mail nebo heslo.",
     "User already registered": "Uživatel s tímto e-mailem již existuje.",
+    "A user with this email address has already been registered":
+      "Uživatel s touto e-mailovou adresou je již zaregistrován.",
     "Email not confirmed":
       "E-mail nebyl potvrzen. Zkontrolujte svou e-mailovou schránku.",
     "Password should be at least 6 characters":
@@ -12,6 +14,8 @@ export const getErrorMessage = (errorMessage: string): string => {
     "Signup requires a valid password": "Registrace vyžaduje platné heslo.",
     "Email rate limit exceeded":
       "Příliš mnoho pokusů. Zkuste to prosím později.",
+    "you can only request this after":
+      "Počkejte prosím chvíli a zkuste to znovu.",
     "User not found": "Uživatel nebyl nalezen.",
     "Invalid email or password": "Neplatný e-mail nebo heslo.",
     "Email link is invalid or has expired":

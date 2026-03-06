@@ -37,7 +37,8 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     const onSignInPage =
       segments[0] === "login" ||
       segments[0] === "register" ||
-      segments[0] === "forgot-password";
+      segments[0] === "forgot-password" ||
+      segments[0] === "verify-email";
 
     const onResetPasswordPage = segments[0] === "reset-password";
     if (onResetPasswordPage) {
@@ -105,7 +106,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background " pointerEvents="box-none">
       <StatusBar style={isDark ? "light" : "dark"} />
       {showNavigation && <TopBar />}
       <Stack
@@ -152,13 +153,15 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         <Stack.Screen
           name="forgot-password"
           options={{
-            headerShown: false,
+            title: "Zapomenuté heslo",
+            headerShown: true,
           }}
         />
         <Stack.Screen
           name="reset-password"
           options={{
-            headerShown: false,
+            title: "Obnovení hesla",
+            headerShown: true,
           }}
         />
         <Stack.Screen
@@ -193,7 +196,13 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{
             title: "Nastavení",
             headerShown: true,
-            headerBackTitle: "Zpět",
+          }}
+        />
+        <Stack.Screen
+          name="change-email"
+          options={{
+            title: "Změna e-mailu",
+            headerShown: true,
           }}
         />
         <Stack.Screen

@@ -31,6 +31,22 @@ export default function ResetPassword() {
   const newPasswordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
+  async function resendCode() {
+    setButtonLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email as string,
+    );
+
+    if (error) {
+      showToast(getErrorMessage(error.message), "error");
+    } else {
+      showToast("Kód byl odeslán znovu na váš email", "success");
+    }
+
+    setButtonLoading(false);
+  }
+
   async function resetPassword() {
     if (!code) {
       showToast("Zadejte prosím kód z emailu", "error");
@@ -177,6 +193,14 @@ export default function ResetPassword() {
                   </Pressable>
                 </View>
               </View>
+              <Button
+                variant="outline"
+                className="w-full"
+                onPress={resendCode}
+                disabled={buttonLoading}
+              >
+                <Text className="text-center flex-1">Odeslat kód znovu</Text>
+              </Button>
 
               <Button
                 className="w-full"
@@ -184,14 +208,6 @@ export default function ResetPassword() {
                 disabled={buttonLoading}
               >
                 <Text className="text-center flex-1">Změnit heslo</Text>
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full"
-                onPress={() => router.back()}
-              >
-                <Text className="text-center flex-1">Změnit email</Text>
               </Button>
             </View>
 
