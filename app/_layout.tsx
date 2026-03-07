@@ -277,25 +277,35 @@ const RootLayout = () => {
 
   useEffect(() => {
     // Ověřit platnost session na serveru
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        // Zkontrolovat, jestli je session platný
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-        if (error || !user) {
-          // Session není platný - smazat a odhlásit
-          await supabase.auth.signOut();
-          setSession(null);
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session } }) => {
+        if (session) {
+          // Zkontrolovat, jestli je session platný
+          const {
+            data: { user },
+            error,
+          } = await supabase.auth.getUser();
+          if (error || !user) {
+            // Session není platný - smazat a odhlásit
+            await supabase.auth.signOut();
+            setSession(null);
+          } else {
+            setSession(session);
+          }
         } else {
-          setSession(session);
+          setSession(null);
         }
-      } else {
+        setInitializing(false);
+      })
+      .catch(async (error) => {
+        // Zachytit chyby s neplatným refresh tokenem
+        console.log("Error getting session:", error.message);
+        // Vyčistit neplatnou session
+        await supabase.auth.signOut();
         setSession(null);
-      }
-      setInitializing(false);
-    });
+        setInitializing(false);
+      });
 
     const {
       data: { subscription },

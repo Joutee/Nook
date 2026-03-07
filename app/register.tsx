@@ -65,8 +65,12 @@ export default function Register() {
     } else {
       showToast("Ověřovací kód byl odeslán na váš e-mail", "success");
       setLoading(false);
+
+      //pro testovani vypnuto
+
+      //je potreba to zapnout v supabase auth settings -> Sign In/Providers -> Confirm email
       // Přesměrování na stránku pro ověření e-mailu
-      router.push(`verify-email?email=${encodeURIComponent(email)}`);
+      //router.push(`verify-email?email=${encodeURIComponent(email)}`);
     }
   }
 

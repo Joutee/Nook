@@ -2,22 +2,16 @@ iOS nekompatibility list:
 tlacitko zpet funguje kdyz jdu z choore detail do chore history ale nefunguje kdyz jdu z chores na chore-create
 
 TODO:
-neukazujou se default widgety na home screenu pokud zrovna vytvorim byt a hodi me to na homescreen
-je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny update takze si muze zmenit is_admin
-Keys
-OCR
-
+neukazujou se default widgety na home screenu pokud zrovna vytvorim dalsi byt a hodi me to na homescreen
+Keys OCR
 udelat modularni homescreenu s widgety
-na home screen by davalo smysl dat moznost dat nejakou dlazdici neco jako moje byty a mohl bych se tak pripojit do jineho bytu
-
-reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
-email change, email verification
-name change
-
-pridat padding ze strany na scroll views na takovych tech edit create strankach hlavne
-chore-edit spatne prenasi datum takze se tam vzdy setne spatne misto toho aby se pritahl z db
 u edit screen povolit odeslani pouze pokud se neco zmenilo
 vypsat hlasku a znepristupnit moduly ktere jsou na komunikaci s pronajimatelem pokud zadny pronajimatel v byte neni
+reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
+je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny update takze si muze zmenit is_admin
+name change
+telefonni cislo a email ke kazdemu profilu
+pridat do financi bankovni ucet
 
 
 kdyz zbyde cas:
