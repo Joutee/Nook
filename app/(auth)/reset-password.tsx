@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "../lib/supabase";
-import { getErrorMessage } from "../lib/errorTranslations";
+import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/errorTranslations";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useToast } from "../contexts/ToastContext";
+import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
@@ -96,7 +96,7 @@ export default function ResetPassword() {
       setButtonLoading(false);
       // Odhlásit uživatele a poslat ho na login
       await supabase.auth.signOut();
-      router.replace("/login");
+      router.replace("/(auth)/login");
     }
   }
 

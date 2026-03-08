@@ -72,7 +72,7 @@ export const DocumentsWidget = () => {
 
   return (
     <Card className="mb-4">
-      <Pressable onPress={() => router.push("/documents")}>
+      <Pressable onPress={() => router.push("/(tabs)/documents")}>
         <CardHeader>
           <View className="flex-row items-center justify-between">
             <CardTitle>Dokumenty</CardTitle>
@@ -93,7 +93,7 @@ export const DocumentsWidget = () => {
               {documents.map((doc) => (
                 <Pressable
                   key={doc.id}
-                  onPress={() => router.push("/documents")}
+                  onPress={() => router.push("/(tabs)/documents")}
                   className="py-2 border-b border-border last:border-b-0"
                 >
                   <View className="flex-row items-center justify-between">

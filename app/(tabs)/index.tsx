@@ -4,16 +4,16 @@ import { Button } from "@/components/ui/button";
 import React, { useState, useCallback } from "react";
 import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { Profile } from "../types/profile";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { Profile } from "@/types/profile";
 import { Ionicons } from "@expo/vector-icons";
 import {
   DEFAULT_WIDGETS,
   WIDGET_COMPONENTS,
   getWidgetsByRole,
   getDefaultWidgetsByRole,
-} from "../config/widgetConfig";
+} from "@/config/widgetConfig";
 
 // Modulová proměnná pro sledování, zda už proběhl Supabase sync v této session
 let hasSupabaseSyncedInSession = false;

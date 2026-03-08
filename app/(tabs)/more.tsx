@@ -22,7 +22,7 @@ const more = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/documents")}
+              onPress={() => router.push("./documents")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons
@@ -45,7 +45,7 @@ const more = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/keys")}
+              onPress={() => router.push("./keys")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons
@@ -68,7 +68,7 @@ const more = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/issues")}
+              onPress={() => router.push("./issues")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons

@@ -3,12 +3,12 @@ import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Issue } from "../types/issues";
-import { getStatusColor, getStatusText } from "../lib/issueUtils";
+import { Issue } from "@/types/issues";
+import { getStatusColor, getStatusText } from "@/lib/issueUtils";
 
 const Issues = () => {
   const { currentFlat, userRole } = useFlatContext();

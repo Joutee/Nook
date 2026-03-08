@@ -137,7 +137,7 @@ const ChoreDetail = () => {
         showToast("Nepodařilo se smazat úkol: " + error.message, "error");
       } else {
         showToast("Úkol byl smazán", "success");
-        router.replace("/chores");
+        router.replace("/(tabs)/chores");
       }
     } catch (error: any) {
       console.error("Error deleting chore:", error);

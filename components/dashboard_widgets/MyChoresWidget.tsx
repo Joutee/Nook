@@ -54,7 +54,7 @@ export const MyChoresWidget = () => {
 
   return (
     <Card className="mb-4">
-      <Pressable onPress={() => router.push("/chores")}>
+      <Pressable onPress={() => router.push("/(tabs)/chores")}>
         <CardHeader>
           <View className="flex-row items-center justify-between">
             <CardTitle>Moje úkoly</CardTitle>

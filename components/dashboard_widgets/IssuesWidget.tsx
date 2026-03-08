@@ -53,7 +53,7 @@ export const IssuesWidget = () => {
 
   return (
     <Card className="mb-4">
-      <Pressable onPress={() => router.push("/issues")}>
+      <Pressable onPress={() => router.push("/(tabs)/issues")}>
         <CardHeader>
           <View className="flex-row items-center justify-between">
             <CardTitle>Poslední závady</CardTitle>

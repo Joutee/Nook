@@ -192,7 +192,7 @@ export default function JoinFlatForm({
 
                 <Button
                   variant="outline"
-                  onPress={() => router.push("/create-flat")}
+                  onPress={() => router.push("/(setup)/create-flat")}
                   disabled={loading}
                 >
                   <Text>Vytvořit novou domácnost</Text>

@@ -12,11 +12,11 @@ import { Separator } from "@/components/ui/separator";
 import React, { useState, useCallback, Fragment } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
-import { Balance, ExpenseWithDetails, Settlement } from "../types/finance";
-import { calculateSettlements } from "../lib/financeUtils";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
+import { Balance, ExpenseWithDetails, Settlement } from "@/types/finance";
+import { calculateSettlements } from "@/lib/financeUtils";
 
 const Finance = () => {
   const [balances, setBalances] = useState<Balance[]>([]);

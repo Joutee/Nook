@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "../lib/supabase";
-import { getErrorMessage } from "../lib/errorTranslations";
+import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/errorTranslations";
 import { useRouter } from "expo-router";
-import { useToast } from "../contexts/ToastContext";
+import { useToast } from "@/contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function ForgotPassword() {
@@ -89,7 +89,7 @@ export default function ForgotPassword() {
             <Button
               variant="secondary"
               className="w-full"
-              onPress={() => router.replace("/login")}
+              onPress={() => router.replace("/(auth)/login")}
             >
               <Text className="text-foreground text-center flex-1">
                 Zpět na přihlášení

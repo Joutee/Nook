@@ -10,10 +10,10 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
 import { useColorScheme } from "nativewind";
 
 export default function SelectRole() {

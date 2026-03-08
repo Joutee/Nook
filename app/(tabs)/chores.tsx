@@ -6,10 +6,10 @@ import { Separator } from "@/components/ui/separator";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
-import { Chore } from "../types/chores";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
+import { Chore } from "@/types/chores";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);

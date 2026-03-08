@@ -51,7 +51,7 @@ export const RepaymentWidget = () => {
 
   return (
     <Card className="mb-4">
-      <Pressable onPress={() => router.push("/finance")}>
+      <Pressable onPress={() => router.push("/(tabs)/finance")}>
         <CardHeader>
           <View className="flex-row items-center justify-between">
             <CardTitle>Vyrovnání dluhů</CardTitle>

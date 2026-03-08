@@ -1,9 +1,8 @@
-import { StyleSheet, View, TouchableOpacity, Alert } from "react-native";
+import { View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Stack, usePathname, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import NavBar from "../components/NavBar";
 import TopBar from "../components/TopBar";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
@@ -12,7 +11,7 @@ import { ToastProvider } from "../contexts/ToastContext";
 import "../global.css";
 import "../lib/icons";
 import { useColorScheme } from "nativewind";
-import { THEME } from "../lib/theme"; //
+import { THEME } from "../lib/theme";
 
 import { PortalHost } from "@rn-primitives/portal";
 
@@ -21,9 +20,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const { isLoading, hasFlat, hasRole } = useFlatContext();
   const segments = useSegments();
   const router = useRouter();
-  const pathname = usePathname();
-
-  //useEffect(() => {console.log(isLoading)}, [isLoading]);
 
   useEffect(() => {
     console.log("=== LAYOUT USEEFFECT ===", {
@@ -34,21 +30,22 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
       hasRole,
     });
 
-    const onSignInPage =
-      segments[0] === "login" ||
-      segments[0] === "register" ||
-      segments[0] === "forgot-password" ||
-      segments[0] === "verify-email";
+    const segmentsArray = segments as string[];
+    const inAuthGroup = segmentsArray[0] === "(auth)";
+    const inSetupGroup = segmentsArray[0] === "(setup)";
+    const inTabsGroup = segmentsArray[0] === "(tabs)";
 
-    const onResetPasswordPage = segments[0] === "reset-password";
-    if (onResetPasswordPage) {
+    // Reset password má speciální handling - může být přístupná bez přihlášení
+    if (
+      segmentsArray[0] === "(auth)" &&
+      segmentsArray[1] === "reset-password"
+    ) {
       return;
     }
 
     // Není přihlášený -> redirect na login
-
-    if (!session && !onSignInPage) {
-      router.replace("/login");
+    if (!session && !inAuthGroup) {
+      router.replace("/(auth)/login");
       console.log("redirect to login");
       return;
     }
@@ -56,79 +53,70 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     console.log("isLoading in layout:", isLoading);
     if (isLoading) return;
 
-    const onJoinFlatPage =
-      segments[0] === "join-flat" || segments[0] === "create-flat";
-    const onSelectRolePage = segments[0] === "select-role";
-
-    if (session && !hasFlat && !onJoinFlatPage) {
+    // Přihlášený ale nemá byt -> redirect na join-flat
+    if (session && !hasFlat && !inSetupGroup) {
       console.log("redirect to join-flat");
-      router.replace("/join-flat");
+      router.replace("/(setup)/join-flat");
       return;
     }
 
-    if (session && hasFlat && !hasRole && !onSelectRolePage) {
-      router.replace("/select-role");
+    // Přihlášený, má byt, ale nemá roli -> redirect na select-role
+    if (session && hasFlat && !hasRole && segmentsArray[1] !== "select-role") {
+      router.replace("/(setup)/select-role");
       return;
     }
 
-    if (
-      session &&
-      hasFlat &&
-      hasRole &&
-      (onJoinFlatPage || onSelectRolePage || onSignInPage)
-    ) {
+    // Přihlášený, má byt i roli -> přesměrovat z auth/setup na hlavní stránku
+    if (session && hasFlat && hasRole && (inAuthGroup || inSetupGroup)) {
       console.log("redirect to home");
-      // Použít push místo replace aby se předešlo problémům s navigací
-      setTimeout(() => router.replace("/"), 0);
+      setTimeout(() => router.replace("/(tabs)"), 0);
       return;
     }
   }, [session, segments, isLoading, hasFlat, hasRole]);
 
-  const showNavigationPaths = [
-    "/",
-    "/chores",
-    "/finance",
-    "/issues",
-    "/keys",
-    "/documents",
-    "/more",
-  ];
-  const showNavigation = showNavigationPaths.includes(pathname);
-  console.log("showNavigation:", showNavigation);
-
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
-  // Vybere správnou sadu barev z tvého souboru theme.ts
   const currentTheme = THEME[isDark ? "dark" : "light"];
+
+  // Zobrazit TopBar pouze v tabs
+  const showTopBar = segments[0] === "(tabs)";
 
   if (session && isLoading) {
     return null; // Nebo loading screen
   }
 
   return (
-    <View className="flex-1 bg-background " pointerEvents="box-none">
+    <View className="flex-1 bg-background" pointerEvents="box-none">
       <StatusBar style={isDark ? "light" : "dark"} />
-      {showNavigation && <TopBar />}
+      {showTopBar && <TopBar />}
       <Stack
         screenOptions={{
           contentStyle: { flex: 1, backgroundColor: "transparent" },
-
-          // --- NASTAVENÍ HEADERU ---
           headerStyle: {
-            // Použije barvu 'background' z tvého theme.ts
             backgroundColor: currentTheme.card,
           },
-          headerTintColor: currentTheme.foreground, // Barva šipky "Zpět" a názvu
+          headerTintColor: currentTheme.foreground,
           headerTitleStyle: {
             fontWeight: "bold",
-            color: currentTheme.foreground, // Barva textu titulku
+            color: currentTheme.foreground,
           },
         }}
       >
         <Stack.Screen
-          name="index"
+          name="(tabs)"
           options={{
-            title: "Domů",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(setup)"
+          options={{
             headerShown: false,
           }}
         />
@@ -137,54 +125,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{
             title: "Uspořádat widgety",
           }}
-        />
-        <Stack.Screen
-          name="login"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="register"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="forgot-password"
-          options={{
-            title: "Zapomenuté heslo",
-            headerShown: true,
-          }}
-        />
-        <Stack.Screen
-          name="reset-password"
-          options={{
-            title: "Obnovení hesla",
-            headerShown: true,
-          }}
-        />
-        <Stack.Screen
-          name="join-flat"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="create-flat"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="select-role"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="finance"
-          options={{ title: "Finance", headerShown: false }}
         />
         <Stack.Screen name="expense-create" options={{ title: "Nový výdaj" }} />
         <Stack.Screen
@@ -205,14 +145,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
             headerShown: true,
           }}
         />
-        <Stack.Screen
-          name="more"
-          options={{ title: "Další", headerShown: false }}
-        />
-        <Stack.Screen
-          name="chores"
-          options={{ title: "Úkoly", headerShown: false }}
-        />
         <Stack.Screen name="chore-detail" options={{ title: "Detail úkolu" }} />
         <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
         <Stack.Screen
@@ -220,10 +152,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{ title: "Historie úkolu" }}
         />
         <Stack.Screen name="chore-edit" options={{ title: "Upravit úkol" }} />
-        <Stack.Screen
-          name="issues"
-          options={{ title: "Závady", headerShown: false }}
-        />
         <Stack.Screen
           name="issue-create"
           options={{ title: "Nahlásit závadu" }}
@@ -233,14 +161,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{ title: "Detail závady" }}
         />
         <Stack.Screen name="issue-edit" options={{ title: "Upravit závadu" }} />
-        <Stack.Screen
-          name="keys"
-          options={{ title: "Klíče", headerShown: false }}
-        />
-        <Stack.Screen
-          name="documents"
-          options={{ title: "Dokumenty", headerShown: false }}
-        />
         <Stack.Screen
           name="document-add"
           options={{ title: "Nový dokument" }}
@@ -262,11 +182,6 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
       </Stack>
-      {showNavigation && (
-        <>
-          <NavBar />
-        </>
-      )}
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
-import { supabase } from "../lib/supabase";
-import { getErrorMessage } from "../lib/errorTranslations";
+import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/errorTranslations";
 import { View, TextInput, ScrollView, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "expo-router";
-import { useToast } from "../contexts/ToastContext";
+import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -70,7 +70,7 @@ export default function Register() {
 
       //je potreba to zapnout v supabase auth settings -> Sign In/Providers -> Confirm email
       // Přesměrování na stránku pro ověření e-mailu
-      //router.push(`verify-email?email=${encodeURIComponent(email)}`);
+      //router.push(`/(auth)/verify-email?email=${encodeURIComponent(email)}`);
     }
   }
 
@@ -209,7 +209,7 @@ export default function Register() {
           <Button
             variant="ghost"
             className="w-full h-auto "
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/(auth)/login")}
           >
             <Text className="text-foreground w-full text-center">
               Zpět na přihlášení

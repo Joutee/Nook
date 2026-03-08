@@ -12,13 +12,13 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
-import { useToast } from "../contexts/ToastContext";
-import DocumentViewerModal from "../components/DocumentViewerModal";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
+import DocumentViewerModal from "@/components/DocumentViewerModal";
 import { Ionicons } from "@expo/vector-icons";
-import { deleteFile } from "../lib/fileService";
-import { Document } from "../types/documents";
+import { deleteFile } from "@/lib/fileService";
+import { Document } from "@/types/documents";
 
 const documents = () => {
   const { currentFlat } = useFlatContext();

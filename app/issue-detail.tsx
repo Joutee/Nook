@@ -58,7 +58,7 @@ const IssueDetail = () => {
 
       if (!issueData) {
         showToast("Závada nebyla nalezena", "error");
-        router.replace("/issues");
+        router.replace("/(tabs)/issues");
         return;
       }
       setIssue(issueData);

@@ -12,10 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "../lib/supabase";
-import { getErrorMessage } from "../lib/errorTranslations";
+import { supabase } from "@/lib/supabase";
+import { getErrorMessage } from "@/lib/errorTranslations";
 import { useRouter } from "expo-router";
-import { useToast } from "../contexts/ToastContext";
+import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -144,7 +144,7 @@ export default function Login() {
             <Button
               variant="secondary"
               className="w-full"
-              onPress={() => router.push("/register")}
+              onPress={() => router.push("/(auth)/register")}
             >
               <Text className="text-foreground">Registrovat se</Text>
             </Button>
