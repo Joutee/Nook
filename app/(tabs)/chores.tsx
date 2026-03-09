@@ -215,7 +215,7 @@ const Chores = () => {
 
   return (
     <View className="flex-1">
-      <ScrollView className="flex-1 p-4 ">
+      <ScrollView className="flex-1 p-4 bg-background">
         <Text className="text-3xl font-bold text-foreground mb-4">Úkoly</Text>
 
         {chores.length === 0 ? (

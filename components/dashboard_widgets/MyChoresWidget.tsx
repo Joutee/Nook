@@ -14,7 +14,52 @@ export const MyChoresWidget = () => {
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
+    // 1. Prvotní načtení dat
     loadMyChores();
+
+    // Pokud nemáme flat_id, nemá smysl nic poslouchat
+    if (!currentFlat?.id) return;
+
+    // 2. Vytvoření Realtime kanálu
+    const choresChannel = supabase
+      .channel("public:chores") // Název kanálu (může být cokoliv)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "chores",
+          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+        },
+        (payload) => {
+          console.log("Změna v úkolech detekována!", payload);
+          // Když se něco změní (někdo přidá/upraví úkol), přenačteme widget
+          loadMyChores();
+        },
+      )
+      .subscribe();
+
+    const completionsChannel = supabase
+      .channel("public:chore_completions_my")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "chore_completions",
+        },
+        (payload) => {
+          console.log("Někdo splnil úkol!", payload);
+          loadMyChores();
+        },
+      )
+      .subscribe();
+
+    // 4. Úklid při opuštění obrazovky (zavře kanály a šetří limit 200 připojení)
+    return () => {
+      supabase.removeChannel(choresChannel);
+      supabase.removeChannel(completionsChannel);
+    };
   }, [currentFlat]);
 
   const loadMyChores = async () => {

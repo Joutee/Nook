@@ -14,7 +14,35 @@ export const DocumentsWidget = () => {
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
+    // 1. Prvotní načtení dat
     loadDocuments();
+
+    // Pokud nemáme flat_id, nemá smysl nic poslouchat
+    if (!currentFlat?.id) return;
+
+    // 2. Vytvoření Realtime kanálu
+    const documentsChannel = supabase
+      .channel("public:documents") // Název kanálu (může být cokoliv)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "documents",
+          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+        },
+        (payload) => {
+          console.log("Změna v dokumentech detekována!", payload);
+          // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
+          loadDocuments();
+        },
+      )
+      .subscribe();
+
+    // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
+    return () => {
+      supabase.removeChannel(documentsChannel);
+    };
   }, [currentFlat]);
 
   const loadDocuments = async () => {

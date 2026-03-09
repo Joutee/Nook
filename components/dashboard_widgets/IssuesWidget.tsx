@@ -16,7 +16,35 @@ export const IssuesWidget = () => {
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
+    // 1. Prvotní načtení dat
     loadIssues();
+
+    // Pokud nemáme flat_id, nemá smysl nic poslouchat
+    if (!currentFlat?.id) return;
+
+    // 2. Vytvoření Realtime kanálu
+    const issuesChannel = supabase
+      .channel("public:issues") // Název kanálu (může být cokoliv)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "issues",
+          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+        },
+        (payload) => {
+          console.log("Změna v závadách detekována!", payload);
+          // Když se něco změní (někdo přidá/upraví závadu), přenačteme widget
+          loadIssues();
+        },
+      )
+      .subscribe();
+
+    // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
+    return () => {
+      supabase.removeChannel(issuesChannel);
+    };
   }, [currentFlat]);
 
   const loadIssues = async () => {
