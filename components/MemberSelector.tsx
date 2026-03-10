@@ -82,55 +82,59 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
         }
       >
         <ScrollView style={{ maxHeight: 400 }}>
-          {members.map((member) => (
-            <Pressable
-              key={member.id}
-              className={`flex-row items-center justify-between bg-secondary rounded-lg p-3 mb-2 mx-4 border ${
-                isMemberSelected(member.id)
-                  ? "bg-primary/10 border-primary"
-                  : "border-border"
-              }`}
-              onPress={() => handleMemberPress(member)}
-            >
-              <View className="flex-row items-center flex-1">
-                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
-                  <Text className="text-primary-foreground text-sm font-semibold">
-                    {member.name.charAt(0).toUpperCase()}
+          <View className="mx-4">
+            {members.map((member) => (
+              <Pressable
+                key={member.id}
+                className={`flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3 ${
+                  isMemberSelected(member.id)
+                    ? "bg-primary/10 border-primary"
+                    : "border-border"
+                }`}
+                onPress={() => handleMemberPress(member)}
+              >
+                <View className="flex-row items-center flex-1">
+                  <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
+                    <Text className="text-primary-foreground text-sm font-semibold">
+                      {member.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text className="text-sm text-foreground font-medium flex-1">
+                    {member.surname
+                      ? `${member.name} ${member.surname}`
+                      : member.name}
                   </Text>
                 </View>
-                <Text className="text-sm text-foreground font-medium flex-1">
-                  {member.surname
-                    ? `${member.name} ${member.surname}`
-                    : member.name}
-                </Text>
-              </View>
-              {multiSelect ? (
-                <Ionicons
-                  name={
-                    isMemberSelected(member.id) ? "checkbox" : "square-outline"
-                  }
-                  size={24}
-                  className={
-                    isMemberSelected(member.id)
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }
-                />
-              ) : (
-                <View
-                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                    isMemberSelected(member.id)
-                      ? "border-primary"
-                      : "border-muted-foreground"
-                  }`}
-                >
-                  {isMemberSelected(member.id) && (
-                    <View className="w-3 h-3 rounded-full bg-primary" />
-                  )}
-                </View>
-              )}
-            </Pressable>
-          ))}
+                {multiSelect ? (
+                  <Ionicons
+                    name={
+                      isMemberSelected(member.id)
+                        ? "checkbox"
+                        : "square-outline"
+                    }
+                    size={24}
+                    className={
+                      isMemberSelected(member.id)
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    }
+                  />
+                ) : (
+                  <View
+                    className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                      isMemberSelected(member.id)
+                        ? "border-primary"
+                        : "border-muted-foreground"
+                    }`}
+                  >
+                    {isMemberSelected(member.id) && (
+                      <View className="w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </View>
+                )}
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       </BottomSheet>
     </>

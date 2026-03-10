@@ -159,7 +159,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         >
           <View {...panResponder.panHandlers} className="bg-card rounded-t-3xl">
             <View className="w-10 h-1 bg-border rounded-full self-center mt-2.5 mb-1" />
-            <View className="flex-row justify-between items-center p-5 border-b border-border">
+            <View className="flex-row justify-between items-center p-5">
               <Text className="text-xl font-semibold text-foreground">
                 {title}
               </Text>

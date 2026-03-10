@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
 import { Profile } from "../types/profile";
+import { formatCurrency } from "../lib/financeUtils";
 
 interface ExpenseSplitSectionProps {
   flatMembers: Profile[];
@@ -264,16 +265,16 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
           {(() => {
             const amountNum = parseFloat(amount) || 0;
             if (selectedMembers.length === 1) {
-              return `Jediný člen zaplatí: ${amountNum.toFixed(2)} Kč`;
+              return `Jediný člen zaplatí: ${formatCurrency(amountNum)}`;
             }
             const baseShare =
               Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
             const lastShare =
               amountNum - baseShare * (selectedMembers.length - 1);
             if (Math.abs(baseShare - lastShare) < 0.01) {
-              return `Každý zaplatí: ${baseShare.toFixed(2)} Kč`;
+              return `Každý zaplatí: ${formatCurrency(baseShare)}`;
             }
-            return `Každý zaplatí: ${baseShare.toFixed(2)} Kč (poslední ${lastShare.toFixed(2)} Kč)`;
+            return `Každý zaplatí: ${formatCurrency(baseShare)} (poslední ${formatCurrency(lastShare)})`;
           })()}
         </Text>
       )}
@@ -288,9 +289,9 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
             ).length;
 
             if (untouchedCount > 0) {
-              return `Součet: ${total.toFixed(2)} Kč / ${targetAmount.toFixed(2)} Kč`;
+              return `Součet: ${formatCurrency(total)} / ${formatCurrency(targetAmount)}`;
             } else {
-              return `Součet: ${total.toFixed(2)} Kč (celková částka se upravuje automaticky)`;
+              return `Součet: ${formatCurrency(total)} (celková částka se upravuje automaticky)`;
             }
           })()}
         </Text>

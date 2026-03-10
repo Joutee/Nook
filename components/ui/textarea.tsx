@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/financeUtils";
 import { Platform, TextInput, type TextInputProps } from "react-native";
 
 function Textarea({

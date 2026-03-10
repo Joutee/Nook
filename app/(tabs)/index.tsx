@@ -15,8 +15,8 @@ import {
   getDefaultWidgetsByRole,
 } from "@/config/widgetConfig";
 
-// Modulová proměnná pro sledování, zda už proběhl Supabase sync v této session
-let hasSupabaseSyncedInSession = false;
+// Modulová proměnná pro sledování, pro které byty už proběhl Supabase sync v této session
+let syncedFlats = new Set<string>();
 
 export default function Home() {
   const [widgetKeys, setWidgetKeys] = useState<string[]>([]);
@@ -64,66 +64,74 @@ export default function Home() {
     const DASHBOARD_LAYOUT_KEY = `@dashboard_layout_${currentFlat.id}`;
 
     try {
-      // 1. Okamžitě načíst z AsyncStorage
-      const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
-      if (storedLayout) {
-        const parsed = JSON.parse(storedLayout);
-        setWidgetKeys(parsed);
-        setIsLoading(false);
+      setIsLoading(true);
+      
+      // Pokud už byl tento byt načten v této session, použij local storage
+      if (syncedFlats.has(currentFlat.id)) {
+        const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
+        if (storedLayout) {
+          setWidgetKeys(JSON.parse(storedLayout));
+          setIsLoading(false);
+          return;
+        }
+        // Pokud z nějakého důvodu není v local storage, pokračuj na načtení z DB
       }
 
-      // 2. Pokud ještě neproběhl sync v této session, fetchni ze Supabase
-      if (!hasSupabaseSyncedInSession) {
-        // Získat aktuálního uživatele
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+      // První načtení tohoto bytu v session - načíst z databáze
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-        if (user) {
-          const { data, error } = await supabase
-            .from("flat_profile")
-            .select("dashboard_layout")
-            .eq("flat_id", currentFlat.id)
-            .eq("profile_id", user.id)
-            .single();
+      if (user) {
+        const { data, error } = await supabase
+          .from("flat_profile")
+          .select("dashboard_layout")
+          .eq("flat_id", currentFlat.id)
+          .eq("profile_id", user.id)
+          .single();
 
-          if (error) {
-            console.error("Error loading dashboard layout:", error);
-            // Při chybě použij výchozí layout
-            const layoutToUse = storedLayout
-              ? JSON.parse(storedLayout)
-              : getDefaultWidgetsByRole(userRole);
-            setWidgetKeys(layoutToUse);
-            await AsyncStorage.setItem(
-              DASHBOARD_LAYOUT_KEY,
-              JSON.stringify(layoutToUse),
-            );
-          } else {
-            // Data ze Supabase přišla
-            const dbLayout =
-              data?.dashboard_layout || getDefaultWidgetsByRole(userRole);
-            setWidgetKeys(dbLayout);
-            // Synchronizovat s AsyncStorage
-            await AsyncStorage.setItem(
-              DASHBOARD_LAYOUT_KEY,
-              JSON.stringify(dbLayout),
-            );
-          }
-        } else {
-          // Pokud není user, použij výchozí layout
+        if (error) {
+          console.error("Error loading dashboard layout:", error);
+          // Při chybě použij local storage jako fallback
+          const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
           const layoutToUse = storedLayout
             ? JSON.parse(storedLayout)
             : getDefaultWidgetsByRole(userRole);
           setWidgetKeys(layoutToUse);
+        } else {
+          // Data ze Supabase přišla - použij je jako primární zdroj
+          const dbLayout =
+            data?.dashboard_layout || getDefaultWidgetsByRole(userRole);
+          setWidgetKeys(dbLayout);
+          // Synchronizovat s AsyncStorage
+          await AsyncStorage.setItem(
+            DASHBOARD_LAYOUT_KEY,
+            JSON.stringify(dbLayout),
+          );
         }
-
-        // Nastavit flag, že sync proběhl
-        hasSupabaseSyncedInSession = true;
+        
+        // Označit tento byt jako načtený v této session
+        syncedFlats.add(currentFlat.id);
+      } else {
+        // Pokud není user, použij local storage nebo výchozí layout
+        const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
+        const layoutToUse = storedLayout
+          ? JSON.parse(storedLayout)
+          : getDefaultWidgetsByRole(userRole);
+        setWidgetKeys(layoutToUse);
       }
     } catch (error) {
       console.error("Error in loadDashboardLayout:", error);
-      // Použít výchozí layout při chybě
-      setWidgetKeys(getDefaultWidgetsByRole(userRole));
+      // Použít local storage nebo výchozí layout při chybě
+      try {
+        const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
+        const layoutToUse = storedLayout
+          ? JSON.parse(storedLayout)
+          : getDefaultWidgetsByRole(userRole);
+        setWidgetKeys(layoutToUse);
+      } catch {
+        setWidgetKeys(getDefaultWidgetsByRole(userRole));
+      }
     } finally {
       setIsLoading(false);
     }

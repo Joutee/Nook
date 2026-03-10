@@ -1,52 +1,52 @@
 import { View, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { SettlementList } from "@/components/SettlementList";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
-import { Balance, Settlement } from "../../types/finance";
-import { calculateSettlements } from "../../lib/financeUtils";
+import { Balance } from "../../types/finance";
 import { Pressable } from "react-native";
+import { formatCurrency } from "../../lib/financeUtils";
 
 export const RepaymentWidget = () => {
-  const [settlements, setSettlements] = useState<Settlement[]>([]);
+  const [balances, setBalances] = useState<Balance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentFlat } = useFlatContext();
 
+  useEffect(() => {
+    // 1. Prvotní načtení dat
+    loadFinanceData();
 
-    useEffect(() => {
-      // 1. Prvotní načtení dat
-      loadFinanceData();
-  
-      // Pokud nemáme flat_id, nemá smysl nic poslouchat
-      if (!currentFlat?.id) return;
-  
-      // 2. Vytvoření Realtime kanálu
-      const expensesChannel = supabase
-        .channel("public:expenses") // Název kanálu (může být cokoliv)
-        .on(
-          "postgres_changes",
-          {
-            event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
-            schema: "public",
-            table: "expenses",
-            filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
-          },
-          (payload) => {
-            console.log("Změna v výdajích detekována!", payload);
-            // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
-            loadFinanceData();
-          },
-        )
-        .subscribe();
-  
-      // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
-      return () => {
-        supabase.removeChannel(expensesChannel);
-      };
-    }, [currentFlat]);
+    // Pokud nemáme flat_id, nemá smysl nic poslouchat
+    if (!currentFlat?.id) return;
+
+    // 2. Vytvoření Realtime kanálu
+    const expensesChannel = supabase
+      .channel("public:expenses") // Název kanálu (může být cokoliv)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "expenses",
+          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+        },
+        (payload) => {
+          console.log("Změna v výdajích detekována!", payload);
+          // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
+          loadFinanceData();
+        },
+      )
+      .subscribe();
+
+    // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
+    return () => {
+      supabase.removeChannel(expensesChannel);
+    };
+  }, [currentFlat]);
 
   const loadFinanceData = async () => {
     if (!currentFlat?.id) {
@@ -64,18 +64,13 @@ export const RepaymentWidget = () => {
       if (error) {
         console.error("Error loading balances:", error);
       } else {
-        const calculatedSettlements = calculateSettlements(balancesData || []);
-        setSettlements(calculatedSettlements.slice(0, 3)); // Zobrazit max 3 vypořádání
+        setBalances(balancesData || []);
       }
     } catch (error) {
       console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(2)} Kč`;
   };
 
   return (
@@ -92,30 +87,14 @@ export const RepaymentWidget = () => {
             <View className="py-4">
               <ActivityIndicator size="small" />
             </View>
-          ) : settlements.length === 0 ? (
-            <Text className="text-muted-foreground text-sm">
-              Všichni jsou vyrovnaní!
-            </Text>
           ) : (
             <View>
-              {settlements.map((settlement, index) => (
-                <View
-                  key={index}
-                  className="flex-row items-center justify-between py-2 border-b border-border last:border-b-0"
-                >
-                  <View className="flex-1">
-                    <Text className="text-sm text-foreground">
-                      <Text className="font-semibold">{settlement.from}</Text>
-                      {" → "}
-                      <Text className="font-semibold">{settlement.to}</Text>
-                    </Text>
-                  </View>
-                  <Text className="text-sm font-semibold text-primary">
-                    {formatCurrency(settlement.amount)}
-                  </Text>
-                </View>
-              ))}
-              {settlements.length > 0 && (
+              <SettlementList
+                balances={balances}
+                formatCurrency={formatCurrency}
+                maxItems={3}
+              />
+              {balances.length > 0 && (
                 <View className="mt-2">
                   <Text className="text-xs text-muted-foreground text-right">
                     Klepněte pro více detailů →

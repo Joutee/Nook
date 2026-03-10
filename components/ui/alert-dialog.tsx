@@ -3,7 +3,7 @@ import { Modal, View, Pressable } from "react-native";
 import { Card } from "./card";
 import { Text } from "./text";
 import { Button } from "./button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/financeUtils";
 
 interface CustomAlertDialogProps {
   open: boolean;

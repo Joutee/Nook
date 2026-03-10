@@ -9,19 +9,19 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { SettlementList } from "@/components/SettlementList";
 import React, { useState, useCallback, Fragment } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
-import { Balance, ExpenseWithDetails, Settlement } from "@/types/finance";
-import { calculateSettlements } from "@/lib/financeUtils";
+import { Balance, ExpenseWithDetails } from "@/types/finance";
+import { formatCurrency } from "@/lib/financeUtils";
 
 const Finance = () => {
   const [balances, setBalances] = useState<Balance[]>([]);
   const [expenses, setExpenses] = useState<ExpenseWithDetails[]>([]);
-  const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
@@ -53,9 +53,6 @@ const Finance = () => {
         );
       } else {
         setBalances(balancesData || []);
-        // Calculate settlements from balances
-        const calculatedSettlements = calculateSettlements(balancesData || []);
-        setSettlements(calculatedSettlements);
       }
 
       // Load expense history (join with profiles to get payer name)
@@ -94,10 +91,6 @@ const Finance = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(2)} Kč`;
   };
 
   const formatDate = (dateString: string) => {
@@ -142,24 +135,6 @@ const Finance = () => {
             {formatCurrency(balance.net_balance)}
           </Text>
         </View>
-      </View>
-    );
-  };
-
-  const renderSettlementItem = (item: Settlement, index: number) => {
-    return (
-      <View
-        key={index}
-        className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
-      >
-        <Ionicons name="arrow-forward" size={20} className="text-primary" />
-        <Text className="text-sm text-foreground flex-1">
-          <Text className="font-semibold text-primary">{item.from}</Text> dluží{" "}
-          <Text className="font-semibold text-primary">{item.to}</Text>{" "}
-          <Text className="font-bold text-foreground">
-            {formatCurrency(item.amount)}
-          </Text>
-        </Text>
       </View>
     );
   };
@@ -240,7 +215,7 @@ const Finance = () => {
         </Card>
 
         {/* Settlements Section */}
-        {settlements.length > 0 && (
+        {balances.length > 0 && (
           <Card className="mb-3">
             <CardHeader className="flex-row items-center gap-2">
               <Ionicons
@@ -250,7 +225,12 @@ const Finance = () => {
               />
               <CardTitle className="flex-1">Doporučená vyrovnání</CardTitle>
             </CardHeader>
-            <CardContent>{settlements.map(renderSettlementItem)}</CardContent>
+            <CardContent>
+              <SettlementList
+                balances={balances}
+                formatCurrency={formatCurrency}
+              />
+            </CardContent>
           </Card>
         )}
 

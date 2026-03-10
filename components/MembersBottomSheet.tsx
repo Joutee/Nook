@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  FlatList,
-  ActivityIndicator,
-  Dimensions,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { View, FlatList, ActivityIndicator, Dimensions } from "react-native";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
-import { Ionicons } from "@expo/vector-icons";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { MemberList, Member } from "@/components/MemberList";
 import { supabase } from "../lib/supabase";
 import BottomSheet from "./BottomSheet";
 import { useToast } from "../contexts/ToastContext";
 import { useFlatContext } from "../contexts/FlatContext";
-import { FlatMember } from "../types/flat";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -30,7 +21,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
   onClose,
   flatId,
 }) => {
-  const [members, setMembers] = useState<FlatMember[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -173,7 +164,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     }
   };
 
-  const openRemoveDialog = (memberId: string) => {
+  const handleRemoveMemberClick = (memberId: string) => {
     setMemberToRemove(memberId);
     setShowDeleteDialog(true);
   };
@@ -214,7 +205,7 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
     <BottomSheet visible={visible} onClose={onClose} title="Členové bytu">
       {isLoading ? (
         <View className="p-10 items-center justify-center">
-          <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+          <ActivityIndicator size="large" className="text-primary" />
         </View>
       ) : members.length === 0 ? (
         <View className="p-10 items-center justify-center">
@@ -225,76 +216,18 @@ const MembersBottomSheet: React.FC<MembersBottomSheetProps> = ({
           <FlatList
             data={members}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              const showDeleteButton =
-                isCurrentUserAdmin || item.id === currentUserId;
-
-              return (
-                <View className="bg-secondary rounded-lg p-3 mb-2 mx-4 border border-border">
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1">
-                      <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
-                        <Text className="text-primary-foreground text-sm font-semibold">
-                          {item.name
-                            ? item.name.charAt(0).toUpperCase()
-                            : item.username
-                              ? item.username.charAt(0).toUpperCase()
-                              : "?"}
-                        </Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-sm text-foreground font-medium mb-0.5">
-                          {item.name && item.surname
-                            ? `${item.name} ${item.surname}`
-                            : item.name || item.username || "Neznámý uživatel"}
-                        </Text>
-                        <Pressable
-                          onPress={() =>
-                            isCurrentUserAdmin
-                              ? handleChangeRole(item.id, item.role)
-                              : null
-                          }
-                          disabled={!isCurrentUserAdmin}
-                        >
-                          <View className="flex-row items-center gap-1">
-                            {isCurrentUserAdmin && (
-                              <Ionicons
-                                name="swap-horizontal"
-                                size={14}
-                                className="text-primary"
-                              />
-                            )}
-                            <Text
-                              className={`text-xs ${
-                                isCurrentUserAdmin
-                                  ? "text-primary font-medium"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {item.role === "pronajimatel"
-                                ? "Pronajímatel"
-                                : "Nájemce"}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      </View>
-                    </View>
-                    {showDeleteButton && (
-                      <TouchableOpacity
-                        onPress={() => openRemoveDialog(item.id)}
-                        className="p-2 ml-2"
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={20}
-                          className="text-destructive"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              );
-            }}
+            renderItem={({ item }) => (
+              <View className="mx-4">
+                <MemberList
+                  members={[item]}
+                  showActions={true}
+                  isAdmin={isCurrentUserAdmin}
+                  currentUserId={currentUserId}
+                  onRemoveMember={handleRemoveMemberClick}
+                  onChangeRole={handleChangeRole}
+                />
+              </View>
+            )}
             contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
             scrollEnabled={members.length > 5}
           />

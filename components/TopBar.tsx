@@ -90,37 +90,39 @@ const TopBar = () => {
         title="Vyberte byt"
       >
         <ScrollView style={{ maxHeight: 400 }}>
-          {flats.map((item) => (
-            <Pressable
-              key={item.id}
-              className={`flex-row items-center justify-between bg-secondary rounded-lg p-3 mb-2 mx-4 border ${
-                currentFlat?.id === item.id
-                  ? "bg-primary/10 border-primary"
-                  : "border-border"
-              }`}
-              onPress={() => handleSelectFlat(item)}
-            >
-              <View className="flex-row items-center flex-1">
-                <Text
-                  className="text-sm text-foreground font-medium flex-1"
-                  numberOfLines={2}
-                >
-                  {item.name}
-                </Text>
-              </View>
-              <View
-                className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+          <View className="mx-4">
+            {flats.map((item) => (
+              <Pressable
+                key={item.id}
+                className={`flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3 ${
                   currentFlat?.id === item.id
-                    ? "border-primary"
-                    : "border-muted-foreground"
+                    ? "bg-primary/10 border-primary"
+                    : "border-border"
                 }`}
+                onPress={() => handleSelectFlat(item)}
               >
-                {currentFlat?.id === item.id && (
-                  <View className="w-3 h-3 rounded-full bg-primary" />
-                )}
-              </View>
-            </Pressable>
-          ))}
+                <View className="flex-row items-center flex-1">
+                  <Text
+                    className="text-sm text-foreground font-medium flex-1"
+                    numberOfLines={2}
+                  >
+                    {item.name}
+                  </Text>
+                </View>
+                <View
+                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+                    currentFlat?.id === item.id
+                      ? "border-primary"
+                      : "border-muted-foreground"
+                  }`}
+                >
+                  {currentFlat?.id === item.id && (
+                    <View className="w-3 h-3 rounded-full bg-primary" />
+                  )}
+                </View>
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       </BottomSheet>
     </>

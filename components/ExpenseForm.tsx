@@ -12,6 +12,7 @@ import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
 import { Profile } from "../types/profile";
+import { formatCurrency } from "../lib/financeUtils";
 import { MemberSelector } from "./MemberSelector";
 import { ExpenseSplitSection } from "./ExpenseSplitSection";
 import { DatePickerInput } from "./DatePickerInput";
@@ -217,7 +218,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       // If all are touched, the amount has been auto-updated
       if (untouchedCount > 0 && Math.abs(totalManual - amountNum) > 0.01) {
         showToast(
-          `Součet částek (${totalManual.toFixed(2)} Kč) musí odpovídat celkové částce (${amountNum.toFixed(2)} Kč)`,
+          `Součet částek (${formatCurrency(totalManual)}) musí odpovídat celkové částce (${formatCurrency(amountNum)})`,
           "error",
         );
         return;
