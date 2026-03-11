@@ -1,6 +1,8 @@
 export interface Member {
   id: string;
   name: string;
-  surname?: string;
-  avatar_url: string | null;
+  surname: string;
+  username?: string;
+  avatar_url?: string | null;
+  role: string;
 }

@@ -163,11 +163,6 @@ const documents = () => {
             </Text>
           )}
           <View className="flex-row items-center gap-1">
-            <Ionicons
-              name="calendar-outline"
-              size={11}
-              className="text-muted-foreground"
-            />
             <Text className="text-xs text-muted-foreground flex-1">
               {formatDate(item.created_at)}
             </Text>

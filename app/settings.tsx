@@ -237,7 +237,6 @@ const Settings = () => {
       <MembersBottomSheet
         visible={isMembersModalVisible}
         onClose={() => setIsMembersModalVisible(false)}
-        flatId={currentFlat?.id || null}
       />
 
       {/* Alert Dialog pro odhlášení */}
