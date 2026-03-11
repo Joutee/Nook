@@ -11,6 +11,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { useToast } from "../contexts/ToastContext";
 import { Chore, HistoryItem } from "../types/chores";
+import { completeChore } from "../lib/choreUtils";
 
 const ChoreDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,6 +22,7 @@ const ChoreDetail = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -88,38 +90,22 @@ const ChoreDetail = () => {
     }
   };
 
-  const handleCompleteChore = async () => {
-    if (!chore || chore.assignee_user_id !== currentUserId) return;
-    if (completingChore) return;
+  const handleCompleteChore = () => {
+    if (!chore || completingChore) return;
+    setShowCompleteDialog(true);
+  };
 
-    if (chore.is_completed_current_cycle) {
-      showToast("Tento úkol je již dokončen", "info");
-      return;
-    }
+  const confirmCompleteChore = async () => {
+    if (!chore) return;
 
     setCompletingChore(true);
-    try {
-      const { error } = await supabase.from("chore_completions").insert({
-        chore_id: chore.id,
-        profile_id: currentUserId,
-        cycle_index: chore.current_cycle_index,
-      });
-
-      if (error) {
-        showToast(
-          "Nepodařilo se označit jako hotové: " + error.message,
-          "error",
-        );
-      } else {
-        showToast("Úkol dokončen!", "success");
-        loadChoreDetail();
-        loadRecentHistory();
-      }
-    } catch (error: any) {
-      showToast("Nepodařilo se označit jako hotové: " + error.message, "error");
-    } finally {
-      setCompletingChore(false);
+    setShowCompleteDialog(false);
+    const success = await completeChore(chore, currentUserId, showToast);
+    if (success) {
+      loadChoreDetail();
+      loadRecentHistory();
     }
+    setCompletingChore(false);
   };
 
   const handleDelete = () => {
@@ -365,6 +351,16 @@ const ChoreDetail = () => {
         actionText="Smazat"
         onAction={confirmDelete}
         destructive
+      />
+
+      <AlertDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+        title="Dokončit úkol"
+        description={`Opravdu chcete označit úkol "${chore?.name}" jako dokončený? Akci nelze vrátit zpět.`}
+        cancelText="Zrušit"
+        actionText="Dokončit"
+        onAction={confirmCompleteChore}
       />
     </ScrollView>
   );

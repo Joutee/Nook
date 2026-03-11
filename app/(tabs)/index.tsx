@@ -65,7 +65,7 @@ export default function Home() {
 
     try {
       setIsLoading(true);
-      
+
       // Pokud už byl tento byt načten v této session, použij local storage
       if (syncedFlats.has(currentFlat.id)) {
         const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
@@ -109,7 +109,7 @@ export default function Home() {
             JSON.stringify(dbLayout),
           );
         }
-        
+
         // Označit tento byt jako načtený v této session
         syncedFlats.add(currentFlat.id);
       } else {
@@ -138,7 +138,7 @@ export default function Home() {
   };
   if (!currentFlat) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
+      <View className="flex-1 items-center justify-center p-6 bg-background">
         <Text className="text-center text-muted-foreground">
           Nejprve se připojte k bytu
         </Text>
@@ -148,8 +148,8 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -178,7 +178,7 @@ export default function Home() {
           })}
 
         {/* Tlačítko pro uspořádání widgetů */}
-        <View className="mt-4 items-center">
+        <View className="items-center">
           <Button
             variant="outline"
             onPress={() => router.push("/reorder-widgets")}

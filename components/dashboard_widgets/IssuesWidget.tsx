@@ -80,13 +80,15 @@ export const IssuesWidget = () => {
   };
 
   return (
-    <Card className="mb-4">
-      <Pressable onPress={() => router.push("/(tabs)/issues")}>
-        <CardHeader>
-          <View className="flex-row items-center justify-between">
-            <CardTitle>Poslední závady</CardTitle>
-            <Ionicons name="warning-outline" size={24} color="#ef4444" />
-          </View>
+    <Pressable onPress={() => router.push("/(tabs)/issues")}>
+      <Card className="mb-4">
+        <CardHeader className="flex-row items-center gap-2">
+          <Ionicons
+            name="warning-outline"
+            size={24}
+            className="text-foreground"
+          />
+          <CardTitle>Poslední závady</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -101,50 +103,45 @@ export const IssuesWidget = () => {
                 <React.Fragment key={issue.id}>
                   <Pressable
                     onPress={() => router.push(`/issue-detail?id=${issue.id}`)}
-                    className="py-2 border-b border-border last:border-b-0"
+                    className="py-2 border-b border-border last:border-b-0 flex flex-row justify-between mb-1 items-center"
                   >
-                    <View className="flex-row items-start justify-between mb-1">
+                    <View className="flex-1">
                       <Text
-                        className="text-sm font-semibold text-foreground flex-1 mr-2"
+                        className="text-base font-semibold text-foreground flex-1 mr-2 w-full"
                         numberOfLines={1}
                       >
                         {issue.title}
                       </Text>
-                      <View
-                        className="px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: getStatusColor(issue.status),
-                        }}
-                      >
-                        <Text className="text-white text-xs font-semibold">
-                          {getStatusText(issue.status)}
+                      {issue.description && (
+                        <Text
+                          className="text-xs text-muted-foreground w-full"
+                          numberOfLines={1}
+                        >
+                          {issue.description}
                         </Text>
-                      </View>
-                    </View>
-                    {issue.description && (
-                      <Text
-                        className="text-xs text-muted-foreground"
-                        numberOfLines={1}
-                      >
-                        {issue.description}
+                      )}
+                      <Text className="text-xs text-muted-foreground mt-1 w-full">
+                        {formatDate(issue.created_at)}
                       </Text>
-                    )}
-                    <Text className="text-xs text-muted-foreground mt-1">
-                      {formatDate(issue.created_at)}
-                    </Text>
+                    </View>
+                    <View
+                      className="px-2 py-0.5 rounded-full ml-3"
+                      style={{
+                        backgroundColor: getStatusColor(issue.status),
+                      }}
+                    >
+                      <Text className="text-white text-xs font-semibold">
+                        {getStatusText(issue.status)}
+                      </Text>
+                    </View>
                   </Pressable>
                   {index < issues.length - 1 && <Separator />}
                 </React.Fragment>
               ))}
-              <View className="mt-2">
-                <Text className="text-xs text-muted-foreground text-right">
-                  Klepněte pro všechny závady →
-                </Text>
-              </View>
             </View>
           )}
         </CardContent>
-      </Pressable>
-    </Card>
+      </Card>
+    </Pressable>
   );
 };

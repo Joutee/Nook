@@ -14,6 +14,7 @@ name change
 telefonni cislo a email ke kazdemu profilu
 pridat do financi bankovni ucet
 zmenit vsechny loadingy na stejnou barvu
+skryt tu bocni listu na scollovani
 
 
 kdyz zbyde cas:

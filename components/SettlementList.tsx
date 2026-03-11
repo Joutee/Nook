@@ -3,6 +3,7 @@ import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { Balance, Settlement } from "@/types/finance";
 import { formatCurrency as formatCurrencyUtil } from "@/lib/financeUtils";
+import { Separator } from "@/components/ui/separator";
 
 interface SettlementListProps {
   balances: Balance[];
@@ -20,12 +21,16 @@ const calculateSettlements = (balances: Balance[]): Settlement[] => {
   // Create mutable copies of balances
   const debtors = balances
     .filter((b) => b.net_balance < 0)
-    .map((b) => ({ name: b.name, amount: Math.abs(b.net_balance) }))
+    .map((b) => ({
+      name: b.name,
+      surname: b.surname,
+      amount: Math.abs(b.net_balance),
+    }))
     .sort((a, b) => b.amount - a.amount); // Sort descending
 
   const creditors = balances
     .filter((b) => b.net_balance > 0)
-    .map((b) => ({ name: b.name, amount: b.net_balance }))
+    .map((b) => ({ name: b.name, surname: b.surname, amount: b.net_balance }))
     .sort((a, b) => b.amount - a.amount); // Sort descending
 
   let i = 0; // Debtor index
@@ -40,8 +45,10 @@ const calculateSettlements = (balances: Balance[]): Settlement[] => {
 
     // Create a settlement transaction
     settlements.push({
-      from: debtor.name,
-      to: creditor.name,
+      fromName: debtor.name,
+      fromSurname: debtor.surname,
+      toName: creditor.name,
+      toSurname: creditor.surname,
       amount: Math.round(settlementAmount * 100) / 100, // Round to 2 decimal places
     });
 
@@ -74,21 +81,26 @@ export const SettlementList = ({
   return (
     <View>
       {settlements.map((settlement, index) => (
-        <View
-          key={index}
-          className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
-        >
-          <Ionicons name="arrow-forward" size={20} className="text-primary" />
-          <Text className="text-sm text-foreground flex-1">
-            <Text className="font-semibold text-primary">
-              {settlement.from}
-            </Text>{" "}
-            dluží{" "}
-            <Text className="font-semibold text-primary">{settlement.to}</Text>{" "}
-            <Text className="font-bold text-foreground">
+        <View key={index}>
+          <View className="py-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="font-semibold text-foreground flex-1">
+                {settlement.fromName} {settlement.fromSurname}
+              </Text>
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                className="text-primary mx-4"
+              />
+              <Text className="font-semibold text-foreground flex-1 text-right">
+                {settlement.toName} {settlement.toSurname}
+              </Text>
+            </View>
+            <Text className="font-bold text-foreground text-xs text-center">
               {formatCurrency(settlement.amount)}
             </Text>
-          </Text>
+          </View>
+          {index < settlements.length - 1 && <Separator />}
         </View>
       ))}
     </View>

@@ -74,13 +74,15 @@ export const RepaymentWidget = () => {
   };
 
   return (
-    <Card className="mb-4">
-      <Pressable onPress={() => router.push("/(tabs)/finance")}>
-        <CardHeader>
-          <View className="flex-row items-center justify-between">
-            <CardTitle>Vyrovnání dluhů</CardTitle>
-            <Ionicons name="wallet-outline" size={24} color="#3b82f6" />
-          </View>
+    <Pressable onPress={() => router.push("/(tabs)/finance")}>
+      <Card className="mb-4">
+        <CardHeader className="flex-row items-center gap-2">
+          <Ionicons
+            name="wallet-outline"
+            size={24}
+            className="text-foreground"
+          />
+          <CardTitle>Vyrovnání dluhů</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -88,23 +90,14 @@ export const RepaymentWidget = () => {
               <ActivityIndicator size="small" />
             </View>
           ) : (
-            <View>
-              <SettlementList
-                balances={balances}
-                formatCurrency={formatCurrency}
-                maxItems={3}
-              />
-              {balances.length > 0 && (
-                <View className="mt-2">
-                  <Text className="text-xs text-muted-foreground text-right">
-                    Klepněte pro více detailů →
-                  </Text>
-                </View>
-              )}
-            </View>
+            <SettlementList
+              balances={balances}
+              formatCurrency={formatCurrency}
+              maxItems={3}
+            />
           )}
         </CardContent>
-      </Pressable>
-    </Card>
+      </Card>
+    </Pressable>
   );
 };

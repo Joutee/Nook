@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useRouter, usePathname } from "expo-router";
 import { useFlatContext } from "../contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet from "./BottomSheet";
+import { FlatsList } from "./FlatsList";
 
 const TopBar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { currentFlat, flats, setCurrentFlat } = useFlatContext();
+  const { currentFlat, flats } = useFlatContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -20,18 +21,7 @@ const TopBar = () => {
     }
   };
 
-  const handleSelectFlat = (flat: {
-    id: string;
-    name: string;
-    address: string;
-  }) => {
-    // Pokud už je tento byt vybraný, jen zavři modal
-    if (currentFlat?.id === flat.id) {
-      setIsModalVisible(false);
-      return;
-    }
-
-    setCurrentFlat(flat);
+  const handleFlatSelect = () => {
     setIsModalVisible(false);
     // Pouze pokud nejsme na domovské stránce, přejdi na ni
     if (pathname !== "/") {
@@ -91,37 +81,7 @@ const TopBar = () => {
       >
         <ScrollView style={{ maxHeight: 400 }}>
           <View className="mx-4">
-            {flats.map((item) => (
-              <Pressable
-                key={item.id}
-                className={`flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3 ${
-                  currentFlat?.id === item.id
-                    ? "bg-primary/10 border-primary"
-                    : "border-border"
-                }`}
-                onPress={() => handleSelectFlat(item)}
-              >
-                <View className="flex-row items-center flex-1">
-                  <Text
-                    className="text-sm text-foreground font-medium flex-1"
-                    numberOfLines={2}
-                  >
-                    {item.name}
-                  </Text>
-                </View>
-                <View
-                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                    currentFlat?.id === item.id
-                      ? "border-primary"
-                      : "border-muted-foreground"
-                  }`}
-                >
-                  {currentFlat?.id === item.id && (
-                    <View className="w-3 h-3 rounded-full bg-primary" />
-                  )}
-                </View>
-              </Pressable>
-            ))}
+            <FlatsList onFlatSelect={handleFlatSelect} />
           </View>
         </ScrollView>
       </BottomSheet>

@@ -3,6 +3,7 @@ import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -10,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Chore } from "@/types/chores";
+import { completeChore } from "@/lib/choreUtils";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -18,6 +20,8 @@ const Chores = () => {
     null,
   );
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [choreToComplete, setChoreToComplete] = useState<Chore | null>(null);
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
 
@@ -71,38 +75,50 @@ const Chores = () => {
     }
   };
 
-  const handleCompleteChore = async (chore: Chore) => {
-    if (!currentFlat?.id || chore.assignee_user_id !== currentUserId) return;
-    if (completingChoreId) return; // Zabránit multiple clicks
+  const handleCompleteChore = (chore: Chore) => {
+    if (!currentFlat?.id || completingChoreId) return;
+    setChoreToComplete(chore);
+    setShowCompleteDialog(true);
+  };
 
-    // Zkontrolovat, jestli už není dokončeno
-    if (chore.is_completed_current_cycle) {
-      showToast("Tento úkol je již dokončen", "info");
-      return;
-    }
-    console.log(chore.is_completed_current_cycle);
-    setCompletingChoreId(chore.id);
-    try {
-      const { error } = await supabase.from("chore_completions").insert({
-        chore_id: chore.id,
-        profile_id: currentUserId,
-        cycle_index: chore.current_cycle_index,
-      });
+  const confirmCompleteChore = async () => {
+    if (!choreToComplete) return;
 
-      if (error) {
-        showToast(
-          "Nepodařilo se označit jako hotové: " + error.message,
-          "error",
-        );
-      } else {
-        showToast("Úkol dokončen!", "success");
-        loadChores();
-      }
-    } catch (error: any) {
-      showToast("Nepodařilo se označit jako hotové: " + error.message, "error");
-    } finally {
-      setCompletingChoreId(null);
+    setCompletingChoreId(choreToComplete.id);
+    setShowCompleteDialog(false);
+    const success = await completeChore(
+      choreToComplete,
+      currentUserId,
+      showToast,
+    );
+    if (success) {
+      loadChores();
     }
+    setCompletingChoreId(null);
+    setChoreToComplete(null);
+  };
+
+  const calculateNextCycleDate = (chore: Chore): Date | null => {
+    if (!chore.start_date) return null;
+
+    const startDate = new Date(chore.start_date);
+    const nextCycleDate = new Date(startDate);
+    nextCycleDate.setDate(
+      startDate.getDate() +
+        (chore.current_cycle_index + 1) * chore.interval_days,
+    );
+
+    return nextCycleDate;
+  };
+
+  const formatNextCycle = (date: Date | null): string => {
+    if (!date) return "";
+
+    return date.toLocaleDateString("cs-CZ", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
   };
 
   const renderChoreItem = (item: Chore) => {
@@ -110,6 +126,8 @@ const Chores = () => {
     const isCompleted = item.is_completed_current_cycle;
     const isFutureStart =
       item.start_date && new Date(item.start_date) > new Date();
+    const nextCycleDate = calculateNextCycleDate(item);
+    const nextCycleText = formatNextCycle(nextCycleDate);
 
     return (
       <Card
@@ -162,12 +180,16 @@ const Chores = () => {
                   Každých {item.interval_days}{" "}
                   {item.interval_days === 1 ? "den" : "dní"}
                 </Text>
-                {isFutureStart && (
+                {isFutureStart ? (
                   <Text className="text-xs text-primary font-medium mt-0.5">
                     Začíná:{" "}
                     {new Date(item.start_date!).toLocaleDateString("cs-CZ")}
                   </Text>
-                )}
+                ) : nextCycleText ? (
+                  <Text className="text-xs text-primary font-medium min-w- mt-0.5">
+                    Nový cyklus: {nextCycleText}
+                  </Text>
+                ) : null}
               </View>
             </View>
           </Pressable>
@@ -241,6 +263,16 @@ const Chores = () => {
       >
         <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>
+
+      <AlertDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+        title="Dokončit úkol"
+        description={`Opravdu chcete označit úkol "${choreToComplete?.name}" jako dokončený? Akci nelze vrátit zpět.`}
+        cancelText="Zrušit"
+        actionText="Dokončit"
+        onAction={confirmCompleteChore}
+      />
     </View>
   );
 };

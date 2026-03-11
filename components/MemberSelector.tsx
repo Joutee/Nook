@@ -1,9 +1,10 @@
 import React from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable, useColorScheme } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet from "./BottomSheet";
 import { Member } from "../types/members";
+import { THEME } from "../lib/theme";
 
 interface MemberSelectorProps {
   members: Member[];
@@ -23,6 +24,9 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
   title,
 }) => {
   const [showBottomSheet, setShowBottomSheet] = React.useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const borderColor = isDark ? THEME.dark.border : THEME.light.border;
 
   const isMemberSelected = (memberId: string) => {
     return selectedMembers.some((m) => m.id === memberId);
@@ -113,10 +117,11 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
                         : "square-outline"
                     }
                     size={24}
+                    color={
+                      isMemberSelected(member.id) ? undefined : borderColor
+                    }
                     className={
-                      isMemberSelected(member.id)
-                        ? "text-primary"
-                        : "text-muted-foreground"
+                      isMemberSelected(member.id) ? "text-primary" : undefined
                     }
                   />
                 ) : (
@@ -124,7 +129,7 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
                     className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
                       isMemberSelected(member.id)
                         ? "border-primary"
-                        : "border-muted-foreground"
+                        : "border-border"
                     }`}
                   >
                     {isMemberSelected(member.id) && (

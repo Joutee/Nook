@@ -7,11 +7,13 @@ import { Ionicons } from "@expo/vector-icons";
 export const FlatMembersWidget = () => {
   return (
     <Card className="mb-4">
-      <CardHeader>
-        <View className="flex-row items-center justify-between">
-          <CardTitle>Členové bytu</CardTitle>
-          <Ionicons name="people-outline" size={24} color="#6366f1" />
-        </View>
+          <CardHeader className="flex-row items-center gap-2">
+            <Ionicons
+              name="people-outline"
+              size={24}
+              className="text-foreground"
+            />
+            <CardTitle>Členové bytu</CardTitle>
       </CardHeader>
       <CardContent>
         <MemberList showActions={true} />

@@ -28,8 +28,10 @@ export interface Balance {
 }
 
 export interface Settlement {
-  from: string;
-  to: string;
+  fromName: string;
+  fromSurname: string;
+  toName: string;
+  toSurname: string;
   amount: number;
 }
 

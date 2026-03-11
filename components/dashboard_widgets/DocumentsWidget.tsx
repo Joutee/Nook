@@ -99,13 +99,15 @@ export const DocumentsWidget = () => {
   };
 
   return (
-    <Card className="mb-4">
-      <Pressable onPress={() => router.push("/(tabs)/documents")}>
-        <CardHeader>
-          <View className="flex-row items-center justify-between">
-            <CardTitle>Dokumenty</CardTitle>
-            <Ionicons name="document-text-outline" size={24} color="#6366f1" />
-          </View>
+    <Pressable onPress={() => router.push("/(tabs)/documents")}>
+      <Card className="mb-4">
+        <CardHeader className="flex-row items-center gap-2">
+          <Ionicons
+            name="document-text-outline"
+            size={24}
+            className="text-foreground"
+          />
+          <CardTitle>Poslední dokumenty</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -149,7 +151,7 @@ export const DocumentsWidget = () => {
                       </View>
                     </View>
                     <View className="ml-2">
-                      <Text className="text-xs text-muted-foreground">
+                      <Text className="text-xs min-w-24 text-right text-muted-foreground">
                         {formatDate(doc.created_at)}
                       </Text>
                     </View>
@@ -159,7 +161,7 @@ export const DocumentsWidget = () => {
             </View>
           )}
         </CardContent>
-      </Pressable>
-    </Card>
+      </Card>
+    </Pressable>
   );
 };
