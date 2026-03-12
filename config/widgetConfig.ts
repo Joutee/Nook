@@ -5,6 +5,7 @@ import { MyChoresWidget } from "@/components/dashboard_widgets/MyChoresWidget";
 import { FlatsWidget } from "@/components/dashboard_widgets/FlatsWidget";
 import { FlatMembersWidget } from "@/components/dashboard_widgets/FlatMembersWidget";
 import { DocumentsWidget } from "@/components/dashboard_widgets/DocumentsWidget";
+import { ChoreLeaderBoardWidget } from "@/components/dashboard_widgets/ChoreLeaderBoardWidget";
 
 export const DEFAULT_WIDGETS = [
   "my_chores_widget",
@@ -29,6 +30,7 @@ export const WIDGET_NAMES: Record<string, string> = {
   flats_widget: "Moje byty",
   flat_members_widget: "Členové bytu",
   documents_widget: "Dokumenty",
+  chore_leaderboard_widget: "Žebříček plnění úkolů",
 };
 
 // Mapování klíčů na ikony
@@ -39,6 +41,7 @@ export const WIDGET_ICONS: Record<string, any> = {
   flats_widget: "home-outline",
   flat_members_widget: "people-outline",
   documents_widget: "document-text-outline",
+  chore_leaderboard_widget: "trophy-outline",
 };
 
 // Mapování klíčů na komponenty
@@ -49,6 +52,7 @@ export const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   flats_widget: FlatsWidget,
   flat_members_widget: FlatMembersWidget,
   documents_widget: DocumentsWidget,
+  chore_leaderboard_widget: ChoreLeaderBoardWidget,
 };
 
 // Všechny dostupné widgety
@@ -59,13 +63,11 @@ export const ALL_WIDGETS = [
   "flats_widget",
   "flat_members_widget",
   "documents_widget",
+  "chore_leaderboard_widget",
 ];
 
 // Mapování widgetů na role - které widgety jsou dostupné pro koho
-export const WIDGETS_BY_ROLE: Record<
-  "pronajimatel" | "najemce",
-  string[]
-> = {
+export const WIDGETS_BY_ROLE: Record<"pronajimatel" | "najemce", string[]> = {
   pronajimatel: [
     "issues_widget",
     "flats_widget",
@@ -80,6 +82,7 @@ export const WIDGETS_BY_ROLE: Record<
     "flat_members_widget",
     "documents_widget",
     "flats_widget",
+    "chore_leaderboard_widget",
   ],
 };
 

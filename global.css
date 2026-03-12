@@ -16,7 +16,6 @@
     /* Text na kartách - používej pro text uvnitř card komponent */
     --card-foreground: 0 0% 3.9%;
 
-
     /* Pozadí pro vyskakovací menu, dropdown, tooltip */
     --popover: 0 0% 100%;
 
@@ -52,6 +51,7 @@
 
     --success: 142 76% 36%;
 
+    --warning: 43 74% 66%;
     /* Bordery - používej pro ohraničení karet, separátory, inputy */
     --border: 0 0% 89.8%;
 
@@ -75,7 +75,7 @@
 
   .dark:root {
     /* Tmavé pozadí aplikace */
-    --background: 0 0% 4%; 
+    --background: 0 0% 4%;
 
     /* Světlý text pro tmavý režim */
     --foreground: 0 0% 98%;
@@ -120,6 +120,8 @@
     --destructive: 0 84.2% 60.2%;
 
     --success: 142 76% 36%;
+
+    --warning: 43 74% 66%;
 
     /* Bordery v dark mode - světlejší než background */
     --border: 0 0% 14.9%;
