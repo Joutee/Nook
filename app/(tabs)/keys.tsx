@@ -1,37 +1,373 @@
-import { View, Text, StyleSheet } from "react-native";
-import React from "react";
+import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import BottomSheet from "@/components/BottomSheet";
+import React, { useCallback, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
+import { Ionicons } from "@expo/vector-icons";
+import { KeyWithAssignee } from "@/types/keys";
+import { Member } from "@/types/members";
 
 const Keys = () => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Klíče</Text>
-        <Text style={styles.subtitle}>Správa přístupových klíčů</Text>
+  const { currentFlat, userRole } = useFlatContext();
+  const { showToast } = useToast();
+
+  const [keys, setKeys] = useState<KeyWithAssignee[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Přiřazování klíčů
+  const [assignSheetKey, setAssignSheetKey] = useState<KeyWithAssignee | null>(
+    null,
+  );
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [isSavingAssignment, setIsSavingAssignment] = useState(false);
+
+  // Smazání klíče
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [keyToDelete, setKeyToDelete] = useState<KeyWithAssignee | null>(null);
+
+  const isLandlord = userRole === "pronajimatel";
+
+  const loadKeys = async () => {
+    if (!currentFlat?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("keys")
+        .select(
+          "*, assignee:profiles!assigned_to(id, name, surname, avatar_url)",
+        )
+        .eq("flat_id", currentFlat.id)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      setKeys((data as KeyWithAssignee[]) || []);
+    } catch (error: any) {
+      showToast("Chyba při načítání klíčů", "error");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMembers = async () => {
+    if (!currentFlat?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("flat_profile")
+        .select("profile_id, role, profiles(id, name, surname, avatar_url)")
+        .eq("flat_id", currentFlat.id)
+        .eq("active", true);
+
+      if (error) throw error;
+
+      const memberList: Member[] = (data || []).map((fp: any) => ({
+        id: fp.profiles.id,
+        name: fp.profiles.name,
+        surname: fp.profiles.surname,
+        avatar_url: fp.profiles.avatar_url,
+        role: fp.role,
+      }));
+
+      setMembers(memberList);
+    } catch (error: any) {
+      console.error("Chyba při načítání členů:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (currentFlat?.id) {
+        loadKeys();
+        if (isLandlord) loadMembers();
+      }
+    }, [currentFlat]),
+  );
+
+  const openAssignSheet = (key: KeyWithAssignee) => {
+    setAssignSheetKey(key);
+    setSelectedMemberId(key.assigned_to);
+  };
+
+  const closeAssignSheet = () => {
+    setAssignSheetKey(null);
+    setSelectedMemberId(null);
+  };
+
+  const handleSaveAssignment = async () => {
+    if (!assignSheetKey) return;
+
+    setIsSavingAssignment(true);
+    try {
+      const { error } = await supabase
+        .from("keys")
+        .update({ assigned_to: selectedMemberId })
+        .eq("id", assignSheetKey.id);
+
+      if (error) throw error;
+
+      showToast(
+        selectedMemberId ? "Klíč přiřazen" : "Přiřazení odebráno",
+        "success",
+      );
+      closeAssignSheet();
+      loadKeys();
+    } catch (error: any) {
+      showToast("Chyba: " + error.message, "error");
+      console.error(error);
+    } finally {
+      setIsSavingAssignment(false);
+    }
+  };
+
+  const handleDeleteKey = (key: KeyWithAssignee) => {
+    setKeyToDelete(key);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!keyToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("keys")
+        .delete()
+        .eq("id", keyToDelete.id);
+
+      if (error) throw error;
+
+      showToast("Klíč smazán", "success");
+      loadKeys();
+    } catch (error: any) {
+      showToast("Chyba při mazání: " + error.message, "error");
+      console.error(error);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return `${name?.charAt(0) ?? ""}`.toUpperCase();
+  };
+
+  const renderKey = (item: KeyWithAssignee) => (
+    <Card key={item.id} className="mb-3 py-4">
+      <CardContent className="flex-row items-center px-4 gap-3">
+        {/* Ikona klíče */}
+        <Ionicons name="key-outline" size={24} className="text-foreground" />
+
+        {/* Obsah */}
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-foreground">
+            {item.name}
+          </Text>
+          {item.description ? (
+            <Text
+              className="text-xs text-muted-foreground mt-0.5"
+              numberOfLines={1}
+            >
+              {item.description}
+            </Text>
+          ) : null}
+
+          {/* Přiřazení */}
+          <View className="flex-row items-center gap-1.5 mt-1.5">
+            {item.assignee ? (
+              <>
+                <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
+                  <Text className="text-primary-foreground text-[9px] font-bold">
+                    {getInitials(item.assignee.name)}
+                  </Text>
+                </View>
+                <Text className="text-xs flex-1 text-foreground">
+                  {item.assignee.name} {item.assignee.surname}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons
+                  name="person-outline"
+                  size={14}
+                  className="text-muted-foreground"
+                />
+                <Text className="text-xs text-muted-foreground italic">
+                  Nepřiřazen
+                </Text>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Akce pronajímatele */}
+        {isLandlord && (
+          <View className="flex-row gap-1">
+            {/* Přiřadit */}
+            <Pressable
+              className="w-10 h-10 items-center justify-center"
+              onPress={() => openAssignSheet(item)}
+            >
+              <Ionicons
+                name="person-add-outline"
+                size={22}
+                className="text-foreground"
+              />
+            </Pressable>
+
+            {/* Upravit */}
+            <Pressable
+              className="w-10 h-10 items-center justify-center"
+              onPress={() => router.push(`/key-edit?id=${item.id}`)}
+            >
+              <Ionicons
+                name="create-outline"
+                size={22}
+                className="text-foreground"
+              />
+            </Pressable>
+
+            {/* Smazat */}
+            <Pressable
+              className="w-10 h-10 items-center justify-center"
+              onPress={() => handleDeleteKey(item)}
+            >
+              <Ionicons
+                name="trash-outline"
+                size={22}
+                className="text-destructive"
+              />
+            </Pressable>
+          </View>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1 p-4">
+        <Text className="text-3xl font-bold text-foreground mb-4">Klíče</Text>
+
+        {keys.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="key-outline"
+              size={64}
+              className="text-muted-foreground"
+            />
+            <Text className="text-base text-muted-foreground mt-4 text-center w-full">
+              {isLandlord
+                ? "Zatím žádné klíče.\nPřidejte první klíč pomocí tlačítka +"
+                : "Zatím žádné klíče"}
+            </Text>
+          </View>
+        ) : (
+          <>{keys.map(renderKey)}</>
+        )}
+      </ScrollView>
+
+      {/* FAB — pouze pronajímatel */}
+      {isLandlord && (
+        <Pressable
+          className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
+          onPress={() => router.push("/key-create")}
+        >
+          <Ionicons name="add" size={28} className="text-primary-foreground" />
+        </Pressable>
+      )}
+
+      {/* BottomSheet pro přiřazení klíče */}
+      <BottomSheet
+        visible={!!assignSheetKey}
+        onClose={closeAssignSheet}
+        title={`Přiřadit: ${assignSheetKey?.name ?? ""}`}
+      >
+        <View className="px-4 pb-6">
+          {members.map((member) => {
+            const isSelected = selectedMemberId === member.id;
+            return (
+              <Pressable
+                key={member.id}
+                className={`flex-row items-center gap-3 p-3 mb-2 rounded-xl border ${
+                  isSelected
+                    ? "bg-primary/10 border-primary"
+                    : "border-border bg-card"
+                }`}
+                onPress={() =>
+                  setSelectedMemberId(isSelected ? null : member.id)
+                }
+              >
+                <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+                  <Text className="text-primary-foreground text-sm font-bold">
+                    {getInitials(member.name, member.surname)}
+                  </Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-foreground">
+                    {member.name} {member.surname}
+                  </Text>
+                  <Text className="text-xs text-muted-foreground">
+                    {member.role === "pronajimatel"
+                      ? "Pronajímatel"
+                      : "Nájemce"}
+                  </Text>
+                </View>
+                <View
+                  className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
+                    isSelected ? "border-primary bg-primary" : "border-border"
+                  }`}
+                >
+                  {isSelected && (
+                    <Ionicons name="checkmark" size={12} color="white" />
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
+
+          <Button
+            onPress={handleSaveAssignment}
+            disabled={isSavingAssignment}
+            className="mt-3 bg-primary"
+          >
+            {isSavingAssignment ? (
+              <ActivityIndicator className="text-foreground" />
+            ) : (
+              <Text>
+                {selectedMemberId ? "Uložit přiřazení" : "Odebrat přiřazení"}
+              </Text>
+            )}
+          </Button>
+        </View>
+      </BottomSheet>
+
+      {/* AlertDialog pro smazání */}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Smazat klíč"
+        description={`Opravdu chcete smazat klíč "${keyToDelete?.name}"?`}
+        actionText="Smazat"
+        onAction={confirmDelete}
+        destructive
+      />
     </View>
   );
 };
 
 export default Keys;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-  },
-});

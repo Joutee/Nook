@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { Document } from "../../types/documents";
+import { Separator } from "../ui/separator";
 
 export const DocumentsWidget = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -120,43 +121,46 @@ export const DocumentsWidget = () => {
             </Text>
           ) : (
             <View>
-              {documents.map((doc) => (
-                <Pressable
-                  key={doc.id}
-                  onPress={() => router.push("/(tabs)/documents")}
-                  className="py-2 border-b border-border last:border-b-0"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center flex-1 gap-2">
-                      <Ionicons
-                        name={getFileIcon(doc.name)}
-                        size={20}
-                        color="#6b7280"
-                      />
-                      <View className="flex-1">
-                        <Text
-                          className="text-sm font-semibold text-foreground"
-                          numberOfLines={1}
-                        >
-                          {doc.name}
-                        </Text>
-                        {doc.description && (
+              {documents.map((doc, index) => (
+                <View key={index}>
+                  <Pressable
+                    key={doc.id}
+                    onPress={() => router.push("/(tabs)/documents")}
+                    className="py-2 border-b border-border last:border-b-0"
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center flex-1 gap-2">
+                        <Ionicons
+                          name={getFileIcon(doc.name)}
+                          size={20}
+                          color="#6b7280"
+                        />
+                        <View className="flex-1">
                           <Text
-                            className="text-xs text-muted-foreground mt-0.5"
+                            className="text-sm font-semibold text-foreground"
                             numberOfLines={1}
                           >
-                            {doc.description}
+                            {doc.name}
                           </Text>
-                        )}
+                          {doc.description && (
+                            <Text
+                              className="text-xs text-muted-foreground mt-0.5"
+                              numberOfLines={1}
+                            >
+                              {doc.description}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                      <View className="ml-2">
+                        <Text className="text-xs min-w-24 text-right text-muted-foreground">
+                          {formatDate(doc.created_at)}
+                        </Text>
                       </View>
                     </View>
-                    <View className="ml-2">
-                      <Text className="text-xs min-w-24 text-right text-muted-foreground">
-                        {formatDate(doc.created_at)}
-                      </Text>
-                    </View>
-                  </View>
-                </Pressable>
+                  </Pressable>
+                  {index < documents.length - 1 && <Separator />}
+                </View>
               ))}
             </View>
           )}
