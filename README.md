@@ -136,11 +136,25 @@ npm install
 
 #### 3.2 Inicializace databázového schématu
 
-V Supabase SQL Editoru spusťte SQL skripty pro vytvoření tabulek, pohledů, triggerů a RLS politik:
+Databázové schéma je k dispozici v adresáři `supabase/migrations/`. Pro inicializaci databáze:
+
+**Možnost 1: Manuální import přes SQL Editor**
+
+1. Otevřete Supabase Dashboard → SQL Editor
+2. Zkopírujte obsah souboru `supabase/migrations/20260314101841_remote_schema.sql`
+3. Spusťte SQL dotaz (Run)
+
+**Možnost 2: Použití Supabase CLI** *(doporučeno)*
 
 ```bash
-# SQL skripty budou k dispozici v adresáři:
-# supabase/migrations/
+# Instalace Supabase CLI
+npm install -g supabase
+
+# Link projektu
+supabase link --project-ref your-project-ref
+
+# Spuštění migrace
+supabase db push
 ```
 
 **Hlavní tabulky:**
