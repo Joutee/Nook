@@ -137,68 +137,73 @@ const documents = () => {
   };
 
   const renderDocument = (item: Document) => (
-    <Card key={item.id} className="mb-3 py-4">
-      <CardContent className="flex-row items-center px-4 gap-3">
-        {/* Ikona dokumentu */}
-        <Ionicons
-          name="document-text-outline"
-          size={24}
-          className="text-primary-foreground"
-        />
+    <Pressable
+      key={item.id}
+      className="flex-1"
+      onPress={() => handleOpenDocument(item.document_path, item.name)}
+    >
+      <Card className="mb-3">
+        <CardContent className="flex-row items-center px-4 gap-4">
+          {/* Ikona dokumentu */}
+          <Ionicons
+            name="document-text-outline"
+            size={24}
+            className="text-primary-foreground"
+          />
 
-        {/* Obsah dokumentu */}
-        <Pressable
-          className="flex-1"
-          onPress={() => handleOpenDocument(item.document_path, item.name)}
-        >
-          <Text className="text-base font-semibold text-foreground mb-0.5">
-            {item.name}
-          </Text>
-          {item.description && (
-            <Text
-              className="text-xs text-muted-foreground mb-1"
-              numberOfLines={1}
-            >
-              {item.description}
-            </Text>
-          )}
-          <View className="flex-row items-center gap-1">
-            <Text className="text-xs text-muted-foreground flex-1">
-              {formatDate(item.created_at)}
-            </Text>
+          <View className="flex-1 flex-row">
+            {/* Obsah dokumentu */}
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-foreground mb-0.5">
+                {item.name}
+              </Text>
+              {item.description && (
+                <Text
+                  className="text-xs text-muted-foreground mb-1"
+                  numberOfLines={1}
+                >
+                  {item.description}
+                </Text>
+              )}
+              <View className="flex-row items-center gap-1">
+                <Text className="text-xs text-muted-foreground flex-1">
+                  {formatDate(item.created_at)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Akční tlačítka */}
+            <View className="flex-row gap-1">
+              <Pressable
+                className="w-10 h-10 items-center justify-center"
+                onPress={() =>
+                  handleDownloadDocument(item.document_path, item.name)
+                }
+              >
+                <Ionicons
+                  name="download-outline"
+                  size={22}
+                  className="text-foreground"
+                />
+              </Pressable>
+
+              <Pressable
+                className="w-10 h-10 items-center justify-center"
+                onPress={() =>
+                  handleDeleteDocument(item.id, item.document_path, item.name)
+                }
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={22}
+                  className="text-destructive"
+                />
+              </Pressable>
+            </View>
           </View>
-        </Pressable>
-
-        {/* Akční tlačítka */}
-        <View className="flex-row gap-1">
-          <Pressable
-            className="w-10 h-10 items-center justify-center"
-            onPress={() =>
-              handleDownloadDocument(item.document_path, item.name)
-            }
-          >
-            <Ionicons
-              name="download-outline"
-              size={22}
-              className="text-foreground"
-            />
-          </Pressable>
-
-          <Pressable
-            className="w-10 h-10 items-center justify-center"
-            onPress={() =>
-              handleDeleteDocument(item.id, item.document_path, item.name)
-            }
-          >
-            <Ionicons
-              name="trash-outline"
-              size={22}
-              className="text-destructive"
-            />
-          </Pressable>
-        </View>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Pressable>
   );
 
   if (isLoading) {

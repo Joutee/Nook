@@ -51,52 +51,62 @@ const Issues = () => {
   };
 
   const renderIssue = (item: Issue) => (
-    <Card key={item.id} className="mb-3 ">
-      <Pressable onPress={() => router.push(`/issue-detail?id=${item.id}`)}>
-        <CardContent className="px-4">
-          <View className="flex-row justify-between items-start mb-2">
-            <Text className="text-lg font-semibold text-foreground flex-1 mr-2">
-              {item.title}
-            </Text>
-            <View
-              className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: getStatusColor(item.status) }}
-            >
-              <Text className="text-white text-xs font-semibold">
-                {getStatusText(item.status)}
+    <Pressable
+      key={item.id}
+      onPress={() => router.push(`/issue-detail?id=${item.id}`)}
+    >
+      <Card className="mb-3 ">
+        <CardContent className="flex-row items-center px-4 gap-4">
+          <Ionicons
+            name="warning-outline"
+            size={24}
+            className="text-primary-foreground"
+          />
+          <View className="flex-1">
+            <View className="flex-row justify-between items-start mb-2">
+              <Text className="text-base font-semibold text-foreground flex-1 mr-2">
+                {item.title}
               </Text>
+              <View
+                className="px-3 py-1 rounded-full"
+                style={{ backgroundColor: getStatusColor(item.status) }}
+              >
+                <Text className="text-white text-xs font-semibold">
+                  {getStatusText(item.status)}
+                </Text>
+              </View>
             </View>
-          </View>
-          {item.description && (
-            <Text
-              className="text-sm text-muted-foreground mb-2"
-              numberOfLines={2}
-            >
-              {item.description}
-            </Text>
-          )}
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row items-center gap-1">
-              <Ionicons
-                name="calendar-outline"
-                size={12}
-                className="text-muted-foreground"
-              />
-              <Text className="text-xs text-muted-foreground w-6/12">
-                {formatDate(item.created_at)}
+            {item.description && (
+              <Text
+                className="text-sm text-muted-foreground mb-2"
+                numberOfLines={2}
+              >
+                {item.description}
               </Text>
-            </View>
-            {item.image_path && (
-              <Ionicons
-                name="image-outline"
-                size={16}
-                className="text-muted-foreground"
-              />
             )}
+            <View className="flex-row justify-between items-center">
+              <View className="flex-row items-center gap-1">
+                <Ionicons
+                  name="calendar-outline"
+                  size={12}
+                  className="text-muted-foreground"
+                />
+                <Text className="text-xs text-muted-foreground w-6/12">
+                  {formatDate(item.created_at)}
+                </Text>
+              </View>
+              {item.image_path && (
+                <Ionicons
+                  name="image-outline"
+                  size={16}
+                  className="text-muted-foreground"
+                />
+              )}
+            </View>
           </View>
         </CardContent>
-      </Pressable>
-    </Card>
+      </Card>
+    </Pressable>
   );
 
   if (isLoading) {

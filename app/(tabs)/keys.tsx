@@ -160,7 +160,7 @@ const Keys = () => {
 
   const renderKey = (item: KeyWithAssignee) => (
     <Card key={item.id} className="mb-3 py-4">
-      <CardContent className="flex-row items-center px-4 gap-3">
+      <CardContent className="flex-row items-center px-4 gap-4">
         {/* Ikona klíče */}
         <Ionicons name="key-outline" size={24} className="text-foreground" />
 
