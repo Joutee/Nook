@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { HistoryItem } from "../../types/chores";
+import { Avatar } from "@/components/ui/avatar";
 
 interface MemberStats {
   profile_id: string;
@@ -210,11 +211,11 @@ export const ChoreLeaderBoardWidget = () => {
                   </View>
 
                   {/* Avatar */}
-                  <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-                    <Text className="text-primary-foreground text-sm font-semibold">
-                      {stat.name.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
+                  <Avatar
+                    name={stat.name}
+                    imageUrl={stat.avatar_url}
+                    size="xl"
+                  />
 
                   {/* Name and Stats */}
                   <View className="flex-1">

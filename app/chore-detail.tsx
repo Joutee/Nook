@@ -12,6 +12,7 @@ import { supabase } from "../lib/supabase";
 import { useToast } from "../contexts/ToastContext";
 import { Chore, HistoryItem } from "../types/chores";
 import { completeChore } from "../lib/choreUtils";
+import { Avatar } from "@/components/ui/avatar";
 
 const ChoreDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -186,11 +187,11 @@ const ChoreDetail = () => {
                 </Text>
               </View>
               <View className="flex-row items-center rounded-lg h-7 ">
-                <View className="w-7 h-7 rounded-full bg-primary items-center justify-center mr-3">
-                  <Text className="text-primary-foreground text-sm font-semibold">
-                    {chore.assignee_name?.charAt(0).toUpperCase() || "?"}
-                  </Text>
-                </View>
+                <Avatar
+                  name={chore.assignee_name}
+                  size="base"
+                  className="mr-3"
+                />
                 <Text className="text-sm text-foreground font-medium flex-1">
                   {chore.assignee_name && chore.assignee_surname
                     ? `${chore.assignee_name} ${chore.assignee_surname}`

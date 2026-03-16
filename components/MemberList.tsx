@@ -13,6 +13,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Member } from "@/types/members";
 import { getRoleLabel } from "@/lib/memberUtils";
+import { Avatar } from "@/components/ui/avatar";
 
 export type { Member };
 
@@ -219,15 +220,11 @@ export const MemberList = ({
             key={member.id}
             className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
           >
-            <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-              <Text className="text-primary-foreground text-base font-semibold">
-                {member.name
-                  ? member.name.charAt(0).toUpperCase()
-                  : member.username
-                    ? member.username.charAt(0).toUpperCase()
-                    : "?"}
-              </Text>
-            </View>
+            <Avatar
+              name={member.name ?? member.username}
+              imageUrl={member.avatar_url}
+              size="xl"
+            />
             <View className="flex-1">
               <Text className="text-base font-semibold text-foreground">
                 {member.name && member.surname

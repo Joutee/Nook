@@ -12,6 +12,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Chore } from "@/types/chores";
 import { completeChore } from "@/lib/choreUtils";
+import { Avatar } from "@/components/ui/avatar";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -163,11 +164,7 @@ const Chores = () => {
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2 flex-1">
-                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-primary-foreground text-sm font-semibold">
-                    {item.assignee_name?.charAt(0).toUpperCase() || "?"}
-                  </Text>
-                </View>
+                <Avatar name={item.assignee_name} size="lg" />
                 <Text className="text-sm text-foreground font-medium flex-1">
                   {item.assignee_name && item.assignee_surname
                     ? `${item.assignee_name} ${item.assignee_surname}`

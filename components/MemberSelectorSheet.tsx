@@ -1,6 +1,7 @@
 import React from "react";
 import { View, ScrollView, Pressable, useColorScheme } from "react-native";
 import { Text } from "@/components/ui/text";
+import { Avatar } from "@/components/ui/avatar";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet from "./BottomSheet";
 import { Member } from "../types/members";
@@ -60,11 +61,7 @@ export const MemberSelectorSheet: React.FC<MemberSelectorSheetProps> = ({
               onPress={() => handleMemberPress(member)}
             >
               <View className="flex-row items-center flex-1">
-                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mr-2">
-                  <Text className="text-primary-foreground text-sm font-semibold">
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
+                <Avatar name={member.name} size="lg" className="mr-2" />
                 <Text className="text-base text-foreground font-medium flex-1">
                   {member.surname
                     ? `${member.name} ${member.surname}`

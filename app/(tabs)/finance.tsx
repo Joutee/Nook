@@ -18,6 +18,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Balance, ExpenseWithDetails } from "@/types/finance";
 import { formatCurrency } from "@/lib/financeUtils";
+import { Avatar } from "@/components/ui/avatar";
 
 const Finance = () => {
   const [balances, setBalances] = useState<Balance[]>([]);
@@ -112,11 +113,7 @@ const Finance = () => {
         className="flex-row justify-between items-center py-3"
       >
         <View className="flex-row items-center gap-3 flex-1">
-          <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-            <Text className="text-primary-foreground text-base font-semibold">
-              {balance.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <Avatar name={balance.name} imageUrl={balance.avatar_url} size="xl" />
           <Text className="text-base text-foreground font-medium flex-1">
             {balance.name} {balance.surname}
           </Text>

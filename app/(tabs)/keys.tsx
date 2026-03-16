@@ -11,6 +11,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyWithAssignee } from "@/types/keys";
 import { Member } from "@/types/members";
+import { Avatar } from "@/components/ui/avatar";
 
 const Keys = () => {
   const { currentFlat, userRole } = useFlatContext();
@@ -149,10 +150,6 @@ const Keys = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return `${name?.charAt(0) ?? ""}`.toUpperCase();
-  };
-
   const renderKey = (item: KeyWithAssignee) => (
     <Card key={item.id} className="mb-3 py-4">
       <CardContent className="flex-row items-center px-4 gap-4">
@@ -177,11 +174,7 @@ const Keys = () => {
           <View className="flex-row items-center gap-1.5 mt-1.5">
             {item.assignee ? (
               <>
-                <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-primary-foreground text-[9px] font-bold">
-                    {getInitials(item.assignee.name)}
-                  </Text>
-                </View>
+                <Avatar name={item.assignee.name} size="sm" />
                 <Text className="text-xs flex-1 text-foreground">
                   {item.assignee.name} {item.assignee.surname}
                 </Text>

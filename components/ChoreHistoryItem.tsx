@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
 import { HistoryItem } from "../types/chores";
+import { Avatar } from "@/components/ui/avatar";
 
 interface ChoreHistoryItemProps {
   item: HistoryItem;
@@ -35,11 +36,11 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
           </View>
           {item.expected_profile_name && (
             <View className="flex-row items-center">
-              <View className="w-6 h-6 rounded-full bg-primary items-center justify-center mr-2">
-                <Text className="text-primary-foreground text-xs font-semibold">
-                  {item.expected_profile_name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
+              <Avatar
+                name={item.expected_profile_name}
+                size="md"
+                className="mr-2"
+              />
               <Text className="text-xs text-foreground font-medium">
                 {item.expected_profile_name}
                 {item.expected_profile_surname &&

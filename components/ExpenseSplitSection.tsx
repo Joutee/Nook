@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
 import { Member } from "../types/members";
 import { formatCurrency } from "../lib/financeUtils";
+import { Avatar } from "@/components/ui/avatar";
 
 interface ExpenseSplitSectionProps {
   flatMembers: Member[];
@@ -220,11 +221,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
               onPress={() => handleMemberToggle(member)}
             >
               <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-primary-foreground text-base font-semibold">
-                    {member.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
+                <Avatar name={member.name} size="xl" />
                 <Text className="text-base text-foreground font-medium flex-1">
                   {member.name} {member.surname}
                 </Text>

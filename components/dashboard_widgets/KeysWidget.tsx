@@ -8,6 +8,7 @@ import { router } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import { useFlatContext } from "../../contexts/FlatContext";
 import { KeyWithAssignee } from "../../types/keys";
+import { Avatar } from "@/components/ui/avatar";
 
 export const KeysWidget = () => {
   const [keys, setKeys] = useState<KeyWithAssignee[]>([]);
@@ -66,10 +67,6 @@ export const KeysWidget = () => {
     }
   };
 
-  const getInitials = (name: string, surname: string) => {
-    return `${name?.charAt(0) ?? ""}${surname?.charAt(0) ?? ""}`.toUpperCase();
-  };
-
   const keysPath =
     userRole === "pronajimatel" ? "/(tabs)/keys" : "/(tabs)/more";
 
@@ -103,14 +100,7 @@ export const KeysWidget = () => {
                       </Text>
                       {key.assignee ? (
                         <View className="flex-row items-center gap-1 mt-0.5">
-                          <View className="w-4 h-4 rounded-full bg-primary items-center justify-center">
-                            <Text className="text-primary-foreground text-[8px] font-bold">
-                              {getInitials(
-                                key.assignee.name,
-                                key.assignee.surname,
-                              )}
-                            </Text>
-                          </View>
+                          <Avatar name={key.assignee.name} size="xs" />
                           <Text className="text-xs text-muted-foreground">
                             {key.assignee.name} {key.assignee.surname}
                           </Text>

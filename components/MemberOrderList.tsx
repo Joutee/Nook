@@ -3,6 +3,7 @@ import { View, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { Member } from "../types/members";
+import { Avatar } from "@/components/ui/avatar";
 
 interface MemberOrderListProps {
   members: Member[];
@@ -49,11 +50,7 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
             <Text className="text-base font-semibold text-primary w-6">
               {index + 1}.
             </Text>
-            <View className="w-8 h-8 rounded-full bg-primary items-center justify-center">
-              <Text className="text-primary-foreground text-sm font-semibold">
-                {member.name.charAt(0).toUpperCase()}
-              </Text>
-            </View>
+            <Avatar name={member.name} size="lg" />
             <Text className="text-sm text-foreground font-medium flex-1">
               {member.name} {member.surname}
             </Text>

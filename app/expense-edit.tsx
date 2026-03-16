@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { useToast } from "../contexts/ToastContext";
 import { ExpenseForm } from "../components/ExpenseForm";
-import { Profile } from "../types/profile";
+import { Member } from "../types/members";
 
 const EditExpense = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -13,8 +13,8 @@ const EditExpense = () => {
     title: string;
     amount: string;
     date: Date;
-    selectedPayer: Profile[];
-    selectedMembers: Profile[];
+    selectedPayer: Member[];
+    selectedMembers: Member[];
     manualAmounts: Record<string, string>;
     splitMode: "auto" | "manual";
   } | null>(null);
@@ -75,9 +75,10 @@ const EditExpense = () => {
       }
 
       // Process the data
-      const selectedMembers: Profile[] = sharesData
+      const selectedMembers: Member[] = sharesData
         .map((share: any) => share.profile)
-        .filter((p: any) => p);
+        .filter((p: any) => p)
+        .map((p: any) => ({ ...p, surname: p.surname || "", role: "" }));
 
       const manualAmounts: Record<string, string> = {};
       sharesData.forEach((share: any) => {
@@ -93,7 +94,13 @@ const EditExpense = () => {
         title: expenseData.title,
         amount: expenseData.amount.toFixed(2),
         date: new Date(expenseData.happened_at),
-        selectedPayer: [expenseData.payer],
+        selectedPayer: [
+          {
+            ...expenseData.payer,
+            surname: expenseData.payer.surname || "",
+            role: "",
+          },
+        ],
         selectedMembers,
         manualAmounts,
         splitMode: isAutoSplit ? "auto" : "manual",
