@@ -11,7 +11,7 @@ import { router } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { useFlatContext } from "../contexts/FlatContext";
 import { useToast } from "../contexts/ToastContext";
-import { Profile } from "../types/profile";
+import { Member } from "../types/members";
 import { formatCurrency } from "../lib/financeUtils";
 import { MemberSelector } from "./MemberSelector";
 import { ExpenseSplitSection } from "./ExpenseSplitSection";
@@ -25,8 +25,8 @@ interface ExpenseFormProps {
     title: string;
     amount: string;
     date: Date;
-    selectedPayer: Profile[];
-    selectedMembers: Profile[];
+    selectedPayer: Member[];
+    selectedMembers: Member[];
     manualAmounts: Record<string, string>;
     splitMode: "auto" | "manual";
   };
@@ -40,13 +40,13 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [title, setTitle] = useState(initialData?.title || "");
   const [amount, setAmount] = useState(initialData?.amount || "0");
   const [date, setDate] = useState(initialData?.date || new Date());
-  const [selectedPayer, setSelectedPayer] = useState<Profile[]>(
+  const [selectedPayer, setSelectedPayer] = useState<Member[]>(
     initialData?.selectedPayer || [],
   );
-  const [selectedMembers, setSelectedMembers] = useState<Profile[]>(
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>(
     initialData?.selectedMembers || [],
   );
-  const [flatMembers, setFlatMembers] = useState<Profile[]>([]);
+  const [flatMembers, setFlatMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -102,6 +102,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         .select(
           `
         profile_id,
+        role,
         profiles (
           id,
           name,
@@ -117,11 +118,12 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         console.error("Error loading flat members:", error);
         showToast("Nepodařilo se načíst členy bytu", "error");
       } else {
-        const members: Profile[] = data.map((m: any) => ({
+        const members: Member[] = data.map((m: any) => ({
           id: m.profiles.id,
           name: m.profiles.name,
-          surname: m.profiles.surname,
+          surname: m.profiles.surname || "",
           avatar_url: m.profiles.avatar_url,
+          role: m.role,
         }));
         setFlatMembers(members);
         // Pre-select all members by default only in create mode
@@ -137,7 +139,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     }
   };
 
-  const handlePayerSelect = (member: Profile) => {
+  const handlePayerSelect = (member: Member) => {
     // For single select, replace the selection
     setSelectedPayer([member]);
   };

@@ -220,7 +220,7 @@ export const MemberList = ({
             className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
           >
             <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-              <Text className="text-primary-foreground text-sm font-semibold">
+              <Text className="text-primary-foreground text-base font-semibold">
                 {member.name
                   ? member.name.charAt(0).toUpperCase()
                   : member.username
@@ -229,7 +229,7 @@ export const MemberList = ({
               </Text>
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-foreground">
+              <Text className="text-base font-semibold text-foreground">
                 {member.name && member.surname
                   ? `${member.name} ${member.surname}`
                   : member.name || member.username || "Neznámý uživatel"}

@@ -2,8 +2,7 @@ import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDialog } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import BottomSheet from "@/components/BottomSheet";
+import { MemberSelectorSheet } from "@/components/MemberSelectorSheet";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -22,11 +21,9 @@ const Keys = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Přiřazování klíčů
-  const [assignSheetKey, setAssignSheetKey] = useState<KeyWithAssignee | null>(
+  const [assigningKey, setAssigningKey] = useState<KeyWithAssignee | null>(
     null,
   );
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-  const [isSavingAssignment, setIsSavingAssignment] = useState(false);
 
   // Smazání klíče
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -95,29 +92,29 @@ const Keys = () => {
   );
 
   const openAssignSheet = (key: KeyWithAssignee) => {
-    setAssignSheetKey(key);
-    setSelectedMemberId(key.assigned_to);
+    setAssigningKey(key);
   };
 
   const closeAssignSheet = () => {
-    setAssignSheetKey(null);
-    setSelectedMemberId(null);
+    setAssigningKey(null);
   };
 
-  const handleSaveAssignment = async () => {
-    if (!assignSheetKey) return;
+  const handleMemberToggle = async (member: Member) => {
+    if (!assigningKey) return;
 
-    setIsSavingAssignment(true);
+    const isCurrentlyAssigned = assigningKey.assigned_to === member.id;
+    const newAssignedTo = isCurrentlyAssigned ? null : member.id;
+
     try {
       const { error } = await supabase
         .from("keys")
-        .update({ assigned_to: selectedMemberId })
-        .eq("id", assignSheetKey.id);
+        .update({ assigned_to: newAssignedTo })
+        .eq("id", assigningKey.id);
 
       if (error) throw error;
 
       showToast(
-        selectedMemberId ? "Klíč přiřazen" : "Přiřazení odebráno",
+        newAssignedTo ? "Klíč přiřazen" : "Přiřazení odebráno",
         "success",
       );
       closeAssignSheet();
@@ -125,8 +122,6 @@ const Keys = () => {
     } catch (error: any) {
       showToast("Chyba: " + error.message, "error");
       console.error(error);
-    } finally {
-      setIsSavingAssignment(false);
     }
   };
 
@@ -291,70 +286,20 @@ const Keys = () => {
         </Pressable>
       )}
 
-      {/* BottomSheet pro přiřazení klíče */}
-      <BottomSheet
-        visible={!!assignSheetKey}
+      {/* MemberSelector Sheet pro přiřazení klíče */}
+      <MemberSelectorSheet
+        visible={!!assigningKey}
         onClose={closeAssignSheet}
-        title={`Přiřadit: ${assignSheetKey?.name ?? ""}`}
-      >
-        <View className="px-4 pb-6">
-          {members.map((member) => {
-            const isSelected = selectedMemberId === member.id;
-            return (
-              <Pressable
-                key={member.id}
-                className={`flex-row items-center gap-3 p-3 mb-2 rounded-xl border ${
-                  isSelected
-                    ? "bg-primary/10 border-primary"
-                    : "border-border bg-card"
-                }`}
-                onPress={() =>
-                  setSelectedMemberId(isSelected ? null : member.id)
-                }
-              >
-                <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-                  <Text className="text-primary-foreground text-sm font-bold">
-                    {getInitials(member.name, member.surname)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-foreground">
-                    {member.name} {member.surname}
-                  </Text>
-                  <Text className="text-xs text-muted-foreground">
-                    {member.role === "pronajimatel"
-                      ? "Pronajímatel"
-                      : "Nájemce"}
-                  </Text>
-                </View>
-                <View
-                  className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-                    isSelected ? "border-primary bg-primary" : "border-border"
-                  }`}
-                >
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={12} color="white" />
-                  )}
-                </View>
-              </Pressable>
-            );
-          })}
-
-          <Button
-            onPress={handleSaveAssignment}
-            disabled={isSavingAssignment}
-            className="mt-3 bg-primary"
-          >
-            {isSavingAssignment ? (
-              <ActivityIndicator className="text-foreground" />
-            ) : (
-              <Text>
-                {selectedMemberId ? "Uložit přiřazení" : "Odebrat přiřazení"}
-              </Text>
-            )}
-          </Button>
-        </View>
-      </BottomSheet>
+        members={members}
+        selectedMembers={
+          assigningKey?.assigned_to
+            ? members.filter((m) => m.id === assigningKey.assigned_to)
+            : []
+        }
+        onToggleMember={handleMemberToggle}
+        multiSelect={false}
+        title={`Přiřadit: ${assigningKey?.name ?? ""}`}
+      />
 
       {/* AlertDialog pro smazání */}
       <AlertDialog

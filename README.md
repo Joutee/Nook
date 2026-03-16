@@ -18,17 +18,20 @@ Sdílené bydlení přináší řadu výzev v oblasti organizace, komunikace a s
 ## ✨ Hlavní funkce
 
 ### 👥 Pro nájemce
+
 - **💰 Finance** - Evidence sdílených výdajů s automatickým výpočtem dluhů a optimalizací vyrovnávacích plateb
 - **🧹 Úklid** - Automatická rotace úkolů mezi členy s historií plnění a žebříčkem
 - **📊 Dashboard** - Plně přizpůsobitelný přehled s widgety pro každý modul
 - **👤 Správa členů** - Správa členství a rolí v bytě
 
 ### 🏠 Pro pronajímatele
+
 - **⚠️ Závady** - Hlášení a správa poruch s fotodokumentací
 - **📄 Dokumenty** - Ukládání důležitých dokumentů (smlouvy, protokoly)
 - **🔑 Klíče** - Evidence a přiřazování fyzických klíčů členům
 
 ### 🔄 Společné funkce
+
 - **Multi-flat podpora** - Správa více domácností s různými rolemi
 - **🌓 Tmavý režim** - Automatický nebo manuální přepínač motivu
 - **🔐 Zabezpečení** - Row Level Security na úrovni databáze
@@ -37,6 +40,7 @@ Sdílené bydlení přináší řadu výzev v oblasti organizace, komunikace a s
 ## 🛠️ Technologický stack
 
 ### Frontend
+
 - **React Native 0.81.5** - Cross-platform mobilní framework
 - **Expo 54** (Managed Workflow) - Vývojové nástroje a nativní moduly
 - **TypeScript 5.9** - Typová bezpečnost
@@ -45,6 +49,7 @@ Sdílené bydlení přináší řadu výzev v oblasti organizace, komunikace a s
 - **@rn-primitives** - Přístupnostní UI komponenty
 
 ### Backend
+
 - **Supabase** - Backend-as-a-Service platforma
   - **Auth** - E-mail/heslo autentizace s JWT tokeny
   - **Database** - PostgreSQL s Row Level Security (RLS)
@@ -52,6 +57,7 @@ Sdílené bydlení přináší řadu výzev v oblasti organizace, komunikace a s
   - **Realtime** (připraveno) - WebSocket subscriptions
 
 ### Klíčové knihovny
+
 - `@supabase/supabase-js` - Supabase klient
 - `react-native-draggable-flatlist` - Drag-and-drop seznamy
 - `expo-document-picker` / `expo-image-picker` - Správa souborů
@@ -93,7 +99,7 @@ Nook/
 
 ## 📸 Screenshots
 
-*Screenshoty aplikace budou přidány po dokončení implementace všech plánovaných funkcí.*
+_Screenshoty aplikace budou přidány po dokončení implementace všech plánovaných funkcí._
 
 <!-- Placeholder pro screenshoty:
 - Dashboard s widgety
@@ -144,7 +150,7 @@ Databázové schéma je k dispozici v adresáři `supabase/migrations/`. Pro ini
 2. Zkopírujte obsah souboru `supabase/migrations/20260314101841_remote_schema.sql`
 3. Spusťte SQL dotaz (Run)
 
-**Možnost 2: Použití Supabase CLI** *(doporučeno)*
+**Možnost 2: Použití Supabase CLI** _(doporučeno)_
 
 ```bash
 # Instalace Supabase CLI
@@ -158,6 +164,7 @@ supabase db push
 ```
 
 **Hlavní tabulky:**
+
 - `profiles` - Uživatelské profily
 - `flats` - Byty/domácnosti
 - `flat_profile` - Členství uživatelů v bytech (s rolí)
@@ -168,11 +175,13 @@ supabase db push
 - `keys` - Klíče
 
 **Databázové pohledy:**
+
 - `view_chore_dashboard` - Aktuální stav úkolů
 - `view_chore_history` - Historie úkolů
 - `view_flat_balances` - Finanční zůstatky členů
 
 **Storage Buckety:**
+
 ```sql
 -- Vytvořte dva buckety v Supabase Storage:
 -- 1. "documents" - pro dokumenty
@@ -277,21 +286,9 @@ Všechny tabulky jsou chráněny RLS politikami na úrovni PostgreSQL:
 - **Database Views** - Agregace dat na straně databáze
 - **Trigger-based automation** - Business logika v databázových triggerech
 
-## 🧪 Známá omezení
-
-- ⚠️ Pole `is_admin` v tabulce `flat_profile` je upravitelné běžnými členy (plánovaná migrace do samostatné tabulky)
-- 📱 Web verze je experimentální a není plně funkční
-- 🔄 Realtime subscriptions připraveny, ale neimplementovány
-
 ## 🎓 Akademický kontext
 
 Tento projekt byl vytvořen jako součást bakalářské práce na téma **"Návrh a implementace mobilní aplikace pro správu sdíleného bydlení"**.
-
-**Klíčové výstupy:**
-- Analýza požadavků a návrh systému
-- Implementace full-stack mobilní aplikace
-- Testování a dokumentace
-- Komplexní master context dokument (`MASTER_CONTEXT.md`)
 
 ## 📄 Dokumentace
 
@@ -302,17 +299,6 @@ Podrobná technická dokumentace je k dispozici v souboru [`MASTER_CONTEXT.md`](
 - Datový model s přehledem všech tabulek
 - Bezpečnostní model
 - Popis triggerů a databázových funkcí
-
-## 🗺️ Roadmap
-
-- [ ] Implementace realtime notifikací
-- [ ] Push notifications
-- [ ] Export finančních reportů (PDF)
-- [ ] Kalendářní integrace pro úkoly
-- [ ] OCR pro dokumenty
-- [ ] Migrace admin oprávnění do samostatné tabulky
-- [ ] Podpora více měn
-- [ ] Lokalizace (EN, CZ)
 
 ## 📦 Build
 

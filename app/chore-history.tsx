@@ -75,7 +75,7 @@ const ChoreHistory = () => {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -84,18 +84,14 @@ const ChoreHistory = () => {
     <View className="flex-1 bg-background">
       {history.length === 0 ? (
         <View className="flex-1 justify-center items-center p-10">
-          <Card>
-            <CardContent className="p-10 items-center">
-              <Ionicons
-                name="time-outline"
-                size={64}
-                color="hsl(240, 5%, 64.9%)"
-              />
-              <Text className="text-base text-muted-foreground mt-4">
-                Zatím žádná historie
-              </Text>
-            </CardContent>
-          </Card>
+          <Ionicons
+            name="time-outline"
+            size={64}
+            className="text-muted-foreground"
+          />
+          <Text className="text-base text-muted-foreground mt-4 w-full text-center">
+            Zatím žádná historie
+          </Text>
         </View>
       ) : (
         <FlatList

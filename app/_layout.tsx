@@ -181,6 +181,8 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
             headerBackTitle: "Zpět",
           }}
         />
+        <Stack.Screen name="key-create" options={{ title: "Přidat klíč" }} />
+        <Stack.Screen name="key-edit" options={{ title: "Upravit klíč" }} />
       </Stack>
     </View>
   );

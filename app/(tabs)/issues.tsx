@@ -60,7 +60,7 @@ const Issues = () => {
           <Ionicons
             name="warning-outline"
             size={24}
-            className="text-primary-foreground"
+            className="text-foreground"
           />
           <View className="flex-1">
             <View className="flex-row justify-between items-start mb-2">

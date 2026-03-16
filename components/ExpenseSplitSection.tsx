@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Ionicons } from "@expo/vector-icons";
-import { Profile } from "../types/profile";
+import { Member } from "../types/members";
 import { formatCurrency } from "../lib/financeUtils";
 
 interface ExpenseSplitSectionProps {
-  flatMembers: Profile[];
-  selectedMembers: Profile[];
-  onSelectedMembersChange: (members: Profile[]) => void;
+  flatMembers: Member[];
+  selectedMembers: Member[];
+  onSelectedMembersChange: (members: Member[]) => void;
   splitMode: "auto" | "manual";
   onSplitModeChange: (mode: "auto" | "manual") => void;
   amount: string;
@@ -42,7 +42,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
     }, 0);
   };
 
-  const handleMemberToggle = (member: Profile) => {
+  const handleMemberToggle = (member: Member) => {
     const isSelected = selectedMembers.some((m) => m.id === member.id);
     if (isSelected) {
       onSelectedMembersChange(

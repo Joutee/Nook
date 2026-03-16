@@ -10,8 +10,16 @@ interface ChoreHistoryItemProps {
 }
 
 export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
-  const cycleDate = new Date(item.cycle_start_date);
-  const completedDate = item.completed_at ? new Date(item.completed_at) : null;
+  // Convert PostgreSQL timestamp format to ISO 8601 format
+  // "2026-03-15 00:00:00+00" -> "2026-03-15T00:00:00Z"
+  const isoDateString = item.cycle_start_date
+    .replace(" ", "T")
+    .replace("+00", "Z");
+
+  const cycleDate = new Date(isoDateString);
+  const completedDate = item.completed_at
+    ? new Date(item.completed_at.replace(" ", "T").replace("+00", "Z"))
+    : null;
 
   return (
     <Card>
