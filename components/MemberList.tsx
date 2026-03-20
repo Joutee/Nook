@@ -8,6 +8,7 @@ import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -32,6 +33,7 @@ export const MemberList = ({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { currentFlat, refreshFlats } = useFlatContext();
   const { showToast } = useToast();
+  const router = useRouter();
 
   // Použít propFlatId pokud je poskytnut, jinak currentFlat.id
   const effectiveFlatId = propFlatId || currentFlat?.id;
@@ -216,8 +218,16 @@ export const MemberList = ({
           isCurrentUserAdmin || member.id === currentUserId;
 
         return (
-          <View
+      <TouchableOpacity
             key={member.id}
+            onPress={() => {
+              if (member.id === currentUserId) {
+                router.push("/profile");
+              } else {
+                router.push(`/profile?id=${member.id}`);
+              }
+            }}
+            activeOpacity={0.7}
             className="flex-row items-center py-3 px-3 bg-card border border-border rounded-lg mb-2 gap-3"
           >
             <Avatar
@@ -292,7 +302,7 @@ export const MemberList = ({
                 />
               </TouchableOpacity>
             )}
-          </View>
+          </TouchableOpacity>
         );
       })}
 

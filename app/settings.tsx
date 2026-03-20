@@ -1,4 +1,5 @@
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Modal, Pressable } from "react-native";
+import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -13,6 +14,13 @@ import { useToast } from "../contexts/ToastContext";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import PasswordVerification from "@/components/PasswordVerification";
+import {
+  isBiometricAvailable,
+  hasBiometricCredentials,
+  saveBiometricCredentials,
+  deleteBiometricCredentials,
+} from "@/lib/biometricAuth";
 
 const Settings = () => {
   const router = useRouter();
@@ -21,6 +29,40 @@ const Settings = () => {
   const [isMembersModalVisible, setIsMembersModalVisible] = useState(false);
   const [flatCode, setFlatCode] = useState<string | null>(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id);
+        setCurrentEmail(user.email || "");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (currentEmail) {
+      checkBiometric();
+    }
+  }, [currentEmail]);
+
+  async function checkBiometric() {
+    try {
+      const available = await isBiometricAvailable();
+      setBiometricAvailable(available);
+
+      if (available && currentEmail) {
+        const hasSaved = await hasBiometricCredentials(currentEmail);
+        setBiometricEnabled(hasSaved);
+      }
+    } catch (error) {
+      console.log("Error checking biometric:", error);
+    }
+  }
 
   useEffect(() => {
     const fetchFlatCode = async () => {
@@ -56,6 +98,43 @@ const Settings = () => {
 
   const handleOpenMembers = () => {
     setIsMembersModalVisible(true);
+  };
+
+  const handleBiometricToggle = async (enabled: boolean) => {
+    if (enabled) {
+      // Zapnout biometriku - vyžaduje heslo
+      setShowPasswordDialog(true);
+    } else {
+      // Vypnout biometriku - smazat credentials pro aktuálního uživatele
+      try {
+        await deleteBiometricCredentials(currentEmail);
+        setBiometricEnabled(false);
+        showToast("Biometrické přihlášení vypnuto", "success");
+      } catch (error) {
+        showToast("Nepodařilo se vypnout biometrické přihlášení", "error");
+      }
+    }
+  };
+
+  const handleBiometricPasswordVerified = async (password?: string) => {
+    if (!password) {
+      showToast("Chyba při ověření hesla", "error");
+      return;
+    }
+
+    try {
+      // Heslo už bylo ověřené, takže můžeme přímo uložit pro biometriku
+      await saveBiometricCredentials(currentEmail, password);
+      setBiometricEnabled(true);
+      setShowPasswordDialog(false);
+      showToast("Biometrické přihlášení zapnuto", "success");
+    } catch (error) {
+      showToast("Nepodařilo se zapnout biometrické přihlášení", "error");
+    }
+  };
+
+  const handlePasswordDialogCancel = () => {
+    setShowPasswordDialog(false);
   };
 
   return (
@@ -181,6 +260,39 @@ const Settings = () => {
           </Card>
         </View>
 
+        {/* Bezpečnost */}
+        <View className="gap-2">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
+            Bezpečnost
+          </Text>
+
+          <Card className="gap-0 py-0">
+            {biometricAvailable && (
+              <>
+                <View className="flex-row justify-between items-center py-4 px-6">
+                  <View className="flex-row items-center gap-3 flex-1">
+                    <Ionicons
+                      name="finger-print-outline"
+                      size={24}
+                      className="text-foreground"
+                    />
+                    <View className="flex-1">
+                      <Text className="text-base">Biometrické přihlášení</Text>
+                      <Text className="text-xs text-muted-foreground">
+                        Přihlášení pomocí otisku prstu
+                      </Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={biometricEnabled}
+                    onValueChange={handleBiometricToggle}
+                  />
+                </View>
+              </>
+            )}
+          </Card>
+        </View>
+
         {/* Účet */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
@@ -188,6 +300,28 @@ const Settings = () => {
           </Text>
 
           <Card className="gap-0 py-0">
+            <Button
+              variant="ghost"
+              className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
+              onPress={() => currentUserId && router.push(`/profile`)}
+            >
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="person-circle-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <Text className="text-base">Profil</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                className="text-foreground"
+              />
+            </Button>
+
+            <Separator />
+
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
@@ -250,6 +384,32 @@ const Settings = () => {
         onAction={handleLogout}
         destructive
       />
+
+      {/* Modal pro zapnutí biometriky */}
+      <Modal
+        visible={showPasswordDialog}
+        transparent
+        animationType="fade"
+        onRequestClose={handlePasswordDialogCancel}
+      >
+        <Pressable
+          className="flex-1 bg-black/75 items-center justify-center p-4"
+          onPress={handlePasswordDialogCancel}
+        >
+          <Pressable
+            className="w-80 max-w-[600px]"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <PasswordVerification
+              title="Zapnout biometrické přihlášení"
+              description="Pro zapnutí biometrického přihlášení zadejte své aktuální heslo"
+              onVerified={handleBiometricPasswordVerified}
+              onCancel={handlePasswordDialogCancel}
+              returnPassword={true}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 };

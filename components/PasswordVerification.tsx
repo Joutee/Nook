@@ -17,10 +17,11 @@ import { getErrorMessage } from "../lib/errorTranslations";
 import { useToast } from "../contexts/ToastContext";
 
 interface PasswordVerificationProps {
-  onVerified: () => void;
+  onVerified: (password?: string) => void;
   onCancel: () => void;
   title?: string;
   description?: string;
+  returnPassword?: boolean; // Nová prop pro vrácení hesla
 }
 
 export default function PasswordVerification({
@@ -28,6 +29,7 @@ export default function PasswordVerification({
   onCancel,
   title = "Ověření totožnosti",
   description = "Pro pokračování zadejte své heslo",
+  returnPassword = false, // Default je false pro zpětnou kompatibilitu
 }: PasswordVerificationProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,7 +68,8 @@ export default function PasswordVerification({
     } else {
       showToast("Heslo bylo ověřeno", "success");
       setLoading(false);
-      onVerified();
+      // Volitelně vrátí heslo, pokud je to požadováno
+      onVerified(returnPassword ? password : undefined);
     }
   };
 

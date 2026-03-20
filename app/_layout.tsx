@@ -45,7 +45,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
 
     // Není přihlášený -> redirect na login
     if (!session && !inAuthGroup) {
-      router.replace("/(auth)/login");
+      router.replace("/(auth)/");
       console.log("redirect to login");
       return;
     }
@@ -183,6 +183,11 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen name="key-create" options={{ title: "Přidat klíč" }} />
         <Stack.Screen name="key-edit" options={{ title: "Upravit klíč" }} />
+        <Stack.Screen name="profile" options={{ title: "Profil" }} />
+        <Stack.Screen
+          name="change-password"
+          options={{ title: "Změna hesla" }}
+        />
       </Stack>
     </View>
   );

@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ionicons } from "@expo/vector-icons";
+import { Switch } from "@/components/ui/switch";
 import { Member } from "../types/members";
 import { formatCurrency } from "../lib/financeUtils";
 import { Avatar } from "@/components/ui/avatar";
@@ -146,8 +146,8 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
     }
   };
 
-  const handleSplitModeChange = () => {
-    if (splitMode === "auto") {
+  const handleSplitModeChange = (isManual: boolean) => {
+    if (isManual) {
       // Switching to manual - pre-fill with equal amounts
       const amountNum = parseFloat(amount);
       if (!isNaN(amountNum) && selectedMembers.length > 0) {
@@ -182,30 +182,12 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
     <View>
       <View className="flex-row justify-between items-center mb-2">
         <Label>Rozdělit mezi</Label>
-        <View className="flex-row items-center gap-2">
-          <Ionicons
-            name="calculator-outline"
-            size={16}
-            className="text-muted-foreground"
-          />
-          <Pressable
-            className={`w-11 h-6 rounded-full p-0.5 justify-center ${
-              splitMode === "manual" ? "bg-primary" : "bg-border"
-            }`}
-            onPress={handleSplitModeChange}
-          >
-            <View
-              className={`w-5 h-5 rounded-full bg-white ${
-                splitMode === "manual" ? "self-end" : "self-start"
-              }`}
-            />
-          </Pressable>
-          <Ionicons
-            name="hand-right-outline"
-            size={16}
-            className="text-muted-foreground"
-          />
-        </View>
+        <Switch
+          value={splitMode === "manual"}
+          onValueChange={handleSplitModeChange}
+          leftIcon="calculator-outline"
+          rightIcon="hand-right-outline"
+        />
       </View>
 
       {flatMembers.map((member) => {

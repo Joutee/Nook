@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { getErrorMessage } from "@/lib/errorTranslations";
+import { saveUsedAccount } from "@/lib/biometricAuth";
 import { View, TextInput, ScrollView, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
@@ -13,15 +14,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "nativewind";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Register() {
-  const [email, setEmail] = useState("");
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
@@ -31,16 +31,40 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
-  const { colorScheme } = useColorScheme();
 
-  const surnameInputRef = useRef<TextInput>(null);
   const emailInputRef = useRef<TextInput>(null);
+  const nameInputRef = useRef<TextInput>(null);
+  const surnameInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
   async function signUpWithEmail() {
+    if (!email.trim()) {
+      showToast("Zadejte email", "error");
+      emailInputRef.current?.focus();
+      return;
+    }
+
+    if (!name.trim()) {
+      showToast("Zadejte jméno", "error");
+      return;
+    }
+
+    if (!surname.trim()) {
+      showToast("Zadejte příjmení", "error");
+      surnameInputRef.current?.focus();
+      return;
+    }
+
+    if (!password.trim()) {
+      showToast("Zadejte heslo", "error");
+      passwordInputRef.current?.focus();
+      return;
+    }
+
     if (password !== confirmPassword) {
       showToast(getErrorMessage("PASSWORDS_DO_NOT_MATCH"), "error");
+      confirmPasswordInputRef.current?.focus();
       return;
     }
 
@@ -63,6 +87,8 @@ export default function Register() {
       showToast(getErrorMessage(error.message), "error");
       setLoading(false);
     } else {
+      // Úspěšná registrace - uložit účet do seznamu použitých účtů
+      await saveUsedAccount(email);
       showToast("Ověřovací kód byl odeslán na váš e-mail", "success");
       setLoading(false);
 
@@ -89,14 +115,31 @@ export default function Register() {
         <CardHeader>
           <CardTitle className="text-center text-2xl">Registrace</CardTitle>
           <CardDescription className="text-center">
-            Vytvořte si účet a začněte používat aplikaci
+            Vytvořte si nový účet
           </CardDescription>
         </CardHeader>
         <CardContent className="gap-6">
           <View className="gap-6">
             <View className="gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                ref={emailInputRef}
+                id="email"
+                placeholder="email@example.com"
+                keyboardType="email-address"
+                autoComplete="email"
+                autoCapitalize="none"
+                onChangeText={setEmail}
+                value={email}
+                returnKeyType="next"
+                onSubmitEditing={() => nameInputRef.current?.focus()}
+              />
+            </View>
+
+            <View className="gap-1.5">
               <Label htmlFor="name">Jméno</Label>
               <Input
+                ref={nameInputRef}
                 id="name"
                 placeholder="Jan"
                 autoCapitalize="words"
@@ -116,22 +159,6 @@ export default function Register() {
                 autoCapitalize="words"
                 onChangeText={setSurname}
                 value={surname}
-                returnKeyType="next"
-                onSubmitEditing={() => emailInputRef.current?.focus()}
-              />
-            </View>
-
-            <View className="gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                ref={emailInputRef}
-                id="email"
-                placeholder="email@address.com"
-                keyboardType="email-address"
-                autoComplete="email"
-                autoCapitalize="none"
-                onChangeText={setEmail}
-                value={email}
                 returnKeyType="next"
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
               />
@@ -208,35 +235,10 @@ export default function Register() {
 
           <Button
             variant="ghost"
-            className="w-full h-auto "
-            onPress={() => router.push("/(auth)/login")}
-          >
-            <Text className="text-foreground w-full text-center">
-              Zpět na přihlášení
-            </Text>
-          </Button>
-
-          <View className="flex-row items-center gap-4">
-            <Separator className="flex-1" />
-            <Text className="text-muted-foreground text-sm shrink-0 px-1">
-              nebo
-            </Text>
-            <Separator className="flex-1" />
-          </View>
-
-          <Button
-            variant="outline"
             className="w-full"
-            onPress={() => {
-              // TODO: Implement Google OAuth
-            }}
+            onPress={() => router.back()}
           >
-            <Ionicons
-              name="logo-google"
-              size={20}
-              className="text-foreground"
-            />
-            <Text>Pokračovat s Google</Text>
+            <Text className="text-muted-foreground">Zpět</Text>
           </Button>
         </CardContent>
       </Card>

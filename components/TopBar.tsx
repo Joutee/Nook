@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useRouter, usePathname } from "expo-router";
@@ -7,13 +7,28 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet from "./BottomSheet";
 import { FlatsList } from "./FlatsList";
+import { Avatar } from "@/components/ui/avatar";
+import { supabase } from "../lib/supabase";
 
 const TopBar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { currentFlat, flats } = useFlatContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => setUserName(data?.name ?? null));
+    });
+  }, []);
 
   const handleFlatPress = () => {
     if (flats.length > 1) {
@@ -26,6 +41,12 @@ const TopBar = () => {
     // Pouze pokud nejsme na domovské stránce, přejdi na ni
     if (pathname !== "/") {
       router.push("/");
+    }
+  };
+
+  const handleProfilePress = () => {
+    if (pathname !== "/profile") {
+      router.push("/profile");
     }
   };
 
@@ -63,14 +84,19 @@ const TopBar = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Pravá strana - tlačítko nastavení */}
-        <TouchableOpacity className="p-1" onPress={handleSettingsPress}>
-          <Ionicons
-            name="settings-outline"
-            size={24}
-            className="text-foreground"
-          />
-        </TouchableOpacity>
+        {/* Pravá strana - profil + nastavení */}
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity className="p-1" onPress={handleSettingsPress}>
+            <Ionicons
+              name="settings-outline"
+              size={24}
+              className="text-foreground"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity className="p-1" onPress={handleProfilePress}>
+            <Avatar name={userName} size="md" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* BottomSheet pro výběr bytu */}
