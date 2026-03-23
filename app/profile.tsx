@@ -9,8 +9,8 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useToast } from "../contexts/ToastContext";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as Clipboard from "expo-clipboard";
 
@@ -217,7 +217,7 @@ const ProfilePage = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onPress={() => router.push("/change-email")}
+                    onPress={() => router.push("/settings/change-email")}
                   >
                     <Ionicons
                       name="pencil-outline"

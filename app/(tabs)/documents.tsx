@@ -15,7 +15,7 @@ import { router, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
-import DocumentViewerModal from "@/components/DocumentViewerModal";
+import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteFile } from "@/lib/fileService";
 import { Document } from "@/types/documents";
@@ -239,7 +239,7 @@ const documents = () => {
       {/* Floating Action Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
-        onPress={() => router.push("/document-add")}
+        onPress={() => router.push("/documents/add")}
       >
         <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>

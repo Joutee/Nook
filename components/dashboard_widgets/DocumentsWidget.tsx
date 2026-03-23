@@ -4,10 +4,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { Document } from "../../types/documents";
-import { Separator } from "../ui/separator";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { Document } from "@/types/documents";
+import { Separator } from "@/components/ui/separator";
 
 export const DocumentsWidget = () => {
   const [documents, setDocuments] = useState<Document[]>([]);

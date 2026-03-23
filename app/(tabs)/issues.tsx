@@ -53,7 +53,7 @@ const Issues = () => {
   const renderIssue = (item: Issue) => (
     <Pressable
       key={item.id}
-      onPress={() => router.push(`/issue-detail?id=${item.id}`)}
+      onPress={() => router.push(`/issues/${item.id}`)}
     >
       <Card className="mb-3 ">
         <CardContent className="flex-row items-center px-4 gap-4">
@@ -141,7 +141,7 @@ const Issues = () => {
       {userRole === "najemce" && (
         <Pressable
           className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
-          onPress={() => router.push("/issue-create")}
+          onPress={() => router.push("/issues/create")}
         >
           <Ionicons name="add" size={28} className="text-primary-foreground" />
         </Pressable>

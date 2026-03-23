@@ -10,12 +10,12 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { useToast } from "../../contexts/ToastContext";
-import { Chore } from "../../types/chores";
-import { completeChore } from "../../lib/choreUtils";
-import { THEME } from "../../lib/theme";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { useToast } from "@/contexts/ToastContext";
+import { Chore } from "@/types/chores";
+import { completeChore } from "@/lib/choreUtils";
+import { THEME } from "@/lib/theme";
 
 export const MyChoresWidget = () => {
   const [myChores, setMyChores] = useState<Chore[]>([]);
@@ -256,7 +256,7 @@ export const MyChoresWidget = () => {
                     </Pressable>
                     <Pressable
                       onPress={() =>
-                        router.push(`/chore-detail?id=${chore.id}`)
+                        router.push(`/chores/${chore.id}`)
                       }
                       className="flex-1"
                     >

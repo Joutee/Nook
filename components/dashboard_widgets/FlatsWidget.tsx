@@ -2,8 +2,8 @@ import { View, ActivityIndicator } from "react-native";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { FlatsList } from "../FlatsList";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { FlatsList } from "@/components/flats/FlatsList";
 
 export const FlatsWidget = () => {
   const { isLoading } = useFlatContext();

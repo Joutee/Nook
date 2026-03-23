@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { MemberList } from "@/components/MemberList";
+import { MemberList } from "@/components/flats/MemberList";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 

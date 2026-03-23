@@ -1,15 +1,15 @@
 import { View, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { SettlementList } from "@/components/SettlementList";
+import { SettlementList } from "@/components/expenses/SettlementList";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { Balance } from "../../types/finance";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { Balance } from "@/types/finance";
 import { Pressable } from "react-native";
-import { formatCurrency } from "../../lib/financeUtils";
+import { formatCurrency } from "@/lib/financeUtils";
 
 export const RepaymentWidget = () => {
   const [balances, setBalances] = useState<Balance[]>([]);

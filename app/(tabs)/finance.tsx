@@ -9,7 +9,7 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SettlementList } from "@/components/SettlementList";
+import { SettlementList } from "@/components/expenses/SettlementList";
 import React, { useState, useCallback, Fragment } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -140,7 +140,7 @@ const Finance = () => {
     return (
       <Pressable
         className="flex-row justify-between items-center py-3"
-        onPress={() => router.push(`/expense-edit?id=${item.id}`)}
+        onPress={() => router.push(`/expenses/${item.id}/edit`)}
       >
         <View className="flex-row items-center gap-3 flex-1">
           {item.is_settlement ? (
@@ -264,7 +264,7 @@ const Finance = () => {
       {/* Add Expense Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
-        onPress={() => router.push("/expense-create")}
+        onPress={() => router.push("/expenses/create")}
       >
         <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>

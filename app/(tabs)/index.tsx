@@ -181,7 +181,7 @@ export default function Home() {
         <View className="items-center">
           <Button
             variant="outline"
-            onPress={() => router.push("/reorder-widgets")}
+            onPress={() => router.push("/settings/reorder-widgets")}
             className="w-2/3"
           >
             <Ionicons

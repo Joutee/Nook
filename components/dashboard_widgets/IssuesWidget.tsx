@@ -4,11 +4,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { Issue } from "../../types/issues";
-import { getStatusColor, getStatusText } from "../../lib/issueUtils";
-import { Separator } from "../ui/separator";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { Issue } from "@/types/issues";
+import { getStatusColor, getStatusText } from "@/lib/issueUtils";
+import { Separator } from "@/components/ui/separator";
 
 export const IssuesWidget = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -102,7 +102,7 @@ export const IssuesWidget = () => {
               {issues.map((issue, index) => (
                 <React.Fragment key={issue.id}>
                   <Pressable
-                    onPress={() => router.push(`/issue-detail?id=${issue.id}`)}
+                    onPress={() => router.push(`/issues/${issue.id}`)}
                     className="py-2 border-b border-border last:border-b-0 flex flex-row justify-between mb-1 items-center"
                   >
                     <View className="flex-1">

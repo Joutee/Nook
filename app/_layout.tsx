@@ -3,15 +3,15 @@ import React, { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import TopBar from "../components/TopBar";
-import { supabase } from "../lib/supabase";
+import TopBar from "@/components/shared/TopBar";
+import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
-import { FlatProvider, useFlatContext } from "../contexts/FlatContext";
-import { ToastProvider } from "../contexts/ToastContext";
-import "../global.css";
-import "../lib/icons";
+import { FlatProvider, useFlatContext } from "@/contexts/FlatContext";
+import { ToastProvider } from "@/contexts/ToastContext";
+import "@/global.css";
+import "@/lib/icons";
 import { useColorScheme } from "nativewind";
-import { THEME } from "../lib/theme";
+import { THEME } from "@/lib/theme";
 
 import { PortalHost } from "@rn-primitives/portal";
 
@@ -121,14 +121,14 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
         <Stack.Screen
-          name="reorder-widgets"
+          name="settings/reorder-widgets"
           options={{
             title: "Uspořádat widgety",
           }}
         />
-        <Stack.Screen name="expense-create" options={{ title: "Nový výdaj" }} />
+        <Stack.Screen name="expenses/create" options={{ title: "Nový výdaj" }} />
         <Stack.Screen
-          name="expense-edit"
+          name="expenses/[id]/edit"
           options={{ title: "Upravit výdaj" }}
         />
         <Stack.Screen
@@ -139,34 +139,34 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
         <Stack.Screen
-          name="change-email"
+          name="settings/change-email"
           options={{
             title: "Změna e-mailu",
             headerShown: true,
           }}
         />
-        <Stack.Screen name="chore-detail" options={{ title: "Detail úkolu" }} />
-        <Stack.Screen name="chore-create" options={{ title: "Nový úkol" }} />
+        <Stack.Screen name="chores/[id]" options={{ title: "Detail úkolu" }} />
+        <Stack.Screen name="chores/create" options={{ title: "Nový úkol" }} />
         <Stack.Screen
-          name="chore-history"
+          name="chores/[id]/history"
           options={{ title: "Historie úkolu" }}
         />
-        <Stack.Screen name="chore-edit" options={{ title: "Upravit úkol" }} />
+        <Stack.Screen name="chores/[id]/edit" options={{ title: "Upravit úkol" }} />
         <Stack.Screen
-          name="issue-create"
+          name="issues/create"
           options={{ title: "Nahlásit závadu" }}
         />
         <Stack.Screen
-          name="issue-detail"
+          name="issues/[id]"
           options={{ title: "Detail závady" }}
         />
-        <Stack.Screen name="issue-edit" options={{ title: "Upravit závadu" }} />
+        <Stack.Screen name="issues/[id]/edit" options={{ title: "Upravit závadu" }} />
         <Stack.Screen
-          name="document-add"
+          name="documents/add"
           options={{ title: "Nový dokument" }}
         />
         <Stack.Screen
-          name="join-another-flat"
+          name="flats/join"
           options={{
             title: "Připojit se k dalšímu bytu",
             headerShown: true,
@@ -174,15 +174,15 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           }}
         />
         <Stack.Screen
-          name="create-another-flat"
+          name="flats/create"
           options={{
             title: "Vytvořit novou domácnost",
             headerShown: true,
             headerBackTitle: "Zpět",
           }}
         />
-        <Stack.Screen name="key-create" options={{ title: "Přidat klíč" }} />
-        <Stack.Screen name="key-edit" options={{ title: "Upravit klíč" }} />
+        <Stack.Screen name="keys/create" options={{ title: "Přidat klíč" }} />
+        <Stack.Screen name="keys/[id]/edit" options={{ title: "Upravit klíč" }} />
         <Stack.Screen name="profile" options={{ title: "Profil" }} />
         <Stack.Screen
           name="change-password"

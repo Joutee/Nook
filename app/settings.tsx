@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { supabase } from "../lib/supabase";
-import { useFlatContext } from "../contexts/FlatContext";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
 import { Ionicons } from "@expo/vector-icons";
-import MembersBottomSheet from "../components/MembersBottomSheet";
+import MembersBottomSheet from "@/components/shared/MembersBottomSheet";
 import * as Clipboard from "expo-clipboard";
-import { useToast } from "../contexts/ToastContext";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { useToast } from "@/contexts/ToastContext";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog } from "@/components/ui/alert-dialog";
-import PasswordVerification from "@/components/PasswordVerification";
+import PasswordVerification from "@/components/shared/PasswordVerification";
 import {
   isBiometricAvailable,
   hasBiometricCredentials,
@@ -207,7 +207,7 @@ const Settings = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/join-another-flat")}
+              onPress={() => router.push("/flats/join")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons
@@ -230,7 +230,7 @@ const Settings = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/create-another-flat")}
+              onPress={() => router.push("/flats/create")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons
@@ -325,7 +325,7 @@ const Settings = () => {
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
-              onPress={() => router.push("/change-email")}
+              onPress={() => router.push("/settings/change-email")}
             >
               <View className="flex-row items-center gap-3">
                 <Ionicons

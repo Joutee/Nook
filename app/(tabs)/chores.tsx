@@ -138,7 +138,7 @@ const Chores = () => {
         <CardContent className="p-0">
           <Pressable
             className="p-4"
-            onPress={() => router.push(`/chore-detail?id=${item.id}`)}
+            onPress={() => router.push(`/chores/${item.id}`)}
           >
             <View className="flex-row items-start justify-between mb-3">
               <Text className="text-lg font-semibold text-foreground flex-1">
@@ -256,7 +256,7 @@ const Chores = () => {
       {/* Add Chore Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
-        onPress={() => router.push("/chore-create")}
+        onPress={() => router.push("/chores/create")}
       >
         <Ionicons name="add" size={28} className="text-primary-foreground" />
       </Pressable>

@@ -5,9 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { useFlatContext } from "../../contexts/FlatContext";
-import { KeyWithAssignee } from "../../types/keys";
+import { supabase } from "@/lib/supabase";
+import { useFlatContext } from "@/contexts/FlatContext";
+import { KeyWithAssignee } from "@/types/keys";
 import { Avatar } from "@/components/ui/avatar";
 
 export const KeysWidget = () => {

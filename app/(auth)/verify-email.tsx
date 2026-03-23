@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import EmailVerification from "@/components/EmailVerification";
+import EmailVerification from "@/components/shared/EmailVerification";
 
 export default function VerifyEmail() {
   const router = useRouter();

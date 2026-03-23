@@ -2,7 +2,7 @@ import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDialog } from "@/components/ui/alert-dialog";
-import { MemberSelectorSheet } from "@/components/MemberSelectorSheet";
+import { MemberSelectorSheet } from "@/components/shared/MemberSelectorSheet";
 import React, { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -212,7 +212,7 @@ const Keys = () => {
             {/* Upravit */}
             <Pressable
               className="w-10 h-10 items-center justify-center"
-              onPress={() => router.push(`/key-edit?id=${item.id}`)}
+              onPress={() => router.push(`/keys/${item.id}/edit`)}
             >
               <Ionicons
                 name="create-outline"
@@ -273,7 +273,7 @@ const Keys = () => {
       {isLandlord && (
         <Pressable
           className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
-          onPress={() => router.push("/key-create")}
+          onPress={() => router.push("/keys/create")}
         >
           <Ionicons name="add" size={28} className="text-primary-foreground" />
         </Pressable>
