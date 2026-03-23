@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(*.ts)",
+      "Edit(*.tsx)",
+      "Edit(*.js)",
+      "Edit(*.jsx)",
+      "Edit(*.json)",
+      "Edit(*.css)",
+      "Edit(*.sql)"
+    ]
+  }
+}
