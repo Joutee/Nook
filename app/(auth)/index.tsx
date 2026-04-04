@@ -33,11 +33,8 @@ export default function AuthEntry() {
   const params = useLocalSearchParams<{ skipAutoLogin?: string }>();
 
   useEffect(() => {
-    checkForDefaultAccount();
-  }, []);
-
-  useEffect(() => {
     configureGoogleSignIn();
+    checkForDefaultAccount();
   }, []);
 
   async function checkForDefaultAccount() {
@@ -98,16 +95,14 @@ export default function AuthEntry() {
 
   async function handleGoogleSignIn() {
     setIsLoading(true);
-    const result = await signInWithGoogle();
-    if (!result.success) {
-      if (!result.cancelled) {
-        showToast(
-          result.error ? getErrorMessage(result.error) : "Přihlášení přes Google selhalo.",
-          "error",
-        );
+    try {
+      const result = await signInWithGoogle();
+      if (!result.success && !result.cancelled) {
+        showToast(getErrorMessage(result.error), "error");
       }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   async function handleRegister() {
