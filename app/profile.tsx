@@ -23,6 +23,16 @@ interface Profile {
   phone: string | null;
 }
 
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/[^\d+]/g, "");
+  if (digits.startsWith("+")) {
+    const prefix = digits.slice(0, 4);
+    const rest = digits.slice(4).replace(/(.{3})/g, "$1 ").trim();
+    return rest ? `${prefix} ${rest}` : prefix;
+  }
+  return digits.replace(/(.{3})/g, "$1 ").trim();
+}
+
 function formatIban(raw: string): string {
   return raw
     .replace(/\s+/g, "")
@@ -518,7 +528,7 @@ const ProfilePage = () => {
                   </Text>
                   {!isEditingPhone && (
                     <Text className="text-base text-foreground">
-                      {profile?.phone || "Nenastaveno"}
+                      {profile?.phone ? formatPhone(profile.phone) : "Nenastaveno"}
                     </Text>
                   )}
                 </View>
