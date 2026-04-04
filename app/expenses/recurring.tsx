@@ -8,40 +8,9 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency } from "@/lib/financeUtils";
+import { formatInterval } from "@/lib/intervalUtils";
 import { RecurringExpenseWithDetails } from "@/types/finance";
 import logger from "@/lib/logger";
-
-const DAY_NAMES = ["", "Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
-const MONTH_NAMES = [
-  "",
-  "ledna",
-  "února",
-  "března",
-  "dubna",
-  "května",
-  "června",
-  "července",
-  "srpna",
-  "září",
-  "října",
-  "listopadu",
-  "prosince",
-];
-
-function formatInterval(item: RecurringExpenseWithDetails): string {
-  switch (item.interval) {
-    case "daily":
-      return "Denně";
-    case "weekly":
-      return `Týdně, ${DAY_NAMES[item.interval_day ?? 1]}`;
-    case "monthly":
-      return `Měsíčně, ${item.interval_day}. dne`;
-    case "yearly":
-      return `Ročně, ${item.interval_day}. ${MONTH_NAMES[item.interval_month ?? 1]}`;
-    default:
-      return "";
-  }
-}
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -59,7 +28,7 @@ const RecurringExpenseItem: React.FC<{
             {item.title}
           </Text>
           <Text className="text-xs text-muted-foreground mt-0.5">
-            {formatCurrency(item.amount)} · {formatInterval(item)}
+            {formatCurrency(item.amount)} · {formatInterval(item.interval, item.interval_day, item.interval_month)}
           </Text>
           {!item.is_paused && (
             <Text className="text-xs text-muted-foreground mt-0.5">
