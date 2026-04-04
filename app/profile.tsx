@@ -256,20 +256,63 @@ const ProfilePage = () => {
             Informace
           </Text>
           <Card className="gap-0 py-0">
-            <View className="flex-row items-center gap-3 py-4 px-6">
-              <Ionicons
-                name="person-outline"
-                size={24}
-                className="text-foreground"
-              />
-              <View className="flex-1">
-                <Text className="text-xs text-muted-foreground mb-0.5">
-                  Jméno
-                </Text>
-                <Text className="text-base text-foreground">
-                  {profile?.name || "—"}
-                </Text>
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="person-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Jméno
+                  </Text>
+                  {!isEditingName && (
+                    <Text className="text-base text-foreground">
+                      {profile?.name || "—"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingName && (
+                  <Button variant="ghost" size="icon" onPress={handleEditName}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
               </View>
+
+              {isOwnProfile && isEditingName && (
+                <View className="gap-2">
+                  <Input
+                    value={nameInput}
+                    onChangeText={setNameInput}
+                    placeholder="Zadejte jméno"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSaveName}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSaveName}
+                      disabled={isSavingName}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelName}
+                      disabled={isSavingName}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
             </View>
 
             <Separator />
