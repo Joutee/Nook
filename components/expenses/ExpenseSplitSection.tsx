@@ -220,7 +220,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
                   }
                   onBlur={() => handleAmountBlur(member.id)}
                   keyboardType="decimal-pad"
-                  className={`${
+                  className={`bg-background dark:bg-input ${
                     touchedMembers.has(member.id)
                       ? "border-2 border-primary"
                       : "border-primary"
