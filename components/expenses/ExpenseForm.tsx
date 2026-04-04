@@ -196,6 +196,47 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     }
   };
 
+  const calculateNextOccurrence = (): string => {
+    const today = new Date();
+    let next: Date;
+
+    switch (recurringInterval) {
+      case "daily":
+        next = new Date(today);
+        next.setDate(next.getDate() + 1);
+        break;
+      case "weekly":
+        next = new Date(today);
+        const currentDay = next.getDay() || 7; // Convert Sunday 0 to 7
+        const daysUntil =
+          intervalDay > currentDay
+            ? intervalDay - currentDay
+            : 7 - (currentDay - intervalDay);
+        next.setDate(next.getDate() + daysUntil);
+        break;
+      case "monthly":
+        next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        const lastDayOfMonth = new Date(
+          next.getFullYear(),
+          next.getMonth() + 1,
+          0,
+        ).getDate();
+        next.setDate(Math.min(intervalDay, lastDayOfMonth));
+        break;
+      case "yearly":
+        next = new Date(today.getFullYear() + 1, intervalMonth - 1, 1);
+        const lastDay = new Date(
+          next.getFullYear(),
+          intervalMonth,
+          0,
+        ).getDate();
+        next.setDate(Math.min(intervalDay, lastDay));
+        break;
+    }
+
+    return next.toISOString().split("T")[0];
+  };
+
   const handleSave = async () => {
     // Validation
     const finalTitle = title.trim() || `Výdaj z ${formatDate(date)}`;
@@ -409,6 +450,50 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
 
         showToast("Výdaj byl úspěšně přidán", "success");
+
+        // Create recurring expense template if toggle is on
+        if (isRecurring) {
+          const { data: recurringData, error: recurringError } = await supabase
+            .from("recurring_expenses")
+            .insert({
+              flat_id: currentFlat.id,
+              created_by: (await supabase.auth.getUser()).data.user!.id,
+              payer_id: selectedPayer[0].id,
+              title: finalTitle,
+              amount: finalAmount,
+              interval: recurringInterval,
+              interval_day: recurringInterval === "daily" ? null : intervalDay,
+              interval_month: recurringInterval === "yearly" ? intervalMonth : null,
+              next_occurrence: calculateNextOccurrence(),
+            })
+            .select()
+            .single();
+
+          if (recurringError) {
+            logger.error("Error creating recurring expense:", recurringError);
+            showToast("Výdaj byl uložen, ale nepodařilo se nastavit opakování", "error");
+          } else {
+            // Link the first expense to the recurring template
+            await supabase
+              .from("expenses")
+              .update({ recurring_expense_id: recurringData.id })
+              .eq("id", expenseData.id);
+
+            // Insert recurring expense members
+            const memberRows = selectedMembers.map((m) => ({
+              recurring_expense_id: recurringData.id,
+              profile_id: m.id,
+            }));
+
+            const { error: membersError } = await supabase
+              .from("recurring_expense_members")
+              .insert(memberRows);
+
+            if (membersError) {
+              logger.error("Error creating recurring members:", membersError);
+            }
+          }
+        }
       }
 
       router.back();
