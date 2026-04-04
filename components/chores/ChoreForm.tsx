@@ -1,13 +1,12 @@
 import { View, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -17,6 +16,8 @@ import { MemberOrderList } from "@/components/flats/MemberOrderList";
 import { Member } from "@/types/members";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
+import { RecurringInterval } from "@/types/finance";
+import { RecurringIntervalPicker } from "@/components/expenses/RecurringIntervalPicker";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -24,7 +25,11 @@ interface ChoreFormProps {
   initialData?: {
     name: string;
     description: string;
-    intervalDays: string;
+    intervalType: RecurringInterval;
+    intervalDay: number;
+    intervalMonth: number;
+    customDays: number;
+    recurringIntervalId?: string;
     startDate: Date;
     selectedMembers: Member[];
   };
@@ -39,9 +44,14 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   const [description, setDescription] = useState(
     initialData?.description || "",
   );
-  const [intervalDays, setIntervalDays] = useState(
-    initialData?.intervalDays || "",
+  const [intervalType, setIntervalType] = useState<RecurringInterval>(
+    initialData?.intervalType || "weekly",
   );
+  const [intervalDay, setIntervalDay] = useState(initialData?.intervalDay || 1);
+  const [intervalMonth, setIntervalMonth] = useState(
+    initialData?.intervalMonth || 1,
+  );
+  const [customDays, setCustomDays] = useState(initialData?.customDays || 7);
   const [startDate, setStartDate] = useState(
     initialData?.startDate || new Date(),
   );
@@ -63,7 +73,10 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     if (initialData) {
       setName(initialData.name);
       setDescription(initialData.description);
-      setIntervalDays(initialData.intervalDays);
+      setIntervalType(initialData.intervalType);
+      setIntervalDay(initialData.intervalDay);
+      setIntervalMonth(initialData.intervalMonth);
+      setCustomDays(initialData.customDays);
       setStartDate(initialData.startDate);
       setSelectedMembers(initialData.selectedMembers);
     }
@@ -116,12 +129,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       return false;
     }
 
-    if (
-      !intervalDays ||
-      isNaN(Number(intervalDays)) ||
-      Number(intervalDays) < 1
-    ) {
-      showToast("Zadejte platný interval (číslo větší než 0)", "error");
+    if (intervalType === "custom" && (!customDays || customDays < 1)) {
+      showToast("Zadejte platný počet dní", "error");
       return false;
     }
 
@@ -155,13 +164,37 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   };
 
   const handleCreate = async () => {
+    const { data: intervalData, error: intervalError } = await supabase
+      .from("recurring_intervals")
+      .insert({
+        type: intervalType,
+        interval_day:
+          intervalType === "weekly" ||
+          intervalType === "monthly" ||
+          intervalType === "yearly"
+            ? intervalDay
+            : null,
+        interval_month: intervalType === "yearly" ? intervalMonth : null,
+        custom_days: intervalType === "custom" ? customDays : null,
+      })
+      .select()
+      .single();
+
+    if (intervalError) {
+      showToast(
+        "Nepodařilo se vytvořit interval: " + intervalError.message,
+        "error",
+      );
+      return;
+    }
+
     const { data: choreData, error: choreError } = await supabase
       .from("chores")
       .insert({
         flat_id: currentFlat!.id,
         name: name.trim(),
         description: description.trim() || null,
-        interval_days: Number(intervalDays),
+        recurring_interval_id: intervalData.id,
         start_date: startDate.toISOString().split("T")[0],
       })
       .select()
@@ -196,12 +229,36 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   const handleUpdate = async () => {
     if (!choreId) return;
 
+    if (initialData?.recurringIntervalId) {
+      const { error: intervalError } = await supabase
+        .from("recurring_intervals")
+        .update({
+          type: intervalType,
+          interval_day:
+            intervalType === "weekly" ||
+            intervalType === "monthly" ||
+            intervalType === "yearly"
+              ? intervalDay
+              : null,
+          interval_month: intervalType === "yearly" ? intervalMonth : null,
+          custom_days: intervalType === "custom" ? customDays : null,
+        })
+        .eq("id", initialData.recurringIntervalId);
+
+      if (intervalError) {
+        showToast(
+          "Nepodařilo se aktualizovat interval: " + intervalError.message,
+          "error",
+        );
+        return;
+      }
+    }
+
     const { error: choreError } = await supabase
       .from("chores")
       .update({
         name: name.trim(),
         description: description.trim() || null,
-        interval_days: Number(intervalDays),
         start_date: startDate.toISOString().split("T")[0],
       })
       .eq("id", choreId);
@@ -279,12 +336,16 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
           </View>
 
           <View className="gap-2">
-            <Label>Interval (dnů) *</Label>
-            <Input
-              value={intervalDays}
-              onChangeText={setIntervalDays}
-              placeholder="např. 7"
-              keyboardType="number-pad"
+            <Label>Interval *</Label>
+            <RecurringIntervalPicker
+              interval={intervalType}
+              onIntervalChange={setIntervalType}
+              intervalDay={intervalDay}
+              onIntervalDayChange={setIntervalDay}
+              intervalMonth={intervalMonth}
+              onIntervalMonthChange={setIntervalMonth}
+              customDays={customDays}
+              onCustomDaysChange={setCustomDays}
             />
           </View>
 
