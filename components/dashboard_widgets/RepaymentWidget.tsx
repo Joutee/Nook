@@ -10,6 +10,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { Balance } from "@/types/finance";
 import { Pressable } from "react-native";
 import { formatCurrency } from "@/lib/financeUtils";
+import logger from "@/lib/logger";
 
 export const RepaymentWidget = () => {
   const [balances, setBalances] = useState<Balance[]>([]);
@@ -35,7 +36,7 @@ export const RepaymentWidget = () => {
           filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
         },
         (payload) => {
-          console.log("Změna v výdajích detekována!", payload);
+          logger.log("Změna v výdajích detekována!", payload);
           // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
           loadFinanceData();
         },
@@ -62,12 +63,12 @@ export const RepaymentWidget = () => {
         .eq("flat_id", currentFlat.id);
 
       if (error) {
-        console.error("Error loading balances:", error);
+        logger.error("Error loading balances:", error);
       } else {
         setBalances(balancesData || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     } finally {
       setIsLoading(false);
     }

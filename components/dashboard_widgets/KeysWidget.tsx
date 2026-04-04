@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { KeyWithAssignee } from "@/types/keys";
-import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 export const KeysWidget = () => {
   const [keys, setKeys] = useState<KeyWithAssignee[]>([]);
@@ -61,7 +61,7 @@ export const KeysWidget = () => {
       if (error) throw error;
       setKeys((data as KeyWithAssignee[]) || []);
     } catch (error) {
-      console.error("Error loading keys:", error);
+      logger.error("Error loading keys:", error);
     } finally {
       setIsLoading(false);
     }
@@ -90,32 +90,22 @@ export const KeysWidget = () => {
             <View>
               {keys.map((key, index) => (
                 <React.Fragment key={key.id}>
-                  <View className="py-2 flex-row items-center justify-between">
-                    <View className="flex-1">
-                      <Text
-                        className="text-sm font-semibold text-foreground"
-                        numberOfLines={1}
-                      >
-                        {key.name}
+                  <View className="py-2 flex-row items-center">
+                    <Text
+                      className="text-sm font-semibold text-foreground flex-1 flex-shrink"
+                      numberOfLines={1}
+                    >
+                      {key.name}
+                    </Text>
+                    {key.assignee ? (
+                      <Text className="text-xs text-muted-foreground ml-2 text-right w-5/12">
+                        {key.assignee.name} {key.assignee.surname}
                       </Text>
-                      {key.assignee ? (
-                        <View className="flex-row items-center gap-1 mt-0.5">
-                          <Avatar name={key.assignee.name} size="xs" />
-                          <Text className="text-xs text-muted-foreground">
-                            {key.assignee.name} {key.assignee.surname}
-                          </Text>
-                        </View>
-                      ) : (
-                        <Text className="text-xs text-muted-foreground italic mt-0.5">
-                          Nepřiřazen
-                        </Text>
-                      )}
-                    </View>
-                    <Ionicons
-                      name="key-outline"
-                      size={16}
-                      className="text-muted-foreground ml-2"
-                    />
+                    ) : (
+                      <Text className="text-xs text-muted-foreground italic ml-2">
+                        Nepřiřazen
+                      </Text>
+                    )}
                   </View>
                   {index < keys.length - 1 && <Separator />}
                 </React.Fragment>

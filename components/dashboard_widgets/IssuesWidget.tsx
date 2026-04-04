@@ -9,6 +9,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { Issue } from "@/types/issues";
 import { getStatusColor, getStatusText } from "@/lib/issueUtils";
 import { Separator } from "@/components/ui/separator";
+import logger from "@/lib/logger";
 
 export const IssuesWidget = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -34,7 +35,7 @@ export const IssuesWidget = () => {
           filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
         },
         (payload) => {
-          console.log("Změna v závadách detekována!", payload);
+          logger.log("Změna v závadách detekována!", payload);
           // Když se něco změní (někdo přidá/upraví závadu), přenačteme widget
           loadIssues();
         },
@@ -63,12 +64,12 @@ export const IssuesWidget = () => {
         .limit(3);
 
       if (error) {
-        console.error("Error loading issues:", error);
+        logger.error("Error loading issues:", error);
       } else {
         setIssues(data || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -112,14 +113,7 @@ export const IssuesWidget = () => {
                       >
                         {issue.title}
                       </Text>
-                      {issue.description && (
-                        <Text
-                          className="text-xs text-muted-foreground w-full"
-                          numberOfLines={1}
-                        >
-                          {issue.description}
-                        </Text>
-                      )}
+
                       <Text className="text-xs text-muted-foreground mt-1 w-full">
                         {formatDate(issue.created_at)}
                       </Text>

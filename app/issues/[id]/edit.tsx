@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { IssueForm } from "@/components/issues/IssueForm";
+import logger from "@/lib/logger";
 
 const IssueEdit = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,7 +49,7 @@ const IssueEdit = () => {
           .createSignedUrl(data.image_path, 3600);
 
         if (signedUrlError) {
-          console.error("Chyba při získávání podepsané URL:", signedUrlError);
+          logger.error("Chyba při získávání podepsané URL:", signedUrlError);
         }
 
         if (urlData?.signedUrl) {
@@ -63,7 +64,7 @@ const IssueEdit = () => {
         originalImagePath: data.image_path,
       });
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst závadu", "error");
       router.back();
     } finally {

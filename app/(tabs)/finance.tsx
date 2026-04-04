@@ -19,6 +19,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { Balance, ExpenseWithDetails } from "@/types/finance";
 import { formatCurrency } from "@/lib/financeUtils";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 const Finance = () => {
   const [balances, setBalances] = useState<Balance[]>([]);
@@ -47,7 +48,7 @@ const Finance = () => {
         .eq("flat_id", currentFlat.id);
 
       if (balancesError) {
-        console.error("Error loading balances:", balancesError);
+        logger.error("Error loading balances:", balancesError);
         showToast(
           "Nepodařilo se načíst zůstatky: " + balancesError.message,
           "error",
@@ -70,7 +71,7 @@ const Finance = () => {
         .limit(50);
 
       if (expensesError) {
-        console.error("Error loading expenses:", expensesError);
+        logger.error("Error loading expenses:", expensesError);
         showToast(
           "Nepodařilo se načíst historii: " + expensesError.message,
           "error",
@@ -87,7 +88,7 @@ const Finance = () => {
         setExpenses(transformedExpenses);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst finanční data", "error");
     } finally {
       setIsLoading(false);

@@ -11,8 +11,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { Chore, HistoryItem } from "@/types/chores";
-import { completeChore } from "@/lib/choreUtils";
+import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 const ChoreDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,6 +25,7 @@ const ChoreDetail = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [showUncompleteDialog, setShowUncompleteDialog] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -55,14 +57,14 @@ const ChoreDetail = () => {
         .single();
 
       if (error) {
-        console.error("Error loading chore:", error);
+        logger.error("Error loading chore:", error);
         showToast("Nepodařilo se načíst úkol: " + error.message, "error");
         router.back();
       } else {
         setChore(data);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst úkol", "error");
       router.back();
     } finally {
@@ -82,12 +84,12 @@ const ChoreDetail = () => {
         .limit(3);
 
       if (error) {
-        console.error("Error loading history:", error);
+        logger.error("Error loading history:", error);
       } else {
         setHistory(data || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     }
   };
 
@@ -102,6 +104,24 @@ const ChoreDetail = () => {
     setCompletingChore(true);
     setShowCompleteDialog(false);
     const success = await completeChore(chore, currentUserId, showToast);
+    if (success) {
+      loadChoreDetail();
+      loadRecentHistory();
+    }
+    setCompletingChore(false);
+  };
+
+  const handleUncompleteChore = () => {
+    if (!chore || completingChore) return;
+    setShowUncompleteDialog(true);
+  };
+
+  const confirmUncompleteChore = async () => {
+    if (!chore) return;
+
+    setCompletingChore(true);
+    setShowUncompleteDialog(false);
+    const success = await uncompleteChore(chore, currentUserId, showToast);
     if (success) {
       loadChoreDetail();
       loadRecentHistory();
@@ -127,7 +147,7 @@ const ChoreDetail = () => {
         router.replace("/(tabs)/chores");
       }
     } catch (error: any) {
-      console.error("Error deleting chore:", error);
+      logger.error("Error deleting chore:", error);
       showToast("Nepodařilo se smazat úkol: " + error.message, "error");
     } finally {
       setIsDeleting(false);
@@ -294,6 +314,30 @@ const ChoreDetail = () => {
                 )}
               </Button>
             )}
+            {isMyTurn && isCompleted && (
+              <Button
+                variant="secondary"
+                className="flex-1 flex-row gap-2"
+                onPress={handleUncompleteChore}
+                disabled={completingChore || isDeleting}
+              >
+                {completingChore ? (
+                  <ActivityIndicator
+                    size="small"
+                    className="text-secondary-foreground"
+                  />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="close-circle"
+                      size={22}
+                      className="text-secondary-foreground"
+                    />
+                    <Text>Zrušit splnění</Text>
+                  </>
+                )}
+              </Button>
+            )}
           </View>
         </CardContent>
       </Card>
@@ -358,10 +402,20 @@ const ChoreDetail = () => {
         open={showCompleteDialog}
         onOpenChange={setShowCompleteDialog}
         title="Dokončit úkol"
-        description={`Opravdu chcete označit úkol "${chore?.name}" jako dokončený? Akci nelze vrátit zpět.`}
+        description={`Opravdu chcete označit úkol "${chore?.name}" jako dokončený?`}
         cancelText="Zrušit"
         actionText="Dokončit"
         onAction={confirmCompleteChore}
+      />
+
+      <AlertDialog
+        open={showUncompleteDialog}
+        onOpenChange={setShowUncompleteDialog}
+        title="Zrušit splnění"
+        description={`Opravdu chcete zrušit splnění úkolu "${chore?.name}"?`}
+        cancelText="Zrušit"
+        actionText="Odznačit"
+        onAction={confirmUncompleteChore}
       />
     </ScrollView>
   );

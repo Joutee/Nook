@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import logger from "@/lib/logger";
 
 const DocumentAdd = () => {
   const { currentFlat } = useFlatContext();
@@ -47,7 +48,7 @@ const DocumentAdd = () => {
       }
     } catch (error: any) {
       showToast("Chyba při výběru souboru: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -111,7 +112,7 @@ const DocumentAdd = () => {
       }
     } catch (error: any) {
       showToast("Chyba při focení: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 

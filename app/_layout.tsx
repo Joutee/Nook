@@ -14,6 +14,7 @@ import { useColorScheme } from "nativewind";
 import { THEME } from "@/lib/theme";
 
 import { PortalHost } from "@rn-primitives/portal";
+import logger from "@/lib/logger";
 
 // Vnitřní komponenta s přístupem k FlatContext
 const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
@@ -22,7 +23,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("=== LAYOUT USEEFFECT ===", {
+    logger.log("=== LAYOUT USEEFFECT ===", {
       segment: segments[0],
       hasSession: !!session,
       isLoading,
@@ -46,16 +47,16 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     // Není přihlášený -> redirect na login
     if (!session && !inAuthGroup) {
       router.replace("/(auth)/");
-      console.log("redirect to login");
+      logger.log("redirect to login");
       return;
     }
 
-    console.log("isLoading in layout:", isLoading);
+    logger.log("isLoading in layout:", isLoading);
     if (isLoading) return;
 
     // Přihlášený ale nemá byt -> redirect na join-flat
     if (session && !hasFlat && !inSetupGroup) {
-      console.log("redirect to join-flat");
+      logger.log("redirect to join-flat");
       router.replace("/(setup)/join-flat");
       return;
     }
@@ -68,7 +69,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
 
     // Přihlášený, má byt i roli -> přesměrovat z auth/setup na hlavní stránku
     if (session && hasFlat && hasRole && (inAuthGroup || inSetupGroup)) {
-      console.log("redirect to home");
+      logger.log("redirect to home");
       setTimeout(() => router.replace("/(tabs)"), 0);
       return;
     }
@@ -222,7 +223,7 @@ const RootLayout = () => {
       })
       .catch(async (error) => {
         // Zachytit chyby s neplatným refresh tokenem
-        console.log("Error getting session:", error.message);
+        logger.log("Error getting session:", error.message);
         // Vyčistit neplatnou session
         await supabase.auth.signOut();
         setSession(null);

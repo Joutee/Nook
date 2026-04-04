@@ -20,6 +20,7 @@ import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Issue } from "@/types/issues";
 import { Profile } from "@/types/profile";
 import { getStatusColor, getStatusText } from "@/lib/issueUtils";
+import logger from "@/lib/logger";
 
 const IssueDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -72,14 +73,14 @@ const IssueDetail = () => {
           .single();
 
         if (profileError) {
-          console.error("Chyba při načítání profilu:", profileError);
+          logger.error("Chyba při načítání profilu:", profileError);
         } else {
           setProfile(profileData);
         }
       }
     } catch (error: any) {
       showToast("Chyba při načítání závady: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
       router.back();
     } finally {
       setIsLoading(false);
@@ -112,7 +113,7 @@ const IssueDetail = () => {
           .createSignedUrl(issue.image_path!, 3600); // 1 hodina platnost
 
         if (error) {
-          console.error("Chyba signed URL:", error);
+          logger.error("Chyba signed URL:", error);
           return;
         }
 
@@ -120,7 +121,7 @@ const IssueDetail = () => {
           setImageUri(data.signedUrl);
         }
       } catch (error) {
-        console.error("Chyba fetch obrázku:", error);
+        logger.error("Chyba fetch obrázku:", error);
       }
     };
 
@@ -181,7 +182,7 @@ const IssueDetail = () => {
       showToast("Stav závady byl změněn", "success");
     } catch (error: any) {
       showToast("Chyba při změně stavu: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -203,7 +204,7 @@ const IssueDetail = () => {
           .remove([issue.image_path]);
 
         if (storageError) {
-          console.error("Chyba při mazání obrázku:", storageError);
+          logger.error("Chyba při mazání obrázku:", storageError);
           // Pokračujeme i přes chybu storage, hlavně aby se smazal záznam
         }
       }
@@ -217,7 +218,7 @@ const IssueDetail = () => {
       router.replace("/issues");
     } catch (error: any) {
       showToast("Chyba při mazání závady: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
       setIsDeleting(false);
     }
   };

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { KeyForm } from "@/components/keys/KeyForm";
 import { Key } from "@/types/keys";
+import logger from "@/lib/logger";
 
 const KeyEdit = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,7 +44,7 @@ const KeyEdit = () => {
         description: data.description,
       });
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst klíč", "error");
       router.back();
     } finally {

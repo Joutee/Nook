@@ -8,10 +8,13 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { Document } from "@/types/documents";
 import { Separator } from "@/components/ui/separator";
+import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
+import logger from "@/lib/logger";
 
 export const DocumentsWidget = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
@@ -33,7 +36,7 @@ export const DocumentsWidget = () => {
           filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
         },
         (payload) => {
-          console.log("Změna v dokumentech detekována!", payload);
+          logger.log("Změna v dokumentech detekována!", payload);
           // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
           loadDocuments();
         },
@@ -62,12 +65,12 @@ export const DocumentsWidget = () => {
         .limit(5);
 
       if (error) {
-        console.error("Error loading documents:", error);
+        logger.error("Error loading documents:", error);
       } else {
         setDocuments(data || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +128,7 @@ export const DocumentsWidget = () => {
                 <View key={index}>
                   <Pressable
                     key={doc.id}
-                    onPress={() => router.push("/(tabs)/documents")}
+                    onPress={() => setSelectedDoc(doc)}
                     className="py-2 border-b border-border last:border-b-0"
                   >
                     <View className="flex-row items-center justify-between">
@@ -133,7 +136,7 @@ export const DocumentsWidget = () => {
                         <Ionicons
                           name={getFileIcon(doc.name)}
                           size={20}
-                          color="#6b7280"
+                          className="text-foreground"
                         />
                         <View className="flex-1">
                           <Text
@@ -166,6 +169,13 @@ export const DocumentsWidget = () => {
           )}
         </CardContent>
       </Card>
+
+      <DocumentViewerModal
+        visible={!!selectedDoc}
+        onClose={() => setSelectedDoc(null)}
+        filePath={selectedDoc?.document_path}
+        fileName={selectedDoc?.name}
+      />
     </Pressable>
   );
 };

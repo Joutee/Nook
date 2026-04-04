@@ -4,6 +4,7 @@ import { readAsStringAsync, getInfoAsync } from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { supabase } from "./supabase";
+import logger from "@/lib/logger";
 
 const SAFETY_LIMIT = 20 * 1024 * 1024; // 20 MB
 const SUPABASE_LIMIT = 5 * 1024 * 1024; // 5 MB
@@ -29,7 +30,7 @@ export const takePhoto = async (): Promise<string | null> => {
     if (result.canceled) return null;
 
     const photo = result.assets[0];
-    console.log("Vyfoceno:", photo.uri);
+    logger.log("Vyfoceno:", photo.uri);
     return photo.uri;
   } catch (error: any) {
     throw error;
@@ -49,7 +50,7 @@ export const compressImage = async (uri: string): Promise<string> => {
     });
     return result.uri;
   } catch (error) {
-    console.log("Komprese selhala, používám originál:", error);
+    logger.log("Komprese selhala, používám originál:", error);
     return uri;
   }
 };
@@ -76,7 +77,7 @@ export const pickGalleryPhoto = async (): Promise<string | null> => {
     if (result.canceled) return null;
 
     const photo = result.assets[0];
-    console.log("Vybrán obrázek:", photo.uri);
+    logger.log("Vybrán obrázek:", photo.uri);
     return photo.uri;
   } catch (error: any) {
     throw error;
@@ -124,7 +125,7 @@ export const pickFile = async (): Promise<{
       }
     }
 
-    console.log("Vybrán soubor:", fileName, "MIME:", mimeType);
+    logger.log("Vybrán soubor:", fileName, "MIME:", mimeType);
 
     return {
       uri: file.uri,
@@ -167,7 +168,7 @@ export const uploadFile = async ({
   let processedFileName = fileName;
 
   if (mimeType.startsWith("image/")) {
-    console.log("Zahajuji kompresi obrázku...");
+    logger.log("Zahajuji kompresi obrázku...");
     processedUri = await compressImage(fileUri);
     processedMimeType = "image/jpeg";
     if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg")) {
@@ -182,7 +183,7 @@ export const uploadFile = async ({
     throw new Error(`Soubor je příliš velký (${sizeInMb} MB). Limit je 5 MB.`);
   }
 
-  console.log("Zpracovávám pro upload:", processedFileName, processedMimeType);
+  logger.log("Zpracovávám pro upload:", processedFileName, processedMimeType);
 
   // Konverze na base64
   const base64 = await readAsStringAsync(processedUri, {
@@ -193,7 +194,7 @@ export const uploadFile = async ({
   const safeFileName = processedFileName.replace(/\s+/g, "_");
   const filePath = `${flatId}/${Date.now()}_${safeFileName}`;
 
-  console.log("Nahrávám do Supabase...");
+  logger.log("Nahrávám do Supabase...");
 
   // Upload do storage
   const { data, error } = await supabase.storage
@@ -204,11 +205,11 @@ export const uploadFile = async ({
     });
 
   if (error) {
-    console.error("Supabase Storage Error:", error);
+    logger.error("Supabase Storage Error:", error);
     throw error;
   }
 
-  console.log("Nahráno do Storage:", data.path);
+  logger.log("Nahráno do Storage:", data.path);
   return data.path;
 };
 
@@ -247,5 +248,5 @@ export const deleteFile = async ({
 
   if (dbError) throw dbError;
 
-  console.log("Soubor a záznam úspěšně smazány");
+  logger.log("Soubor a záznam úspěšně smazány");
 };

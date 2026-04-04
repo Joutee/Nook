@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { HistoryItem } from "@/types/chores";
+import logger from "@/lib/logger";
 
 const ChoreHistory = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -34,12 +35,12 @@ const ChoreHistory = () => {
         .single();
 
       if (error) {
-        console.error("Error loading chore name:", error);
+        logger.error("Error loading chore name:", error);
       } else {
         setChoreName(data.name);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     }
   };
 
@@ -55,13 +56,13 @@ const ChoreHistory = () => {
         .order("cycle_index", { ascending: false });
 
       if (error) {
-        console.error("Error loading history:", error);
+        logger.error("Error loading history:", error);
         showToast("Nepodařilo se načíst historii: " + error.message, "error");
       } else {
         setHistory(data || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst historii", "error");
     } finally {
       setIsLoading(false);

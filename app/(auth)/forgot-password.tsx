@@ -72,6 +72,7 @@ export default function ForgotPassword() {
                   autoCapitalize="none"
                   onChangeText={setEmail}
                   value={email}
+                  maxLength={254}
                   onSubmitEditing={sendResetCode}
                   returnKeyType="send"
                 />

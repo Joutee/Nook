@@ -9,6 +9,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Issue } from "@/types/issues";
 import { getStatusColor, getStatusText } from "@/lib/issueUtils";
+import logger from "@/lib/logger";
 
 const Issues = () => {
   const { currentFlat, userRole } = useFlatContext();
@@ -18,7 +19,7 @@ const Issues = () => {
 
   const loadIssues = async () => {
     if (!currentFlat) return;
-    console.log("Načítám závady pro flat ID:", currentFlat.id);
+    logger.log("Načítám závady pro flat ID:", currentFlat.id);
     try {
       const { data, error } = await supabase
         .from("issues")
@@ -31,7 +32,7 @@ const Issues = () => {
       setIssues(data || []);
     } catch (error: any) {
       showToast("Chyba při načítání závad", "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsLoading(false);
     }

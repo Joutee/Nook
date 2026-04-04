@@ -15,6 +15,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { Member } from "@/types/members";
 import { getRoleLabel } from "@/lib/memberUtils";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 export type { Member };
 
@@ -100,7 +101,7 @@ export const MemberList = ({
         .eq("active", true);
 
       if (error) {
-        console.error("Error loading members:", error);
+        logger.error("Error loading members:", error);
         showToast("Nepodařilo se načíst členy bytu", "error");
       } else {
         const formattedMembers = (data || [])
@@ -116,7 +117,7 @@ export const MemberList = ({
         setMembers(formattedMembers);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst členy bytu", "error");
     } finally {
       setIsLoading(false);
@@ -154,7 +155,7 @@ export const MemberList = ({
         .select();
 
       if (error) {
-        console.error("Update error:", error);
+        logger.error("Update error:", error);
         showToast("Nepodařilo se odebrat člena: " + error.message, "error");
       } else if (data && data.length > 0) {
         showToast("Člen byl odpojen z bytu", "success");
@@ -164,7 +165,7 @@ export const MemberList = ({
         showToast("Člen nebyl odpojen (RLS policy?)", "error");
       }
     } catch (error: any) {
-      console.error("Catch error:", error);
+      logger.error("Catch error:", error);
       showToast("Nepodařilo se odebrat člena: " + error.message, "error");
     }
   };

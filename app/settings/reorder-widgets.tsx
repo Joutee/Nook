@@ -19,6 +19,7 @@ import {
   getDefaultWidgetsByRole,
 } from "@/config/widgetConfig";
 import { WidgetReorderItem } from "@/components/shared/WidgetReorderItem";
+import logger from "@/lib/logger";
 
 export default function ReorderWidgets() {
   const [activeWidgets, setActiveWidgets] = useState<string[]>([]);
@@ -63,7 +64,7 @@ export default function ReorderWidgets() {
       const hidden = allowedWidgets.filter((w) => !filteredActive.includes(w));
       setHiddenWidgets(hidden);
     } catch (error) {
-      console.error("Error loading layout:", error);
+      logger.error("Error loading layout:", error);
       const defaultFiltered = getDefaultWidgetsByRole(userRole).filter((w) =>
         allowedWidgets.includes(w),
       );
@@ -113,7 +114,7 @@ export default function ReorderWidgets() {
       // 3. Vrátit se zpět na dashboard
       router.back();
     } catch (error: any) {
-      console.error("Error saving layout:", error);
+      logger.error("Error saving layout:", error);
       showToast(
         "Nepodařilo se uložit rozložení: " + (error.message || "Neznámá chyba"),
         "error",

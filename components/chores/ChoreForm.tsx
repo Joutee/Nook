@@ -16,6 +16,7 @@ import { MemberSelector } from "@/components/shared/MemberSelector";
 import { MemberOrderList } from "@/components/flats/MemberOrderList";
 import { Member } from "@/types/members";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import logger from "@/lib/logger";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -79,7 +80,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
         .eq("active", true);
 
       if (error) {
-        console.error("Error loading members:", error);
+        logger.error("Error loading members:", error);
       } else if (data) {
         const membersList = data
           .map((item: any) => item.profiles)
@@ -87,7 +88,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
         setMembers(membersList);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     }
   };
 
@@ -262,6 +263,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
               value={name}
               onChangeText={setName}
               placeholder="např. Vytřít podlahu"
+              maxLength={100}
             />
           </View>
 
@@ -272,6 +274,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
               onChangeText={setDescription}
               placeholder="Volitelný popis úkolu"
               numberOfLines={4}
+              maxLength={500}
             />
           </View>
 

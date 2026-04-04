@@ -18,6 +18,7 @@ import {
 } from "@/lib/fileService";
 import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import logger from "@/lib/logger";
 
 interface IssueFormProps {
   mode: "create" | "edit";
@@ -182,7 +183,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
       router.back();
     } catch (error: any) {
       showToast("Chyba: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsUploading(false);
     }
@@ -206,6 +207,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
               onChangeText={setTitle}
               placeholder="Např. Nefunguje topení"
               className="mb-5"
+              maxLength={100}
             />
 
             <Label nativeID="description" className="mb-2">
@@ -220,6 +222,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
               numberOfLines={4}
               className="mb-5 h-24"
               style={{ textAlignVertical: "top" }}
+              maxLength={1000}
             />
 
             <Label nativeID="photo" className="mb-4 mt-2">
@@ -295,7 +298,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
             </Button>
 
             <Button
-              variant="outline"
+              variant="secondary"
               onPress={() => router.back()}
               disabled={isUploading}
               className="mt-2"

@@ -21,6 +21,7 @@ import {
   getDefaultUsedAccount,
   migrateLegacyBiometricCredentials,
 } from "@/lib/biometricAuth";
+import logger from "@/lib/logger";
 
 export default function AuthEntry() {
   const [email, setEmail] = useState("");
@@ -58,7 +59,7 @@ export default function AuthEntry() {
 
       // Žádný účet není uložený - zobrazit formulář pro email
     } catch (error) {
-      console.log("Error checking for default account:", error);
+      logger.log("Error checking for default account:", error);
     } finally {
       setIsCheckingBiometric(false);
     }
@@ -83,7 +84,7 @@ export default function AuthEntry() {
       // Jednoduše přesměrujeme na login
       router.push(`/(auth)/login?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
-      console.log("Error:", error);
+      logger.log("Error:", error);
       showToast("Chyba při přesměrování", "error");
     } finally {
       setIsLoading(false);
@@ -100,7 +101,7 @@ export default function AuthEntry() {
         : "";
       router.push(`/(auth)/register${emailParam}`);
     } catch (error: any) {
-      console.log("Error:", error);
+      logger.log("Error:", error);
       showToast("Chyba při přesměrování", "error");
     } finally {
       setIsLoading(false);

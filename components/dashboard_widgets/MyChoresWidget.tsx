@@ -14,8 +14,9 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Chore } from "@/types/chores";
-import { completeChore } from "@/lib/choreUtils";
+import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { THEME } from "@/lib/theme";
+import logger from "@/lib/logger";
 
 export const MyChoresWidget = () => {
   const [myChores, setMyChores] = useState<Chore[]>([]);
@@ -29,6 +30,8 @@ export const MyChoresWidget = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [choreToComplete, setChoreToComplete] = useState<Chore | null>(null);
+  const [showUncompleteDialog, setShowUncompleteDialog] = useState(false);
+  const [choreToUncomplete, setChoreToUncomplete] = useState<Chore | null>(null);
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
   const colorScheme = useColorScheme();
@@ -54,7 +57,7 @@ export const MyChoresWidget = () => {
           filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
         },
         (payload) => {
-          console.log("Změna v úkolech detekována!", payload);
+          logger.log("Změna v úkolech detekována!", payload);
           // Když se něco změní (někdo přidá/upraví úkol), přenačteme widget
           loadMyChores();
         },
@@ -71,7 +74,7 @@ export const MyChoresWidget = () => {
           table: "chore_completions",
         },
         (payload) => {
-          console.log("Někdo splnil úkol!", payload);
+          logger.log("Někdo splnil úkol!", payload);
           loadMyChores();
         },
       )
@@ -107,7 +110,7 @@ export const MyChoresWidget = () => {
           .eq("assignee_user_id", user.id);
 
         if (error) {
-          console.error("Error loading my chores:", error);
+          logger.error("Error loading my chores:", error);
         } else {
           const allChoresData = data || [];
           setTotalCount(allChoresData.length);
@@ -136,7 +139,7 @@ export const MyChoresWidget = () => {
         }
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -163,6 +166,29 @@ export const MyChoresWidget = () => {
     }
     setCompletingChoreId(null);
     setChoreToComplete(null);
+  };
+
+  const handleUncompleteChore = (chore: Chore) => {
+    if (!currentFlat?.id || completingChoreId) return;
+    setChoreToUncomplete(chore);
+    setShowUncompleteDialog(true);
+  };
+
+  const confirmUncompleteChore = async () => {
+    if (!choreToUncomplete) return;
+
+    setCompletingChoreId(choreToUncomplete.id);
+    setShowUncompleteDialog(false);
+    const success = await uncompleteChore(
+      choreToUncomplete,
+      currentUserId,
+      showToast,
+    );
+    if (success) {
+      loadMyChores();
+    }
+    setCompletingChoreId(null);
+    setChoreToUncomplete(null);
   };
 
   const calculateNextCycleDate = (chore: Chore): Date | null => {
@@ -224,11 +250,12 @@ export const MyChoresWidget = () => {
                     className={`flex-row items-center justify-between py-2 border-b border-border last:border-b-0 ${chore.is_completed_current_cycle ? "opacity-60" : ""}`}
                   >
                     <Pressable
-                      onPress={() => handleCompleteChore(chore)}
-                      disabled={
-                        completingChoreId === chore.id ||
+                      onPress={() =>
                         chore.is_completed_current_cycle
+                          ? handleUncompleteChore(chore)
+                          : handleCompleteChore(chore)
                       }
+                      disabled={completingChoreId === chore.id}
                       className="mr-3"
                     >
                       {completingChoreId === chore.id ? (
@@ -326,10 +353,20 @@ export const MyChoresWidget = () => {
         open={showCompleteDialog}
         onOpenChange={setShowCompleteDialog}
         title="Dokončit úkol"
-        description={`Opravdu chcete označit úkol "${choreToComplete?.name}" jako dokončený? Akci nelze vrátit zpět.`}
+        description={`Opravdu chcete označit úkol "${choreToComplete?.name}" jako dokončený?`}
         cancelText="Zrušit"
         actionText="Dokončit"
         onAction={confirmCompleteChore}
+      />
+
+      <AlertDialog
+        open={showUncompleteDialog}
+        onOpenChange={setShowUncompleteDialog}
+        title="Zrušit splnění"
+        description={`Opravdu chcete zrušit splnění úkolu "${choreToUncomplete?.name}"?`}
+        cancelText="Zrušit"
+        actionText="Odznačit"
+        onAction={confirmUncompleteChore}
       />
     </>
   );

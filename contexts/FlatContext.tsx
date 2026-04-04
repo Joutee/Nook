@@ -9,6 +9,7 @@ import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { Flat } from "../types/flat";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import logger from "@/lib/logger";
 
 const CURRENT_FLAT_KEY = "@current_flat_id";
 
@@ -66,16 +67,16 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
 
     try {
       setIsLoading(true);
-      console.log("started Fetching flats");
+      logger.log("started Fetching flats");
       // Načíst všechny byty, ke kterým má uživatel přístup
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
         .select("flat_id, role, flat:flats(id, name, address)")
         .eq("profile_id", session.user.id)
         .eq("active", true);
-      console.log("ended Fetching flats");
+      logger.log("ended Fetching flats");
       if (error) {
-        console.error("Error fetching flats:", error);
+        logger.error("Error fetching flats:", error);
         setFlats([]);
         setCurrentFlatState(null);
         return;
@@ -115,7 +116,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
               await AsyncStorage.setItem(CURRENT_FLAT_KEY, userFlats[0].id);
             }
           } catch (error) {
-            console.error("Chyba při načítání uloženého bytu:", error);
+            logger.error("Chyba při načítání uloženého bytu:", error);
             setCurrentFlatState(userFlats[0]);
             setUserRole(flatProfiles[0].role as UserRole);
           }
@@ -140,7 +141,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
         setUserRole(null);
       }
     } catch (error) {
-      console.error("Error in fetchFlats:", error);
+      logger.error("Error in fetchFlats:", error);
       setFlats([]);
       setCurrentFlatState(null);
       setUserRole(null);
@@ -160,7 +161,7 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
     try {
       await AsyncStorage.setItem(CURRENT_FLAT_KEY, flat.id);
     } catch (error) {
-      console.error("Chyba při ukládání bytu:", error);
+      logger.error("Chyba při ukládání bytu:", error);
     }
 
     // Načíst roli pro nově vybraný byt

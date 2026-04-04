@@ -131,6 +131,7 @@ export default function Register() {
                 autoCapitalize="none"
                 onChangeText={setEmail}
                 value={email}
+                maxLength={254}
                 returnKeyType="next"
                 onSubmitEditing={() => nameInputRef.current?.focus()}
               />
@@ -145,6 +146,7 @@ export default function Register() {
                 autoCapitalize="words"
                 onChangeText={setName}
                 value={name}
+                maxLength={50}
                 returnKeyType="next"
                 onSubmitEditing={() => surnameInputRef.current?.focus()}
               />
@@ -159,6 +161,7 @@ export default function Register() {
                 autoCapitalize="words"
                 onChangeText={setSurname}
                 value={surname}
+                maxLength={50}
                 returnKeyType="next"
                 onSubmitEditing={() => passwordInputRef.current?.focus()}
               />
@@ -175,6 +178,7 @@ export default function Register() {
                   autoCapitalize="none"
                   onChangeText={setPassword}
                   value={password}
+                  maxLength={128}
                   returnKeyType="next"
                   onSubmitEditing={() =>
                     confirmPasswordInputRef.current?.focus()
@@ -205,6 +209,7 @@ export default function Register() {
                   autoCapitalize="none"
                   onChangeText={setConfirmPassword}
                   value={confirmPassword}
+                  maxLength={128}
                   returnKeyType="send"
                   onSubmitEditing={signUpWithEmail}
                   className="pr-12"

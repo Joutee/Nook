@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { ChoreForm } from "@/components/chores/ChoreForm";
 import { Member } from "@/types/members";
+import logger from "@/lib/logger";
 
 const EditChore = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -50,7 +51,7 @@ const EditChore = () => {
         .order("rotation_order");
 
       if (assignmentsError) {
-        console.error("Error loading assignments:", assignmentsError);
+        logger.error("Error loading assignments:", assignmentsError);
       }
 
       const assignedMembers = assignmentsData
@@ -67,7 +68,7 @@ const EditChore = () => {
         selectedMembers: assignedMembers,
       });
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst úkol", "error");
       router.back();
     } finally {

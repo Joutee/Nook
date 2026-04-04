@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import logger from "@/lib/logger";
 
 const THEME_STORAGE_KEY = "@theme_mode";
 
@@ -30,7 +31,7 @@ export function ThemeToggle() {
           setColorScheme(savedTheme);
         }
       } catch (error) {
-        console.error("Chyba při načítání tématu:", error);
+        logger.error("Chyba při načítání tématu:", error);
       }
     };
     loadTheme();
@@ -54,7 +55,7 @@ export function ThemeToggle() {
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
     } catch (error) {
-      console.error("Chyba při ukládání tématu:", error);
+      logger.error("Chyba při ukládání tématu:", error);
     }
   };
 

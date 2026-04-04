@@ -2,11 +2,11 @@ export const getErrorMessage = (errorMessage: string): string => {
   const errorMap: { [key: string]: string } = {
     // Auth errors
     "Invalid login credentials": "Zadali jste špatný e-mail nebo heslo.",
-    "User already registered": "Uživatel s tímto e-mailem již existuje.",
+    "User already registered": "Registrace se nezdařila. Zkuste to prosím znovu.",
     "A user with this email address has already been registered":
-      "Uživatel s touto e-mailovou adresou je již zaregistrován.",
+      "Registrace se nezdařila. Zkuste to prosím znovu.",
     "Email not confirmed":
-      "E-mail nebyl potvrzen. Zkontrolujte svou e-mailovou schránku.",
+      "Neplatné přihlašovací údaje nebo účet neexistuje.",
     "Password should be at least 6 characters":
       "Heslo musí mít alespoň 6 znaků.",
     "Unable to validate email address: invalid format":
@@ -16,12 +16,12 @@ export const getErrorMessage = (errorMessage: string): string => {
       "Příliš mnoho pokusů. Zkuste to prosím později.",
     "you can only request this after":
       "Počkejte prosím chvíli a zkuste to znovu.",
-    "User not found": "Uživatel nebyl nalezen.",
+    "User not found": "Neplatné přihlašovací údaje nebo účet neexistuje.",
     "Invalid email or password": "Neplatný e-mail nebo heslo.",
     "Email link is invalid or has expired":
       "E-mailový odkaz je neplatný nebo vypršel.",
     "Token has expired or is invalid": "Token vypršel nebo je neplatný.",
-    "User already exists": "Uživatel již existuje.",
+    "User already exists": "Registrace se nezdařila. Zkuste to prosím znovu.",
     "Signups not allowed for this instance":
       "Registrace není pro tuto instanci povolena.",
 

@@ -183,6 +183,7 @@ export default function EmailVerification({
                 autoCapitalize="none"
                 value={newEmail}
                 onChangeText={setNewEmail}
+                maxLength={254}
                 onSubmitEditing={handleRequestChange}
                 autoFocus
               />

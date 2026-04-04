@@ -17,6 +17,7 @@ import { MemberSelector } from "@/components/shared/MemberSelector";
 import { ExpenseSplitSection } from "@/components/expenses/ExpenseSplitSection";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import logger from "@/lib/logger";
 
 interface ExpenseFormProps {
   mode: "create" | "edit";
@@ -115,7 +116,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         .eq("active", true);
 
       if (error) {
-        console.error("Error loading flat members:", error);
+        logger.error("Error loading flat members:", error);
         showToast("Nepodařilo se načíst členy bytu", "error");
       } else {
         const members: Member[] = data.map((m: any) => ({
@@ -132,7 +133,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst členy bytu", "error");
     } finally {
       setIsLoading(false);
@@ -181,7 +182,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         router.back();
       }
     } catch (error: any) {
-      console.error("Error deleting expense:", error);
+      logger.error("Error deleting expense:", error);
       showToast("Nepodařilo se smazat výdaj: " + error.message, "error");
     } finally {
       setIsDeleting(false);
@@ -277,7 +278,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           .eq("id", expenseId);
 
         if (expenseError) {
-          console.error("Error updating expense:", expenseError);
+          logger.error("Error updating expense:", expenseError);
           showToast(
             "Nepodařilo se upravit výdaj: " + expenseError.message,
             "error",
@@ -292,7 +293,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           .eq("expense_id", expenseId);
 
         if (deleteSharesError) {
-          console.error("Error deleting old shares:", deleteSharesError);
+          logger.error("Error deleting old shares:", deleteSharesError);
           showToast(
             "Nepodařilo se upravit rozdělení: " + deleteSharesError.message,
             "error",
@@ -330,7 +331,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           .insert(expenseShares);
 
         if (sharesError) {
-          console.error("Error inserting expense shares:", sharesError);
+          logger.error("Error inserting expense shares:", sharesError);
           showToast(
             "Nepodařilo se uložit rozdělení: " + sharesError.message,
             "error",
@@ -355,7 +356,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           .single();
 
         if (expenseError) {
-          console.error("Error inserting expense:", expenseError);
+          logger.error("Error inserting expense:", expenseError);
           showToast(
             "Nepodařilo se uložit výdaj: " + expenseError.message,
             "error",
@@ -393,7 +394,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           .insert(expenseShares);
 
         if (sharesError) {
-          console.error("Error inserting expense shares:", sharesError);
+          logger.error("Error inserting expense shares:", sharesError);
           showToast(
             "Nepodařilo se uložit rozdělení: " + sharesError.message,
             "error",
@@ -406,7 +407,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
       router.back();
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Došlo k chybě při ukládání", "error");
     } finally {
       setIsSaving(false);
@@ -442,6 +443,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               placeholder="např. Nákup v Albertu"
               value={title}
               onChangeText={setTitle}
+              maxLength={100}
             />
           </View>
 
@@ -454,6 +456,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               value={amount}
               onChangeText={setAmount}
               keyboardType="decimal-pad"
+              maxLength={10}
               editable={
                 !(
                   splitMode === "manual" &&

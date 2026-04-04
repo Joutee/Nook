@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons"; // Pro křížek na zavření
 import { supabase } from "@/lib/supabase";
+import logger from "@/lib/logger";
 
 type Props = {
   visible: boolean;
@@ -70,7 +71,7 @@ export default function DocumentViewerModal({
       if (error) throw error;
       if (data?.signedUrl) setUrl(data.signedUrl);
     } catch (err) {
-      console.error("Chyba při načítání dokumentu:", err);
+      logger.error("Chyba při načítání dokumentu:", err);
     } finally {
       setLoading(false);
     }

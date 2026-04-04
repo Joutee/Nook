@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { Member } from "@/types/members";
+import logger from "@/lib/logger";
 
 const EditExpense = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -65,7 +66,7 @@ const EditExpense = () => {
         .eq("expense_id", id);
 
       if (sharesError) {
-        console.error("Error loading shares:", sharesError);
+        logger.error("Error loading shares:", sharesError);
         showToast(
           "Nepodařilo se načíst rozdělení: " + sharesError.message,
           "error",
@@ -106,7 +107,7 @@ const EditExpense = () => {
         splitMode: isAutoSplit ? "auto" : "manual",
       });
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst výdaj", "error");
       router.back();
     } finally {

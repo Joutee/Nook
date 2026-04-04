@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { KeyWithAssignee } from "@/types/keys";
 import { Member } from "@/types/members";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 const Keys = () => {
   const { currentFlat, userRole } = useFlatContext();
@@ -51,7 +52,7 @@ const Keys = () => {
       setKeys((data as KeyWithAssignee[]) || []);
     } catch (error: any) {
       showToast("Chyba při načítání klíčů", "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +80,7 @@ const Keys = () => {
 
       setMembers(memberList);
     } catch (error: any) {
-      console.error("Chyba při načítání členů:", error);
+      logger.error("Chyba při načítání členů:", error);
     }
   };
 
@@ -122,7 +123,7 @@ const Keys = () => {
       loadKeys();
     } catch (error: any) {
       showToast("Chyba: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -146,7 +147,7 @@ const Keys = () => {
       loadKeys();
     } catch (error: any) {
       showToast("Chyba při mazání: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 

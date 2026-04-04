@@ -19,6 +19,7 @@ import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
 import { Ionicons } from "@expo/vector-icons";
 import { deleteFile } from "@/lib/fileService";
 import { Document } from "@/types/documents";
+import logger from "@/lib/logger";
 
 const documents = () => {
   const { currentFlat } = useFlatContext();
@@ -52,7 +53,7 @@ const documents = () => {
       setDocuments(data || []);
     } catch (error: any) {
       showToast("Chyba při načítání dokumentů", "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +105,7 @@ const documents = () => {
       }
     } catch (error: any) {
       showToast("Chyba při stahování: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -132,7 +133,7 @@ const documents = () => {
       loadDocuments();
     } catch (error: any) {
       showToast("Chyba při mazání: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     }
   };
 

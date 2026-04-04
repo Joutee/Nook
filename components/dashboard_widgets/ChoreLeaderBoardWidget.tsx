@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { HistoryItem } from "@/types/chores";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 interface MemberStats {
   profile_id: string;
@@ -42,7 +43,7 @@ export const ChoreLeaderBoardWidget = () => {
           table: "chore_completions",
         },
         (payload) => {
-          console.log("Změna v dokončení úkolů detekována!", payload);
+          logger.log("Změna v dokončení úkolů detekována!", payload);
           loadChoreStats();
         },
       )
@@ -60,7 +61,7 @@ export const ChoreLeaderBoardWidget = () => {
           filter: `flat_id=eq.${currentFlat.id}`,
         },
         (payload) => {
-          console.log("Změna v úkolech detekována!", payload);
+          logger.log("Změna v úkolech detekována!", payload);
           loadChoreStats();
         },
       )
@@ -99,7 +100,7 @@ export const ChoreLeaderBoardWidget = () => {
         .eq("active", true);
 
       if (membersError) {
-        console.error("Error loading members:", membersError);
+        logger.error("Error loading members:", membersError);
         setIsLoading(false);
         return;
       }
@@ -111,7 +112,7 @@ export const ChoreLeaderBoardWidget = () => {
         .eq("flat_id", currentFlat.id);
 
       if (historyError) {
-        console.error("Error loading chore history:", historyError);
+        logger.error("Error loading chore history:", historyError);
         setIsLoading(false);
         return;
       }
@@ -153,7 +154,7 @@ export const ChoreLeaderBoardWidget = () => {
 
       setMemberStats(stats);
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
     } finally {
       setIsLoading(false);
     }

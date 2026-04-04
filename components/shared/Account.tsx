@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Session } from "@supabase/supabase-js";
+import logger from "@/lib/logger";
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ export default function Account({ session }: { session: Session }) {
     } catch (error) {
       if (error instanceof Error) {
         // Nevypisovat chybu, pokud profil ještě neexistuje
-        console.log("Profile not found yet, will be created on first update");
+        logger.log("Profile not found yet, will be created on first update");
       }
     } finally {
       setLoading(false);

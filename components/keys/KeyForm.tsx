@@ -11,6 +11,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Key } from "@/types/keys";
+import logger from "@/lib/logger";
 
 interface KeyFormProps {
   mode: "create" | "edit";
@@ -87,7 +88,7 @@ export const KeyForm: React.FC<KeyFormProps> = ({
       router.back();
     } catch (error: any) {
       showToast("Chyba: " + error.message, "error");
-      console.error(error);
+      logger.error(error);
     } finally {
       setIsSaving(false);
     }

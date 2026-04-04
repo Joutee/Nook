@@ -14,6 +14,7 @@ import {
   getWidgetsByRole,
   getDefaultWidgetsByRole,
 } from "@/config/widgetConfig";
+import logger from "@/lib/logger";
 
 // Modulová proměnná pro sledování, pro které byty už proběhl Supabase sync v této session
 let syncedFlats = new Set<string>();
@@ -51,7 +52,7 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.error("Error loading user profile:", error);
+      logger.error("Error loading user profile:", error);
     }
   };
 
@@ -91,7 +92,7 @@ export default function Home() {
           .single();
 
         if (error) {
-          console.error("Error loading dashboard layout:", error);
+          logger.error("Error loading dashboard layout:", error);
           // Při chybě použij local storage jako fallback
           const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
           const layoutToUse = storedLayout
@@ -121,7 +122,7 @@ export default function Home() {
         setWidgetKeys(layoutToUse);
       }
     } catch (error) {
-      console.error("Error in loadDashboardLayout:", error);
+      logger.error("Error in loadDashboardLayout:", error);
       // Použít local storage nebo výchozí layout při chybě
       try {
         const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
@@ -171,7 +172,7 @@ export default function Home() {
           .map((key) => {
             const WidgetComponent = WIDGET_COMPONENTS[key];
             if (!WidgetComponent) {
-              console.warn(`Widget with key "${key}" not found`);
+              logger.warn(`Widget with key "${key}" not found`);
               return null;
             }
             return <WidgetComponent key={key} />;

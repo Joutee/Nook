@@ -11,8 +11,9 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import { Chore } from "@/types/chores";
-import { completeChore } from "@/lib/choreUtils";
+import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
+import logger from "@/lib/logger";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -23,6 +24,8 @@ const Chores = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [choreToComplete, setChoreToComplete] = useState<Chore | null>(null);
+  const [showUncompleteDialog, setShowUncompleteDialog] = useState(false);
+  const [choreToUncomplete, setChoreToUncomplete] = useState<Chore | null>(null);
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
 
@@ -49,7 +52,7 @@ const Chores = () => {
 
     setIsLoading(true);
     try {
-      console.log("Loading chores for flat_id:", currentFlat.id);
+      logger.log("Loading chores for flat_id:", currentFlat.id);
 
       // Přidání timestamp aby se vynutilo čerstvé načtení dat
       const { data, error } = await supabase
@@ -58,18 +61,18 @@ const Chores = () => {
         .eq("flat_id", currentFlat.id)
         .order("name");
 
-      console.log("Chores response:", { data, error });
+      logger.log("Chores response:", { data, error });
 
       if (error) {
-        console.error("Error loading chores:", error);
+        logger.error("Error loading chores:", error);
         showToast("Nepodařilo se načíst úkoly: " + error.message, "error");
       } else {
-        console.log("Loaded chores count:", data?.length || 0);
-        console.log("Chores data:", JSON.stringify(data, null, 2));
+        logger.log("Loaded chores count:", data?.length || 0);
+        logger.log("Chores data:", JSON.stringify(data, null, 2));
         setChores(data || []);
       }
     } catch (error) {
-      console.error("Error:", error);
+      logger.error("Error:", error);
       showToast("Nepodařilo se načíst úkoly", "error");
     } finally {
       setIsLoading(false);
@@ -97,6 +100,29 @@ const Chores = () => {
     }
     setCompletingChoreId(null);
     setChoreToComplete(null);
+  };
+
+  const handleUncompleteChore = (chore: Chore) => {
+    if (!currentFlat?.id || completingChoreId) return;
+    setChoreToUncomplete(chore);
+    setShowUncompleteDialog(true);
+  };
+
+  const confirmUncompleteChore = async () => {
+    if (!choreToUncomplete) return;
+
+    setCompletingChoreId(choreToUncomplete.id);
+    setShowUncompleteDialog(false);
+    const success = await uncompleteChore(
+      choreToUncomplete,
+      currentUserId,
+      showToast,
+    );
+    if (success) {
+      loadChores();
+    }
+    setCompletingChoreId(null);
+    setChoreToUncomplete(null);
   };
 
   const calculateNextCycleDate = (chore: Chore): Date | null => {
@@ -219,6 +245,34 @@ const Chores = () => {
               </View>
             </>
           )}
+          {isMyTurn && isCompleted && (
+            <>
+              <Separator className="my-3" />
+              <View className="px-4 pb-4">
+                <Button
+                  variant="secondary"
+                  className="w-full flex-row gap-2 py-2"
+                  onPress={() => handleUncompleteChore(item)}
+                  disabled={completingChoreId === item.id}
+                >
+                  {completingChoreId === item.id ? (
+                    <ActivityIndicator size="small" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="close-circle"
+                        size={24}
+                        className="text-secondary-foreground"
+                      />
+                      <Text className="text-secondary-foreground font-semibold text-base">
+                        Označit jako nesplněné
+                      </Text>
+                    </>
+                  )}
+                </Button>
+              </View>
+            </>
+          )}
         </CardContent>
       </Card>
     );
@@ -265,10 +319,19 @@ const Chores = () => {
         open={showCompleteDialog}
         onOpenChange={setShowCompleteDialog}
         title="Dokončit úkol"
-        description={`Opravdu chcete označit úkol "${choreToComplete?.name}" jako dokončený? Akci nelze vrátit zpět.`}
+        description={`Opravdu chcete označit úkol "${choreToComplete?.name}" jako dokončený?`}
         cancelText="Zrušit"
         actionText="Dokončit"
         onAction={confirmCompleteChore}
+      />
+      <AlertDialog
+        open={showUncompleteDialog}
+        onOpenChange={setShowUncompleteDialog}
+        title="Zrušit splnění"
+        description={`Opravdu chcete zrušit splnění úkolu "${choreToUncomplete?.name}"?`}
+        cancelText="Zrušit"
+        actionText="Odznačit"
+        onAction={confirmUncompleteChore}
       />
     </View>
   );
