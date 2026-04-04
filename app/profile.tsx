@@ -1,4 +1,4 @@
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Linking } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -524,6 +524,22 @@ const ProfilePage = () => {
                   <Button variant="ghost" size="icon" onPress={handleEditPhone}>
                     <Ionicons
                       name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
+                {!isOwnProfile && profile?.phone && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onPress={() => {
+                      const digits = profile.phone!.replace(/[^\d+]/g, "");
+                      Linking.openURL(`tel:${digits}`);
+                    }}
+                  >
+                    <Ionicons
+                      name="call-outline"
                       size={18}
                       className="text-muted-foreground"
                     />
