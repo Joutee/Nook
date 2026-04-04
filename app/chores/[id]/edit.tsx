@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { ChoreForm } from "@/components/chores/ChoreForm";
 import { Member } from "@/types/members";
+import { RecurringInterval } from "@/types/finance";
 import logger from "@/lib/logger";
 
 const EditChore = () => {
@@ -13,7 +14,11 @@ const EditChore = () => {
   const [initialData, setInitialData] = useState<{
     name: string;
     description: string;
-    intervalDays: string;
+    intervalType: RecurringInterval;
+    intervalDay: number;
+    intervalMonth: number;
+    customDays: number;
+    recurringIntervalId?: string;
     startDate: Date;
     selectedMembers: Member[];
   } | null>(null);
@@ -32,7 +37,7 @@ const EditChore = () => {
     try {
       const { data: choreData, error: choreError } = await supabase
         .from("chores")
-        .select("*")
+        .select("*, recurring_interval:recurring_intervals(*)")
         .eq("id", id)
         .single();
 
@@ -63,7 +68,11 @@ const EditChore = () => {
       setInitialData({
         name: choreData.name,
         description: choreData.description || "",
-        intervalDays: choreData.interval_days.toString(),
+        intervalType: choreData.recurring_interval.type,
+        intervalDay: choreData.recurring_interval.interval_day ?? 1,
+        intervalMonth: choreData.recurring_interval.interval_month ?? 1,
+        customDays: choreData.recurring_interval.custom_days ?? 7,
+        recurringIntervalId: choreData.recurring_interval_id,
         startDate: new Date(choreData.start_date),
         selectedMembers: assignedMembers,
       });

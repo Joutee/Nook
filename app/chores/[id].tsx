@@ -14,6 +14,7 @@ import { Chore, HistoryItem } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
+import { formatInterval } from "@/lib/intervalUtils";
 
 const ChoreDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -144,6 +145,13 @@ const ChoreDetail = () => {
         showToast("Nepodařilo se smazat úkol: " + error.message, "error");
       } else {
         showToast("Úkol byl smazán", "success");
+        // Clean up orphaned interval
+        if (chore?.recurring_interval_id) {
+          await supabase
+            .from("recurring_intervals")
+            .delete()
+            .eq("id", chore.recurring_interval_id);
+        }
         router.replace("/(tabs)/chores");
       }
     } catch (error: any) {
@@ -233,8 +241,12 @@ const ChoreDetail = () => {
               </View>
               <View className="justify-center h-7">
                 <Text className="text-sm text-foreground ml-7">
-                  Každých {chore.interval_days}{" "}
-                  {chore.interval_days === 1 ? "den" : "dní"}
+                  {formatInterval(
+                    chore.interval_type,
+                    chore.interval_day,
+                    chore.interval_month,
+                    chore.custom_days,
+                  )}
                 </Text>
               </View>
             </View>

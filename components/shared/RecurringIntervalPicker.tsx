@@ -13,6 +13,8 @@ interface RecurringIntervalPickerProps {
   onIntervalDayChange: (day: number) => void;
   intervalMonth: number;
   onIntervalMonthChange: (month: number) => void;
+  customDays: number;
+  onCustomDaysChange: (days: number) => void;
 }
 
 const INTERVALS: { value: RecurringInterval; label: string }[] = [
@@ -20,6 +22,7 @@ const INTERVALS: { value: RecurringInterval; label: string }[] = [
   { value: "weekly", label: "Týdně" },
   { value: "monthly", label: "Měsíčně" },
   { value: "yearly", label: "Ročně" },
+  { value: "custom", label: "Vlastní" },
 ];
 
 const DAYS_OF_WEEK = [
@@ -65,6 +68,8 @@ export const RecurringIntervalPicker: React.FC<
   onIntervalDayChange,
   intervalMonth,
   onIntervalMonthChange,
+  customDays,
+  onCustomDaysChange,
 }) => {
   return (
     <Card>
@@ -186,6 +191,31 @@ export const RecurringIntervalPicker: React.FC<
                   </Text>
                 </Pressable>
               ))}
+            </View>
+          </View>
+        )}
+        {/* Custom: number of days input */}
+        {interval === "custom" && (
+          <View className="gap-2">
+            <Label>Počet dní</Label>
+            <View className="flex-row items-center gap-3">
+              <Input
+                className="w-20"
+                keyboardType="number-pad"
+                maxLength={3}
+                value={String(customDays)}
+                onChangeText={(text) => {
+                  const num = parseInt(text, 10);
+                  if (!isNaN(num) && num >= 1 && num <= 365) {
+                    onCustomDaysChange(num);
+                  } else if (text === "") {
+                    onCustomDaysChange(1);
+                  }
+                }}
+              />
+              <Text className="text-muted-foreground text-sm flex-1">
+                {customDays === 1 ? "den" : "dní"}
+              </Text>
             </View>
           </View>
         )}

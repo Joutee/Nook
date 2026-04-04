@@ -14,6 +14,7 @@ import { Chore } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
+import { formatInterval, calculateNextCycleDate } from "@/lib/intervalUtils";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -125,19 +126,6 @@ const Chores = () => {
     setChoreToUncomplete(null);
   };
 
-  const calculateNextCycleDate = (chore: Chore): Date | null => {
-    if (!chore.start_date) return null;
-
-    const startDate = new Date(chore.start_date);
-    const nextCycleDate = new Date(startDate);
-    nextCycleDate.setDate(
-      startDate.getDate() +
-        (chore.current_cycle_index + 1) * chore.interval_days,
-    );
-
-    return nextCycleDate;
-  };
-
   const formatNextCycle = (date: Date | null): string => {
     if (!date) return "";
 
@@ -200,8 +188,12 @@ const Chores = () => {
 
               <View className="items-end">
                 <Text className="text-xs text-muted-foreground min-w-24 text-right">
-                  Každých {item.interval_days}{" "}
-                  {item.interval_days === 1 ? "den" : "dní"}
+                  {formatInterval(
+                    item.interval_type,
+                    item.interval_day,
+                    item.interval_month,
+                    item.custom_days,
+                  )}
                 </Text>
                 {isFutureStart ? (
                   <Text className="text-xs text-primary font-medium mt-0.5">

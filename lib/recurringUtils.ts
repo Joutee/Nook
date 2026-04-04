@@ -8,6 +8,7 @@ export function calculateNextOccurrence(
   recurringInterval: RecurringInterval,
   intervalDay: number,
   intervalMonth: number,
+  customDays?: number,
 ): string {
   const today = new Date();
   let next: Date;
@@ -43,6 +44,10 @@ export function calculateNextOccurrence(
         0,
       ).getDate();
       next.setDate(Math.min(intervalDay, lastDay));
+      break;
+    case "custom":
+      next = new Date(today);
+      next.setDate(next.getDate() + (customDays ?? 1));
       break;
   }
 
