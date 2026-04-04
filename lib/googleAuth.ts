@@ -14,14 +14,18 @@ export function isGoogleSignInAvailable(): boolean {
  * No-op if native module is not available (e.g. Expo Go).
  */
 export function configureGoogleSignIn() {
-  if (!isGoogleSignInAvailable()) {
-    console.warn("[googleAuth] Native module not available — skipping configure");
-    return;
+  try {
+    if (!isGoogleSignInAvailable()) {
+      console.warn("[googleAuth] Native module not available — skipping configure");
+      return;
+    }
+    const { GoogleOneTapSignIn } = require("@react-native-google-signin/google-signin");
+    GoogleOneTapSignIn?.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
+    });
+  } catch (e) {
+    console.warn("[googleAuth] Failed to configure:", e);
   }
-  const { GoogleOneTapSignIn } = require("@react-native-google-signin/google-signin");
-  GoogleOneTapSignIn.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
-  });
 }
 
 /**
