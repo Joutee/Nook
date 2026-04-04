@@ -28,7 +28,12 @@ const RecurringExpenseItem: React.FC<{
             {item.title}
           </Text>
           <Text className="text-xs text-muted-foreground mt-0.5">
-            {formatCurrency(item.amount)} · {formatInterval(item.interval, item.interval_day, item.interval_month)}
+            {formatCurrency(item.amount)} · {formatInterval(
+              item.recurring_interval.type,
+              item.recurring_interval.interval_day,
+              item.recurring_interval.interval_month,
+              item.recurring_interval.custom_days,
+            )}
           </Text>
           {!item.is_paused && (
             <Text className="text-xs text-muted-foreground mt-0.5">
@@ -72,7 +77,7 @@ const RecurringExpensesList = () => {
       const { data, error } = await supabase
         .from("recurring_expenses")
         .select(
-          "*, payer:profiles!recurring_expenses_payer_id_fkey(name, surname, avatar_url)",
+          "*, payer:profiles!recurring_expenses_payer_id_fkey(name, surname, avatar_url), recurring_interval:recurring_intervals(*)",
         )
         .eq("flat_id", currentFlat.id)
         .order("is_paused", { ascending: true })

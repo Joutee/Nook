@@ -36,6 +36,7 @@ const RecurringExpenseDetail = () => {
   const [intervalDay, setIntervalDay] = useState(1);
   const [intervalMonth, setIntervalMonth] = useState(1);
   const [customDays, setCustomDays] = useState(1);
+  const [recurringIntervalId, setRecurringIntervalId] = useState<string>("");
   const [isPaused, setIsPaused] = useState(false);
 
   const [selectedPayer, setSelectedPayer] = useState<Member[]>([]);
@@ -91,7 +92,7 @@ const RecurringExpenseDetail = () => {
       const { data: expenseData, error: expenseError } = await supabase
         .from("recurring_expenses")
         .select(
-          "*, payer:profiles!recurring_expenses_payer_id_fkey(id, name, surname, avatar_url)",
+          "*, payer:profiles!recurring_expenses_payer_id_fkey(id, name, surname, avatar_url), recurring_interval:recurring_intervals(*)",
         )
         .eq("id", id)
         .single();
@@ -123,9 +124,11 @@ const RecurringExpenseDetail = () => {
       // Set state from fetched data
       setTitle(expenseData.title);
       setAmount(String(expenseData.amount));
-      setRecurringInterval(expenseData.interval as RecurringInterval);
-      setIntervalDay(expenseData.interval_day ?? 1);
-      setIntervalMonth(expenseData.interval_month ?? 1);
+      setRecurringInterval(expenseData.recurring_interval.type as RecurringInterval);
+      setIntervalDay(expenseData.recurring_interval.interval_day ?? 1);
+      setIntervalMonth(expenseData.recurring_interval.interval_month ?? 1);
+      setCustomDays(expenseData.recurring_interval.custom_days ?? 1);
+      setRecurringIntervalId(expenseData.recurring_interval_id);
       setIsPaused(expenseData.is_paused);
 
       const payer = expenseData.payer;
@@ -182,20 +185,37 @@ const RecurringExpenseDetail = () => {
 
     setIsSaving(true);
     try {
+      // Update interval
+      const { error: intervalError } = await supabase
+        .from("recurring_intervals")
+        .update({
+          type: recurringInterval,
+          interval_day: recurringInterval === "weekly" || recurringInterval === "monthly" || recurringInterval === "yearly"
+            ? intervalDay : null,
+          interval_month: recurringInterval === "yearly" ? intervalMonth : null,
+          custom_days: recurringInterval === "custom" ? customDays : null,
+        })
+        .eq("id", recurringIntervalId);
+
+      if (intervalError) {
+        logger.error("Error updating interval:", intervalError);
+        showToast("Nepodařilo se uložit změny", "error");
+        return;
+      }
+
+      // Update expense (no more interval columns)
       const { error: updateError } = await supabase
         .from("recurring_expenses")
         .update({
           title: trimmedTitle,
           amount: amountNum,
           payer_id: selectedPayer[0].id,
-          interval: recurringInterval,
-          interval_day: recurringInterval === "daily" ? null : intervalDay,
-          interval_month: recurringInterval === "yearly" ? intervalMonth : null,
           is_paused: isPaused,
           next_occurrence: calculateNextOccurrence(
             recurringInterval,
             intervalDay,
             intervalMonth,
+            customDays,
           ),
         })
         .eq("id", id);
@@ -358,6 +378,8 @@ const RecurringExpenseDetail = () => {
               onIntervalDayChange={setIntervalDay}
               intervalMonth={intervalMonth}
               onIntervalMonthChange={setIntervalMonth}
+              customDays={customDays}
+              onCustomDaysChange={setCustomDays}
             />
           </CardContent>
         </Card>

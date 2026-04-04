@@ -416,52 +416,62 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         // Create recurring expense template if toggle is on
         if (isRecurring) {
-          const { data: recurringData, error: recurringError } = await supabase
-            .from("recurring_expenses")
+          const { data: intervalData, error: intervalError } = await supabase
+            .from("recurring_intervals")
             .insert({
-              flat_id: currentFlat.id,
-              created_by: (await supabase.auth.getUser()).data.user!.id,
-              payer_id: selectedPayer[0].id,
-              title: finalTitle,
-              amount: finalAmount,
-              interval: recurringInterval,
-              interval_day: recurringInterval === "daily" ? null : intervalDay,
-              interval_month:
-                recurringInterval === "yearly" ? intervalMonth : null,
-              next_occurrence: calculateNextOccurrence(
-                recurringInterval,
-                intervalDay,
-                intervalMonth,
-              ),
+              type: recurringInterval,
+              interval_day: recurringInterval === "weekly" || recurringInterval === "monthly" || recurringInterval === "yearly"
+                ? intervalDay : null,
+              interval_month: recurringInterval === "yearly" ? intervalMonth : null,
+              custom_days: recurringInterval === "custom" ? customDays : null,
             })
             .select()
             .single();
 
-          if (recurringError) {
-            logger.error("Error creating recurring expense:", recurringError);
-            showToast(
-              "Výdaj byl uložen, ale nepodařilo se nastavit opakování",
-              "error",
-            );
+          if (intervalError) {
+            logger.error("Error creating interval:", intervalError);
+            showToast("Výdaj byl uložen, ale nepodařilo se nastavit opakování", "error");
           } else {
-            // Link the first expense to the recurring template
-            await supabase
-              .from("expenses")
-              .update({ recurring_expense_id: recurringData.id })
-              .eq("id", expenseData.id);
+            const { data: recurringData, error: recurringError } = await supabase
+              .from("recurring_expenses")
+              .insert({
+                flat_id: currentFlat.id,
+                created_by: (await supabase.auth.getUser()).data.user!.id,
+                payer_id: selectedPayer[0].id,
+                title: finalTitle,
+                amount: finalAmount,
+                recurring_interval_id: intervalData.id,
+                next_occurrence: calculateNextOccurrence(
+                  recurringInterval,
+                  intervalDay,
+                  intervalMonth,
+                  customDays,
+                ),
+              })
+              .select()
+              .single();
 
-            // Insert recurring expense members
-            const memberRows = selectedMembers.map((m) => ({
-              recurring_expense_id: recurringData.id,
-              profile_id: m.id,
-            }));
+            if (recurringError) {
+              logger.error("Error creating recurring expense:", recurringError);
+              showToast("Výdaj byl uložen, ale nepodařilo se nastavit opakování", "error");
+            } else {
+              await supabase
+                .from("expenses")
+                .update({ recurring_expense_id: recurringData.id })
+                .eq("id", expenseData.id);
 
-            const { error: membersError } = await supabase
-              .from("recurring_expense_members")
-              .insert(memberRows);
+              const memberRows = selectedMembers.map((m) => ({
+                recurring_expense_id: recurringData.id,
+                profile_id: m.id,
+              }));
 
-            if (membersError) {
-              logger.error("Error creating recurring members:", membersError);
+              const { error: membersError } = await supabase
+                .from("recurring_expense_members")
+                .insert(memberRows);
+
+              if (membersError) {
+                logger.error("Error creating recurring members:", membersError);
+              }
             }
           }
         }
