@@ -17,7 +17,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
 import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
-import { calculateIntervalStartDate } from "@/lib/intervalUtils";
+import { calculateIntervalStartDate, buildIntervalPayload } from "@/lib/intervalUtils";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -157,17 +157,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     const startDate = calculateIntervalStartDate(intervalType, intervalDay, intervalMonth, customDays);
     const { data: intervalData, error: intervalError } = await supabase
       .from("recurring_intervals")
-      .insert({
-        type: intervalType,
-        interval_day:
-          intervalType === "weekly" ||
-          intervalType === "monthly" ||
-          intervalType === "yearly"
-            ? intervalDay
-            : null,
-        interval_month: intervalType === "yearly" ? intervalMonth : null,
-        custom_days: intervalType === "custom" ? customDays : null,
-      })
+      .insert(buildIntervalPayload(intervalType, intervalDay, intervalMonth, customDays))
       .select()
       .single();
 
@@ -220,40 +210,41 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   const handleUpdate = async () => {
     if (!choreId) return;
 
-    const startDate = calculateIntervalStartDate(intervalType, intervalDay, intervalMonth, customDays);
+    const intervalChanged =
+      intervalType !== initialData?.intervalType ||
+      intervalDay !== initialData?.intervalDay ||
+      intervalMonth !== initialData?.intervalMonth ||
+      customDays !== initialData?.customDays;
 
     if (initialData?.recurringIntervalId) {
-      const { error: intervalError } = await supabase
-        .from("recurring_intervals")
-        .update({
-          type: intervalType,
-          interval_day:
-            intervalType === "weekly" ||
-            intervalType === "monthly" ||
-            intervalType === "yearly"
-              ? intervalDay
-              : null,
-          interval_month: intervalType === "yearly" ? intervalMonth : null,
-          custom_days: intervalType === "custom" ? customDays : null,
-        })
-        .eq("id", initialData.recurringIntervalId);
+      if (intervalChanged) {
+        const { error: intervalError } = await supabase
+          .from("recurring_intervals")
+          .update(buildIntervalPayload(intervalType, intervalDay, intervalMonth, customDays))
+          .eq("id", initialData.recurringIntervalId);
 
-      if (intervalError) {
-        showToast(
-          "Nepodařilo se aktualizovat interval: " + intervalError.message,
-          "error",
-        );
-        return;
+        if (intervalError) {
+          showToast(
+            "Nepodařilo se aktualizovat interval: " + intervalError.message,
+            "error",
+          );
+          return;
+        }
       }
+    }
+
+    const choreUpdate: any = {
+      name: name.trim(),
+      description: description.trim() || null,
+    };
+
+    if (intervalChanged) {
+      choreUpdate.start_date = calculateIntervalStartDate(intervalType, intervalDay, intervalMonth, customDays);
     }
 
     const { error: choreError } = await supabase
       .from("chores")
-      .update({
-        name: name.trim(),
-        description: description.trim() || null,
-        start_date: startDate,
-      })
+      .update(choreUpdate)
       .eq("id", choreId);
 
     if (choreError) {

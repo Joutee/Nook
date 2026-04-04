@@ -53,23 +53,16 @@ const Chores = () => {
 
     setIsLoading(true);
     try {
-      logger.log("Loading chores for flat_id:", currentFlat.id);
-
-      // Přidání timestamp aby se vynutilo čerstvé načtení dat
       const { data, error } = await supabase
         .from("view_chore_dashboard")
         .select("*")
         .eq("flat_id", currentFlat.id)
         .order("name");
 
-      logger.log("Chores response:", { data, error });
-
       if (error) {
         logger.error("Error loading chores:", error);
         showToast("Nepodařilo se načíst úkoly: " + error.message, "error");
       } else {
-        logger.log("Loaded chores count:", data?.length || 0);
-        logger.log("Chores data:", JSON.stringify(data, null, 2));
         setChores(data || []);
       }
     } catch (error) {
@@ -201,7 +194,7 @@ const Chores = () => {
                     {new Date(item.start_date!).toLocaleDateString("cs-CZ")}
                   </Text>
                 ) : nextCycleText ? (
-                  <Text className="text-xs text-primary font-medium min-w- mt-0.5">
+                  <Text className="text-xs text-primary font-medium min-w-24 mt-0.5">
                     Nový cyklus: {nextCycleText}
                   </Text>
                 ) : null}

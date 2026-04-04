@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import React, { useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
@@ -18,6 +17,7 @@ import { RecurringInterval } from "@/types/finance";
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
 import logger from "@/lib/logger";
+import { buildIntervalPayload } from "@/lib/intervalUtils";
 
 const RecurringExpenseDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -188,13 +188,7 @@ const RecurringExpenseDetail = () => {
       // Update interval
       const { error: intervalError } = await supabase
         .from("recurring_intervals")
-        .update({
-          type: recurringInterval,
-          interval_day: recurringInterval === "weekly" || recurringInterval === "monthly" || recurringInterval === "yearly"
-            ? intervalDay : null,
-          interval_month: recurringInterval === "yearly" ? intervalMonth : null,
-          custom_days: recurringInterval === "custom" ? customDays : null,
-        })
+        .update(buildIntervalPayload(recurringInterval, intervalDay, intervalMonth, customDays))
         .eq("id", recurringIntervalId);
 
       if (intervalError) {
