@@ -69,6 +69,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     useState<RecurringInterval>("monthly");
   const [intervalDay, setIntervalDay] = useState(new Date().getDate());
   const [intervalMonth, setIntervalMonth] = useState(new Date().getMonth() + 1);
+  const [customDays, setCustomDays] = useState(1);
 
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
@@ -579,6 +580,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
                   onIntervalDayChange={setIntervalDay}
                   intervalMonth={intervalMonth}
                   onIntervalMonthChange={setIntervalMonth}
+                  customDays={customDays}
+                  onCustomDaysChange={setCustomDays}
                 />
               )}
             </View>

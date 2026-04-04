@@ -35,6 +35,7 @@ const RecurringExpenseDetail = () => {
     useState<RecurringInterval>("monthly");
   const [intervalDay, setIntervalDay] = useState(1);
   const [intervalMonth, setIntervalMonth] = useState(1);
+  const [customDays, setCustomDays] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
 
   const [selectedPayer, setSelectedPayer] = useState<Member[]>([]);

@@ -41,7 +41,7 @@ export interface ExpenseWithDetails extends Expense {
   payer_avatar: string | null;
 }
 
-export type RecurringInterval = "daily" | "weekly" | "monthly" | "yearly";
+export type RecurringInterval = "daily" | "weekly" | "monthly" | "yearly" | "custom";
 
 export interface RecurringExpense {
   id: string;
