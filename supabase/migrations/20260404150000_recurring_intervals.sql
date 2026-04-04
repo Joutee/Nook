@@ -125,8 +125,11 @@ END;
 $$;
 
 -- ============================================================
--- 4. Drop old columns and make FKs NOT NULL
+-- 4. Drop dependent views FIRST, then old columns
 -- ============================================================
+
+DROP VIEW IF EXISTS "public"."view_chore_dashboard";
+DROP VIEW IF EXISTS "public"."view_chore_history";
 
 ALTER TABLE "public"."chores" DROP COLUMN IF EXISTS "interval_days";
 
@@ -141,8 +144,6 @@ ALTER TABLE "public"."recurring_expenses" ALTER COLUMN "recurring_interval_id" S
 -- ============================================================
 -- 5. Recreate view_chore_dashboard
 -- ============================================================
-
-DROP VIEW IF EXISTS "public"."view_chore_dashboard";
 
 CREATE VIEW "public"."view_chore_dashboard" WITH ("security_invoker"='on') AS
  WITH "chore_calculations" AS (
@@ -232,8 +233,6 @@ GRANT ALL ON TABLE "public"."view_chore_dashboard" TO "service_role";
 -- ============================================================
 -- 6. Recreate view_chore_history
 -- ============================================================
-
-DROP VIEW IF EXISTS "public"."view_chore_history";
 
 CREATE VIEW "public"."view_chore_history" WITH ("security_invoker"='on') AS
  WITH RECURSIVE "cycle_series" AS (
