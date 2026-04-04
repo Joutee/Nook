@@ -108,6 +108,8 @@ const ProfilePage = () => {
   };
 
   const handleEditIban = () => {
+    if (isEditingName) handleCancelName();
+    if (isEditingSurname) handleCancelSurname();
     setIbanInput(profile?.iban ?? "");
     setIsEditingIban(true);
   };
@@ -156,6 +158,7 @@ const ProfilePage = () => {
 
   const handleEditName = () => {
     if (isEditingSurname) handleCancelSurname();
+    if (isEditingIban) handleCancelIban();
     setNameInput(profile?.name ?? "");
     setIsEditingName(true);
   };
@@ -202,6 +205,7 @@ const ProfilePage = () => {
 
   const handleEditSurname = () => {
     if (isEditingName) handleCancelName();
+    if (isEditingIban) handleCancelIban();
     setSurnameInput(profile?.surname ?? "");
     setIsEditingSurname(true);
   };
