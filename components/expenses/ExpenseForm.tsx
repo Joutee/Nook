@@ -19,7 +19,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
-import { RecurringIntervalPicker } from "@/components/expenses/RecurringIntervalPicker";
+import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { Switch } from "@/components/ui/switch";
 

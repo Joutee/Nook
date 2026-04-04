@@ -16,7 +16,7 @@ import { MemberSelector } from "@/components/shared/MemberSelector";
 import { Member } from "@/types/members";
 import { RecurringInterval } from "@/types/finance";
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
-import { RecurringIntervalPicker } from "@/components/expenses/RecurringIntervalPicker";
+import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
 import logger from "@/lib/logger";
 
 const RecurringExpenseDetail = () => {

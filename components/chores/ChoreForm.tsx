@@ -17,7 +17,7 @@ import { Member } from "@/types/members";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
-import { RecurringIntervalPicker } from "@/components/expenses/RecurringIntervalPicker";
+import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
