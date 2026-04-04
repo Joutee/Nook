@@ -19,8 +19,8 @@ export function configureGoogleSignIn() {
       console.warn("[googleAuth] Native module not available — skipping configure");
       return;
     }
-    const { GoogleOneTapSignIn } = require("@react-native-google-signin/google-signin");
-    GoogleOneTapSignIn?.configure({
+    const { GoogleSignin } = require("@react-native-google-signin/google-signin");
+    GoogleSignin.configure({
       webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
     });
   } catch (e) {
@@ -29,28 +29,9 @@ export function configureGoogleSignIn() {
 }
 
 /**
- * Generate a cryptographic nonce pair for Supabase + Google Sign-In.
- */
-async function generateNonce(): Promise<{
-  rawNonce: string;
-  nonceDigest: string;
-}> {
-  const { digestStringAsync, CryptoDigestAlgorithm, getRandomBytes } = require("expo-crypto");
-  const randomBytes = getRandomBytes(32);
-  const rawNonce = Array.from(randomBytes as Uint8Array)
-    .map((b: number) => b.toString(16).padStart(2, "0"))
-    .join("");
-  const nonceDigest = await digestStringAsync(
-    CryptoDigestAlgorithm.SHA256,
-    rawNonce,
-  );
-  return { rawNonce, nonceDigest };
-}
-
-/**
  * Full Google Sign-In flow:
- * 1. Generate nonce
- * 2. Show native Google dialog (One-Tap → createAccount → explicitSignIn fallback)
+ * 1. Show native Google dialog
+ * 2. Get idToken
  * 3. Exchange idToken with Supabase
  *
  * Returns: { success: true } or { success: false, error: string, cancelled?: true }
@@ -68,30 +49,15 @@ export async function signInWithGoogle(): Promise<
 
   try {
     const {
-      GoogleOneTapSignIn,
+      GoogleSignin,
       isErrorWithCode,
-      isNoSavedCredentialFoundResponse,
       statusCodes,
     } = require("@react-native-google-signin/google-signin");
 
-    const { rawNonce, nonceDigest } = await generateNonce();
+    await GoogleSignin.hasPlayServices();
+    const response = await GoogleSignin.signIn();
 
-    let idToken: string | null = null;
-
-    const signInResponse = await GoogleOneTapSignIn.signIn({ nonce: nonceDigest });
-
-    if (isNoSavedCredentialFoundResponse(signInResponse)) {
-      const createResponse = await GoogleOneTapSignIn.createAccount({ nonce: nonceDigest });
-
-      if (isNoSavedCredentialFoundResponse(createResponse)) {
-        const explicitResponse = await GoogleOneTapSignIn.presentExplicitSignIn({ nonce: nonceDigest });
-        idToken = explicitResponse.data?.idToken ?? null;
-      } else {
-        idToken = createResponse.data?.idToken ?? null;
-      }
-    } else {
-      idToken = signInResponse.data?.idToken ?? null;
-    }
+    const idToken = response.data?.idToken ?? null;
 
     if (!idToken) {
       return { success: false, error: "Google neposkytl autentizační token." };
@@ -100,7 +66,6 @@ export async function signInWithGoogle(): Promise<
     const { error } = await supabase.auth.signInWithIdToken({
       provider: "google",
       token: idToken,
-      nonce: rawNonce,
     });
 
     if (error) {
