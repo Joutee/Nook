@@ -1,0 +1,71 @@
+<h2>Pravy uhel s mezerou</h2>
+<p class="subtitle">Ostrejsi zahnuti do praveho uhlu, vetsi prostor uprostred</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top shape: V with right angles and gap -->
+        <path d="M15 35 L75 75 L75 90" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M105 90 L105 75 L165 35" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom shape: inverted V with right angles and gap -->
+        <path d="M15 145 L75 105 L75 90" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M105 90 L105 105 L165 145" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Mala mezera</h3>
+      <p>Pravouhle zahnuti, mezera 30px uprostred.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top shape -->
+        <path d="M15 30 L65 65 L65 80" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M115 80 L115 65 L165 30" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom shape -->
+        <path d="M15 150 L65 115 L65 100" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M115 100 L115 115 L165 150" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Vetsi mezera</h3>
+      <p>Pravouhle zahnuti, mezera 50px -- jasne viditelny "nook" prostor uprostred.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top shape -->
+        <path d="M15 25 L60 58 L60 75" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M120 75 L120 58 L165 25" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom shape -->
+        <path d="M15 155 L60 122 L60 105" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M120 105 L120 122 L165 155" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: Velka mezera, silne tahy</h3>
+      <p>Ctverec uprostred je jasne viditelny "nook". Silnejsi linky, vic dominantni.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Same as C but with subtle rounded corners at the right angles -->
+        <path d="M15 25 L56 56 Q60 60 60 65 L60 75" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <path d="M120 75 L120 65 Q120 60 124 56 L165 25" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <path d="M15 155 L56 124 Q60 120 60 115 L60 105" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <path d="M120 105 L120 115 Q120 120 124 124 L165 155" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Velka mezera, jemne zaoblene rohy</h3>
+      <p>Stejne jako C, ale rohy maji jemne zaobleni -- mekci, privetivejsi dojem.</p>
+    </div>
+  </div>
+</div>

@@ -80,7 +80,7 @@ export const KeysWidget = () => {
         <CardContent>
           {isLoading ? (
             <View className="py-4">
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" className="text-primary" />
             </View>
           ) : keys.length === 0 ? (
             <Text className="text-muted-foreground text-sm">

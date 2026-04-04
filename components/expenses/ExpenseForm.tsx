@@ -65,7 +65,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   );
   const [touchedMembers, setTouchedMembers] = useState<Set<string>>(new Set());
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurringInterval, setRecurringInterval] = useState<RecurringInterval>("monthly");
+  const [recurringInterval, setRecurringInterval] =
+    useState<RecurringInterval>("monthly");
   const [intervalDay, setIntervalDay] = useState(new Date().getDate());
   const [intervalMonth, setIntervalMonth] = useState(new Date().getMonth() + 1);
 
@@ -424,15 +425,23 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               amount: finalAmount,
               interval: recurringInterval,
               interval_day: recurringInterval === "daily" ? null : intervalDay,
-              interval_month: recurringInterval === "yearly" ? intervalMonth : null,
-              next_occurrence: calculateNextOccurrence(recurringInterval, intervalDay, intervalMonth),
+              interval_month:
+                recurringInterval === "yearly" ? intervalMonth : null,
+              next_occurrence: calculateNextOccurrence(
+                recurringInterval,
+                intervalDay,
+                intervalMonth,
+              ),
             })
             .select()
             .single();
 
           if (recurringError) {
             logger.error("Error creating recurring expense:", recurringError);
-            showToast("Výdaj byl uložen, ale nepodařilo se nastavit opakování", "error");
+            showToast(
+              "Výdaj byl uložen, ale nepodařilo se nastavit opakování",
+              "error",
+            );
           } else {
             // Link the first expense to the recurring template
             await supabase
@@ -547,6 +556,33 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             />
           </View>
 
+          {/* Recurring Toggle */}
+          {mode === "create" && (
+            <View className="gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons
+                    name="repeat-outline"
+                    size={20}
+                    className="text-foreground"
+                  />
+                  <Label>Opakovat</Label>
+                </View>
+                <Switch value={isRecurring} onValueChange={setIsRecurring} />
+              </View>
+
+              {isRecurring && (
+                <RecurringIntervalPicker
+                  interval={recurringInterval}
+                  onIntervalChange={setRecurringInterval}
+                  intervalDay={intervalDay}
+                  onIntervalDayChange={setIntervalDay}
+                  intervalMonth={intervalMonth}
+                  onIntervalMonthChange={setIntervalMonth}
+                />
+              )}
+            </View>
+          )}
           {/* Who Paid */}
 
           <View className="gap-2">
@@ -576,33 +612,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             onTouchedMembersChange={setTouchedMembers}
           />
 
-          {/* Recurring Toggle */}
-          {mode === "create" && (
-            <View className="gap-3">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <Ionicons name="repeat-outline" size={20} className="text-foreground" />
-                  <Label>Opakovat</Label>
-                </View>
-                <Switch
-                  value={isRecurring}
-                  onValueChange={setIsRecurring}
-                />
-              </View>
-
-              {isRecurring && (
-                <RecurringIntervalPicker
-                  interval={recurringInterval}
-                  onIntervalChange={setRecurringInterval}
-                  intervalDay={intervalDay}
-                  onIntervalDayChange={setIntervalDay}
-                  intervalMonth={intervalMonth}
-                  onIntervalMonthChange={setIntervalMonth}
-                />
-              )}
-            </View>
-          )}
-
           {/* Bottom Actions */}
           <View className="flex-col gap-3">
             {mode === "edit" && expenseId && (
@@ -613,10 +622,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
                 className="flex-row gap-2"
               >
                 {isDeleting ? (
-                  <ActivityIndicator
-                    size="small"
-                    className="text-primary"
-                  />
+                  <ActivityIndicator size="small" className="text-primary" />
                 ) : (
                   <>
                     <Text>Smazat výdaj</Text>

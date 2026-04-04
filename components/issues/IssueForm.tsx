@@ -291,7 +291,7 @@ export const IssueForm: React.FC<IssueFormProps> = ({
               className="mb-3 bg-primary"
             >
               {isUploading ? (
-                <ActivityIndicator className="text-foreground" />
+                <ActivityIndicator className="text-primary" />
               ) : (
                 <Text>{isEditMode ? "Uložit změny" : "Odeslat"}</Text>
               )}

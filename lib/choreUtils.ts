@@ -44,3 +44,45 @@ export const completeChore = async (
     return false;
   }
 };
+
+/**
+ * Zruší splnění úkolu v aktuálním cyklu (smaže záznam z chore_completions)
+ * @param chore - Úkol k odznačení
+ * @param currentUserId - ID aktuálního uživatele
+ * @param showToast - Funkce pro zobrazení toast notifikace
+ * @returns Promise<boolean> - true pokud byl úkol úspěšně odznačen
+ */
+export const uncompleteChore = async (
+  chore: Chore,
+  currentUserId: string | null,
+  showToast: (message: string, type: "success" | "error" | "info") => void,
+): Promise<boolean> => {
+  if (chore.assignee_user_id !== currentUserId) {
+    showToast("Tento úkol není přiřazen vám", "error");
+    return false;
+  }
+
+  if (!chore.is_completed_current_cycle) {
+    showToast("Tento úkol ještě není dokončen", "info");
+    return false;
+  }
+
+  try {
+    const { error } = await supabase
+      .from("chore_completions")
+      .delete()
+      .eq("chore_id", chore.id)
+      .eq("cycle_index", chore.current_cycle_index);
+
+    if (error) {
+      showToast("Nepodařilo se odznačit úkol: " + error.message, "error");
+      return false;
+    }
+
+    showToast("Úkol odznačen", "success");
+    return true;
+  } catch (error: any) {
+    showToast("Nepodařilo se odznačit úkol: " + error.message, "error");
+    return false;
+  }
+};

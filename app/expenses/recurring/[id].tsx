@@ -31,7 +31,8 @@ const RecurringExpenseDetail = () => {
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("0");
-  const [recurringInterval, setRecurringInterval] = useState<RecurringInterval>("monthly");
+  const [recurringInterval, setRecurringInterval] =
+    useState<RecurringInterval>("monthly");
   const [intervalDay, setIntervalDay] = useState(1);
   const [intervalMonth, setIntervalMonth] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
@@ -190,7 +191,11 @@ const RecurringExpenseDetail = () => {
           interval_day: recurringInterval === "daily" ? null : intervalDay,
           interval_month: recurringInterval === "yearly" ? intervalMonth : null,
           is_paused: isPaused,
-          next_occurrence: calculateNextOccurrence(recurringInterval, intervalDay, intervalMonth),
+          next_occurrence: calculateNextOccurrence(
+            recurringInterval,
+            intervalDay,
+            intervalMonth,
+          ),
         })
         .eq("id", id);
 
@@ -336,6 +341,14 @@ const RecurringExpenseDetail = () => {
               />
             </View>
 
+            {/* Pause toggle */}
+            <Switch
+              value={isPaused}
+              onValueChange={setIsPaused}
+              label="Pozastaveno"
+              leftIcon="pause-circle-outline"
+            />
+
             {/* Interval picker */}
             <RecurringIntervalPicker
               interval={recurringInterval}
@@ -345,23 +358,12 @@ const RecurringExpenseDetail = () => {
               intervalMonth={intervalMonth}
               onIntervalMonthChange={setIntervalMonth}
             />
-
-            {/* Pause toggle */}
-            <Switch
-              value={isPaused}
-              onValueChange={setIsPaused}
-              label="Pozastaveno"
-              leftIcon="pause-circle-outline"
-            />
           </CardContent>
         </Card>
 
         {/* Actions */}
         <View className="gap-3">
-          <Button
-            onPress={handleSave}
-            disabled={isSaving || isDeleting}
-          >
+          <Button onPress={handleSave} disabled={isSaving || isDeleting}>
             {isSaving ? (
               <ActivityIndicator size="small" className="text-primary" />
             ) : (

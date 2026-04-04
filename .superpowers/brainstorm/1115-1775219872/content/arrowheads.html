@@ -1,0 +1,66 @@
+<h2>Dva arrowheady proti sobe</h2>
+<p class="subtitle">Ruzne varianty orientace a mezery</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top arrowhead pointing down -->
+        <path d="M25 30 L90 80 L155 30" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom arrowhead pointing up -->
+        <path d="M25 150 L90 100 L155 150" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Vertikalne proti sobe</h3>
+      <p>Horni miri dolu, spodni nahoru. Mezera uprostred.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Left arrowhead pointing right -->
+        <path d="M30 25 L80 90 L30 155" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Right arrowhead pointing left -->
+        <path d="M150 25 L100 90 L150 155" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Horizontalne proti sobe</h3>
+      <p>Levy miri doprava, pravy doleva. Nook prostor uprostred.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top-left arrowhead pointing to center -->
+        <path d="M20 20 L80 80 M80 80 L20 80 M80 80 L80 20" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+        <!-- Diagonal: top-left pointing to bottom-right -->
+        <path d="M15 55 L75 85 L55 15" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Diagonal: bottom-right pointing to top-left -->
+        <path d="M165 125 L105 95 L125 165" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: Diagonalne proti sobe</h3>
+      <p>Dva sipky na diagonale miri ke stredu. Dynamicke, asymetricke.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top arrowhead pointing down - wider, flatter -->
+        <path d="M15 40 L90 82 L165 40" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom arrowhead pointing up - wider, flatter -->
+        <path d="M15 140 L90 98 L165 140" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Vertikalne, sirsi a plostejsi</h3>
+      <p>Jako A ale sirsi a mensi mezera -- vic kompaktni, agresivnejsi look.</p>
+    </div>
+  </div>
+</div>

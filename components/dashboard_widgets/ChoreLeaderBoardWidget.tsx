@@ -186,7 +186,7 @@ export const ChoreLeaderBoardWidget = () => {
         <CardContent>
           {isLoading ? (
             <View className="py-4">
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" className="text-primary" />
             </View>
           ) : memberStats.length === 0 ? (
             <View className="py-4">

@@ -81,7 +81,7 @@ export default function DocumentViewerModal({
     if (loading) {
       return (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+          <ActivityIndicator size="large" className="text-primary" />
         </View>
       );
     }
@@ -119,7 +119,7 @@ export default function DocumentViewerModal({
           startInLoadingState={true}
           renderLoading={() => (
             <View className="absolute h-full w-full justify-center items-center">
-              <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+              <ActivityIndicator size="large" className="text-primary" />
             </View>
           )}
         />

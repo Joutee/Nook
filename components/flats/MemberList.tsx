@@ -203,7 +203,7 @@ export const MemberList = ({
   if (isLoading) {
     return (
       <View className="py-4">
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="small" className="text-primary" />
       </View>
     );
   }

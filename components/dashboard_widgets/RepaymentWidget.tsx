@@ -88,7 +88,7 @@ export const RepaymentWidget = () => {
         <CardContent>
           {isLoading ? (
             <View className="py-4">
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" className="text-primary" />
             </View>
           ) : (
             <SettlementList

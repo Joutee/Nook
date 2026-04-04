@@ -281,7 +281,7 @@ const ChoreDetail = () => {
                 {isDeleting ? (
                   <ActivityIndicator
                     size="small"
-                    className="text-primary-foreground"
+                    className="text-primary"
                   />
                 ) : (
                   <>
@@ -300,7 +300,7 @@ const ChoreDetail = () => {
                 {completingChore ? (
                   <ActivityIndicator
                     size="small"
-                    className="text-primary-foreground"
+                    className="text-primary"
                   />
                 ) : (
                   <>
@@ -324,7 +324,7 @@ const ChoreDetail = () => {
                 {completingChore ? (
                   <ActivityIndicator
                     size="small"
-                    className="text-secondary-foreground"
+                    className="text-primary"
                   />
                 ) : (
                   <>

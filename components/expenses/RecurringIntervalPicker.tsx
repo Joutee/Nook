@@ -47,10 +47,7 @@ const MONTHS = [
   { value: 12, label: "Pro" },
 ];
 
-function handleDayInput(
-  text: string,
-  setter: (day: number) => void,
-) {
+function handleDayInput(text: string, setter: (day: number) => void) {
   const num = parseInt(text, 10);
   if (!isNaN(num) && num >= 1 && num <= 31) {
     setter(num);
@@ -59,7 +56,9 @@ function handleDayInput(
   }
 }
 
-export const RecurringIntervalPicker: React.FC<RecurringIntervalPickerProps> = ({
+export const RecurringIntervalPicker: React.FC<
+  RecurringIntervalPickerProps
+> = ({
   interval,
   onIntervalChange,
   intervalDay,
@@ -69,7 +68,7 @@ export const RecurringIntervalPicker: React.FC<RecurringIntervalPickerProps> = (
 }) => {
   return (
     <Card>
-      <CardContent className="gap-4 pt-4">
+      <CardContent className="gap-4">
         {/* Interval picker */}
         <View className="gap-2">
           <Label>Interval</Label>
@@ -138,9 +137,13 @@ export const RecurringIntervalPicker: React.FC<RecurringIntervalPickerProps> = (
                 keyboardType="number-pad"
                 maxLength={2}
                 value={String(intervalDay)}
-                onChangeText={(text) => handleDayInput(text, onIntervalDayChange)}
+                onChangeText={(text) =>
+                  handleDayInput(text, onIntervalDayChange)
+                }
               />
-              <Text className="text-muted-foreground">každého měsíce</Text>
+              <Text className="text-muted-foreground text-sm flex-1">
+                každého měsíce
+              </Text>
             </View>
           </View>
         )}
@@ -155,9 +158,11 @@ export const RecurringIntervalPicker: React.FC<RecurringIntervalPickerProps> = (
                 keyboardType="number-pad"
                 maxLength={2}
                 value={String(intervalDay)}
-                onChangeText={(text) => handleDayInput(text, onIntervalDayChange)}
+                onChangeText={(text) =>
+                  handleDayInput(text, onIntervalDayChange)
+                }
               />
-              <Text className="text-muted-foreground">dne</Text>
+              <Text className="text-muted-foreground text-sm flex-1">dne</Text>
             </View>
             <View className="flex-row flex-wrap gap-1">
               {MONTHS.map((month) => (

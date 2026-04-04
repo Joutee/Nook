@@ -23,7 +23,7 @@ export const FlatsWidget = () => {
         </CardHeader>
         <CardContent>
           <View className="py-4">
-            <ActivityIndicator size="small" />
+            <ActivityIndicator size="small" className="text-primary" />
           </View>
         </CardContent>
       </Card>

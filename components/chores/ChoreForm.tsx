@@ -318,7 +318,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" className="text-primary" />
               ) : (
                 <Text>{mode === "edit" ? "Upravit" : "Vytvořit úkol"}</Text>
               )}

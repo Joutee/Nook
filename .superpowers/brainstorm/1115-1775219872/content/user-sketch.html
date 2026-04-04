@@ -1,0 +1,71 @@
+<h2>Tvuj navrh -- dva propletene koutky</h2>
+<p class="subtitle">Varianty na zaklade tveho sketche</p>
+
+<div class="cards">
+  <!-- Option A: Faithful to sketch -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:240px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <!-- Top-right corner (going down then left-turn up) -->
+        <path d="M95 15 L95 65 Q95 80 110 80 L145 80" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bottom-left corner (going right then down-turn left) -->
+        <path d="M15 80 L55 80 Q70 80 70 95 L70 145" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Verne sketchi</h3>
+      <p>Dva koutky propletene pres sebe -- presne jak jsi nakreslil. Ciste linky, zadne dekorace.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Tighter, more compact -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:240px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <!-- Top-right corner -->
+        <path d="M90 25 L90 68 Q90 80 102 80 L135 80" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <!-- Bottom-left corner -->
+        <path d="M25 80 L58 80 Q70 80 70 92 L70 135" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Kompaktnejsi</h3>
+      <p>Stejny motiv, ale tesneji u sebe a silnejsi linky. Pusobi vic jako logo, mene jako diagram.</p>
+    </div>
+  </div>
+
+  <!-- Option C: With subtle fill -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:240px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <!-- Subtle glow in the center where they interlock -->
+        <circle cx="80" cy="80" r="18" fill="white" opacity="0.08"/>
+        <circle cx="80" cy="80" r="10" fill="white" opacity="0.1"/>
+        <!-- Top-right corner -->
+        <path d="M90 25 L90 68 Q90 80 102 80 L135 80" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+        <!-- Bottom-left corner -->
+        <path d="M25 80 L58 80 Q70 80 70 92 L70 135" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: S jemnym svetlem uprostred</h3>
+      <p>Propletene koutky s jemnou zari v miste kde se protinaji -- naznacuje sdileny prostor.</p>
+    </div>
+  </div>
+
+  <!-- Option D: Different line weights -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:240px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <!-- Top-right corner - slightly thicker -->
+        <path d="M90 25 L90 68 Q90 80 102 80 L135 80" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+        <!-- Bottom-left corner - slightly thinner -->
+        <path d="M25 80 L58 80 Q70 80 70 92 L70 135" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Ruzna tloustka</h3>
+      <p>Jeden koutek silnejsi, druhy jemnejsi -- pridava hloubku a dynamiku. Mene symetricke, vic zajimave.</p>
+    </div>
+  </div>
+</div>

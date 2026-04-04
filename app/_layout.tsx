@@ -184,6 +184,14 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
         />
         <Stack.Screen name="keys/create" options={{ title: "Přidat klíč" }} />
         <Stack.Screen name="keys/[id]/edit" options={{ title: "Upravit klíč" }} />
+        <Stack.Screen
+          name="expenses/recurring"
+          options={{ title: "Opakující se výdaje", headerShown: true }}
+        />
+        <Stack.Screen
+          name="expenses/recurring/[id]"
+          options={{ title: "Opakující se výdaj", headerShown: true }}
+        />
         <Stack.Screen name="profile" options={{ title: "Profil" }} />
         <Stack.Screen
           name="change-password"

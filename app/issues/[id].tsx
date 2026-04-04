@@ -228,7 +228,7 @@ const IssueDetail = () => {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -352,7 +352,7 @@ const IssueDetail = () => {
               className="w-full"
             >
               {isDeleting ? (
-                <ActivityIndicator className="text-primary-foreground" />
+                <ActivityIndicator className="text-primary" />
               ) : (
                 <Text>Smazat závadu</Text>
               )}
@@ -367,7 +367,7 @@ const IssueDetail = () => {
             className="w-full mt-2"
           >
             {isUpdatingStatus ? (
-              <ActivityIndicator className="text-primary-foreground" />
+              <ActivityIndicator className="text-primary" />
             ) : (
               <View className="flex-row items-center gap-2">
                 <Ionicons

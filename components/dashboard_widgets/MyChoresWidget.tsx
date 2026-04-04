@@ -236,7 +236,7 @@ export const MyChoresWidget = () => {
           <CardContent>
             {isLoading ? (
               <View className="py-4">
-                <ActivityIndicator size="small" />
+                <ActivityIndicator size="small" className="text-primary" />
               </View>
             ) : myChores.length === 0 ? (
               <Text className="text-muted-foreground text-sm">
@@ -259,7 +259,7 @@ export const MyChoresWidget = () => {
                       className="mr-3"
                     >
                       {completingChoreId === chore.id ? (
-                        <ActivityIndicator size="small" color="#8b5cf6" />
+                        <ActivityIndicator size="small" className="text-primary" />
                       ) : (
                         <Ionicons
                           name={

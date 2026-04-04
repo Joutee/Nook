@@ -116,7 +116,7 @@ export const DocumentsWidget = () => {
         <CardContent>
           {isLoading ? (
             <View className="py-4">
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" className="text-primary" />
             </View>
           ) : documents.length === 0 ? (
             <Text className="text-muted-foreground text-sm">

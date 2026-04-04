@@ -228,7 +228,7 @@ const Chores = () => {
                   disabled={completingChoreId === item.id}
                 >
                   {completingChoreId === item.id ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" className="text-primary" />
                   ) : (
                     <>
                       <Ionicons
@@ -256,7 +256,7 @@ const Chores = () => {
                   disabled={completingChoreId === item.id}
                 >
                   {completingChoreId === item.id ? (
-                    <ActivityIndicator size="small" />
+                    <ActivityIndicator size="small" className="text-primary" />
                   ) : (
                     <>
                       <Ionicons
@@ -281,7 +281,7 @@ const Chores = () => {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }

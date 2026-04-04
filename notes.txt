@@ -1,29 +1,25 @@
+vytvorit tabulky pro interval opakovani a tu pouzivat jak pro chores (tam je potreba opravit to zadavani) tak pro opakujici se expenseanoo 
+
+
 iOS nekompatibility list:
 tlacitko zpet funguje kdyz jdu z choore detail do chore history ale nefunguje kdyz jdu z chores na chore-create
 
 TODO:
-invalid date v chore history
-upravit ui doporucenych vyrovnani aby to bylo konzistentni se zustatky bud tam pouzit ty subkarty nebo ty separatory
 u edit screen povolit odeslani pouze pokud se neco zmenilo
 vypsat hlasku a znepristupnit moduly ktere jsou na komunikaci s pronajimatelem pokud zadny pronajimatel v byte neni
 reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
 je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny update takze si muze zmenit is_admin
 name change
 telefonni cislo a email ke kazdemu profilu
-pridat do financi bankovni ucet
-zmenit vsechny loadingy na stejnou barvu
 skryt tu bocni listu na scollovani
 
 
 kdyz zbyde cas:
 profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
 pridat do clenu bytu asi i telefonni cislo by davalo smysl
-system theme
 pridat vic intervalu repetetivnosti u chores (tyden, mesic,...)
 o auth
-otisk prstu
 opakujici se vydaje (najem)
-nejake misto kam ulozit bankovni ucet kazdeho uzivatele a moznost pak zobrazeni ve finance, ten by mohl mit i pronajimatel mohl by se zobrazovat nekde v zalozce byt kam by pak mohli najemci posilat najem
 
 
 

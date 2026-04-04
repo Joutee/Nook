@@ -94,7 +94,7 @@ export const IssuesWidget = () => {
         <CardContent>
           {isLoading ? (
             <View className="py-4">
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" className="text-primary" />
             </View>
           ) : issues.length === 0 ? (
             <Text className="text-muted-foreground text-sm">Žádné závady</Text>

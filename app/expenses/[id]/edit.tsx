@@ -118,7 +118,7 @@ const EditExpense = () => {
   if (isLoadingData) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }

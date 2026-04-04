@@ -1,0 +1,175 @@
+<h2>Recurring Expenses — UI Mockups v2</h2>
+<p class="subtitle">2 screens: form toggle + recurring list. Vstup pres header karty Historie.</p>
+
+<div class="split" style="gap: 24px; align-items: start;">
+
+  <!-- MOCKUP 1: ExpenseForm with recurring toggle -->
+  <div class="mockup" style="flex: 1;">
+    <div class="mockup-header">1. ExpenseForm — recurring toggle</div>
+    <div class="mockup-body" style="padding: 16px; font-family: system-ui; background: #1a1a2e; color: #e0e0e0;">
+
+      <!-- Existing fields (dimmed) -->
+      <div style="opacity: 0.5; margin-bottom: 12px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Nazev</div>
+        <div style="background: #2a2a3e; border-radius: 8px; padding: 10px 12px; font-size: 14px;">Najem</div>
+      </div>
+      <div style="opacity: 0.5; margin-bottom: 12px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Castka</div>
+        <div style="background: #2a2a3e; border-radius: 8px; padding: 10px 12px; font-size: 14px;">15 000 Kc</div>
+      </div>
+      <div style="opacity: 0.5; margin-bottom: 16px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Platce / Rozdeleni</div>
+        <div style="background: #2a2a3e; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #666;">...</div>
+      </div>
+
+      <!-- NEW: Recurring toggle -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">&#x1f504;</span>
+            <span style="font-size: 14px; font-weight: 600;">Opakovat</span>
+          </div>
+          <div style="width: 44px; height: 26px; background: #7c3aed; border-radius: 13px; position: relative;">
+            <div style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expanded: interval options -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 8px;">Jak casto</div>
+        <div style="display: flex; gap: 6px;">
+          <div style="flex:1; text-align:center; padding: 8px 4px; border-radius: 8px; font-size: 12px; background: #3a3a4e; color: #888;">Denne</div>
+          <div style="flex:1; text-align:center; padding: 8px 4px; border-radius: 8px; font-size: 12px; background: #3a3a4e; color: #888;">Tydne</div>
+          <div style="flex:1; text-align:center; padding: 8px 4px; border-radius: 8px; font-size: 12px; background: #7c3aed; color: white; font-weight: 600;">Mesicne</div>
+          <div style="flex:1; text-align:center; padding: 8px 4px; border-radius: 8px; font-size: 12px; background: #3a3a4e; color: #888;">Rocne</div>
+        </div>
+      </div>
+
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 8px;">Den v mesici</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="background: #3a3a4e; border-radius: 8px; padding: 10px 20px; font-size: 16px; font-weight: 600; color: white;">15</div>
+          <span style="font-size: 13px; color: #888;">kazdeho mesice</span>
+        </div>
+      </div>
+
+      <div style="background: #7c3aed; border-radius: 12px; padding: 14px; text-align: center; font-weight: 600; font-size: 15px; color: white;">
+        Ulozit
+      </div>
+    </div>
+  </div>
+
+  <!-- MOCKUP 2: Recurring expenses list -->
+  <div class="mockup" style="flex: 1;">
+    <div class="mockup-header">2. Seznam opakujicich se vydaju</div>
+    <div class="mockup-body" style="padding: 16px; font-family: system-ui; background: #1a1a2e; color: #e0e0e0;">
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="font-size: 18px; font-weight: 700;">Opakujici se vydaje</div>
+      </div>
+
+      <!-- Item 1: Active -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #7c3aed;">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div>
+            <div style="font-size: 15px; font-weight: 600;">Najem</div>
+            <div style="font-size: 12px; color: #888; margin-top: 2px;">Mesicne, 15. dne</div>
+            <div style="font-size: 12px; color: #7c3aed; margin-top: 4px;">Dalsi: 15. 5. 2026</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 15px; font-weight: 600;">15 000 Kc</div>
+            <div style="font-size: 11px; color: #22c55e; margin-top: 4px; background: #22c55e22; padding: 2px 8px; border-radius: 4px;">Aktivni</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2: Active -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #7c3aed;">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div>
+            <div style="font-size: 15px; font-weight: 600;">Internet</div>
+            <div style="font-size: 12px; color: #888; margin-top: 2px;">Mesicne, 1. dne</div>
+            <div style="font-size: 12px; color: #7c3aed; margin-top: 4px;">Dalsi: 1. 5. 2026</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 15px; font-weight: 600;">599 Kc</div>
+            <div style="font-size: 11px; color: #22c55e; margin-top: 4px; background: #22c55e22; padding: 2px 8px; border-radius: 4px;">Aktivni</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 3: Paused -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid #666; opacity: 0.6;">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div>
+            <div style="font-size: 15px; font-weight: 600;">Klimatizace</div>
+            <div style="font-size: 12px; color: #888; margin-top: 2px;">Mesicne, 1. dne</div>
+            <div style="font-size: 12px; color: #888; margin-top: 4px;">Pozastaveno</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 15px; font-weight: 600;">1 200 Kc</div>
+            <div style="font-size: 11px; color: #f59e0b; margin-top: 4px; background: #f59e0b22; padding: 2px 8px; border-radius: 4px;">Pozastaveno</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 1px; background: #333; margin: 16px 0;"></div>
+      <div style="font-size: 12px; color: #666; text-align: center;">Klikni na vydaj pro upravu nebo smazani</div>
+    </div>
+  </div>
+</div>
+
+<!-- MOCKUP 3: Finance tab — History card with link -->
+<div style="max-width: 420px; margin: 24px auto 0;">
+  <div class="mockup">
+    <div class="mockup-header">3. Finance tab — proklik z karty Historie</div>
+    <div class="mockup-body" style="padding: 16px; font-family: system-ui; background: #1a1a2e; color: #e0e0e0;">
+
+      <!-- Existing cards dimmed -->
+      <div style="opacity: 0.35; background: #2a2a3e; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;">
+        <div style="font-size: 13px; font-weight: 600;">Zustatky</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Petr: +2 500 Kc | Jana: -1 200 Kc</div>
+      </div>
+      <div style="opacity: 0.35; background: #2a2a3e; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;">
+        <div style="font-size: 13px; font-weight: 600;">Vyrovnani</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Jana &#8594; Petr: 1 200 Kc</div>
+      </div>
+
+      <!-- History card with recurring link in header -->
+      <div style="background: #2a2a3e; border-radius: 12px; padding: 14px 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 15px; font-weight: 700;">Historie</div>
+          <div style="display: flex; align-items: center; gap: 6px; color: #7c3aed; cursor: pointer;">
+            <span style="font-size: 13px; font-weight: 500;">Opakujici se</span>
+            <span style="font-size: 14px;">&#x1f504;</span>
+          </div>
+        </div>
+
+        <!-- Expense items -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #333;">
+          <div>
+            <div style="font-size: 14px; font-weight: 500;">Najem</div>
+            <div style="font-size: 11px; color: #888;">Petr &middot; 15. 4. 2026</div>
+          </div>
+          <div style="font-size: 14px; font-weight: 600;">15 000 Kc</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #333;">
+          <div>
+            <div style="font-size: 14px; font-weight: 500;">Nakup Lidl</div>
+            <div style="font-size: 11px; color: #888;">Jana &middot; 12. 4. 2026</div>
+          </div>
+          <div style="font-size: 14px; font-weight: 600;">842 Kc</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+          <div>
+            <div style="font-size: 14px; font-weight: 500;">Internet</div>
+            <div style="font-size: 11px; color: #888;">Petr &middot; 1. 4. 2026</div>
+          </div>
+          <div style="font-size: 14px; font-weight: 600;">599 Kc</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

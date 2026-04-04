@@ -137,7 +137,7 @@ export default function ReorderWidgets() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -258,7 +258,7 @@ export default function ReorderWidgets() {
           <Button onPress={saveLayout} disabled={isSaving}>
             {isSaving ? (
               <View className="flex-row items-center gap-2">
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" className="text-primary" />
                 <Text>Ukládání...</Text>
               </View>
             ) : (

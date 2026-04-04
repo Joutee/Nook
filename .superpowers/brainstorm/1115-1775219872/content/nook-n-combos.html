@@ -1,0 +1,72 @@
+<h2>Koutek + N: Kombinace</h2>
+<p class="subtitle">Jak propojit motiv koutku s pismenem N</p>
+
+<div class="cards">
+  <!-- Option A: N formed by two corner lines -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <!-- N made from two "nook" corners mirrored -->
+        <path d="M35 105 L35 45 Q35 35 45 35" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        <path d="M105 35 L105 95 Q105 105 95 105" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+        <line x1="35" y1="105" x2="105" y2="35" stroke="white" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Dva koutky = N</h3>
+      <p>Pismeno N vznikne ze dvou zrcadlovych koutku propojenych diagonalou. Koutek je zaklad pismena.</p>
+    </div>
+  </div>
+
+  <!-- Option B: N with nook corner accent -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <!-- Clean N with rounded bottom-left corner forming a nook -->
+        <path d="M40 105 L40 45 L100 105 L100 35" fill="none" stroke="white" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Cozy circle nestled in the nook corner -->
+        <circle cx="58" cy="87" r="10" fill="white" opacity="0.3"/>
+        <circle cx="58" cy="87" r="4.5" fill="white" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: N s koutkem</h3>
+      <p>Klasicke pismeno N, v jehoz spodnim koutku (nook) je "zabydleny" kruhovy prvek -- clovek v koutku.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Rounded square with corner-N -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <!-- Rounded square background -->
+        <rect x="20" y="20" width="100" height="100" rx="22" fill="white" opacity="0.15"/>
+        <!-- N where the verticals become room corners -->
+        <path d="M45 100 L45 50 Q45 40 55 40" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="45" y1="100" x2="95" y2="40" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M95 40 L95 90 Q95 100 85 100" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: N z koutku v ramecku</h3>
+      <p>Oba konce pismena N se zaobluji do koutku (nook). V zakulacenem app-icon tvaru. Symetricke a ciste.</p>
+    </div>
+  </div>
+
+  <!-- Option D: Abstract cozy N -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:220px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <!-- Thick, soft N with rounded everything -->
+        <path d="M40 105 Q40 100 40 50 Q40 35 50 35 Q55 35 58 42 L82 98 Q85 105 90 105 Q100 105 100 90 L100 35"
+              fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+        <!-- Warm dot in the nook -->
+        <circle cx="52" cy="80" r="6" fill="white" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Mekke N</h3>
+      <p>Organicke, zaoblene pismeno N s mekkymi krivkami. Tecka v koutku pridava pocit utulnosti. Friendly a moderni.</p>
+    </div>
+  </div>
+</div>

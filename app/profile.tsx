@@ -328,7 +328,7 @@ const ProfilePage = () => {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }

@@ -48,6 +48,39 @@ function formatDate(dateStr: string): string {
   return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()}`;
 }
 
+const RecurringExpenseItem: React.FC<{
+  item: RecurringExpenseWithDetails;
+}> = ({ item }) => (
+  <Pressable onPress={() => router.push(`/expenses/recurring/${item.id}`)}>
+    <Card>
+      <CardContent className="px-6 flex-row items-center justify-between">
+        <View className="flex-1 mr-3">
+          <Text className="text-sm font-semibold text-foreground">
+            {item.title}
+          </Text>
+          <Text className="text-xs text-muted-foreground mt-0.5">
+            {formatCurrency(item.amount)} · {formatInterval(item)}
+          </Text>
+          {!item.is_paused && (
+            <Text className="text-xs text-muted-foreground mt-0.5">
+              Příští: {formatDate(item.next_occurrence)}
+            </Text>
+          )}
+        </View>
+        <View
+          className={`px-2.5 py-1 rounded-full ${
+            item.is_paused ? "bg-destructive" : "bg-success"
+          }`}
+        >
+          <Text className="text-white text-[11px] font-semibold">
+            {item.is_paused ? "Pozastaveno" : "Aktivní"}
+          </Text>
+        </View>
+      </CardContent>
+    </Card>
+  </Pressable>
+);
+
 const RecurringExpensesList = () => {
   const [expenses, setExpenses] = useState<RecurringExpenseWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,51 +123,6 @@ const RecurringExpensesList = () => {
     }
   };
 
-  const renderItem = ({ item }: { item: RecurringExpenseWithDetails }) => {
-    const borderColor = item.is_paused ? "#666" : "#7c3aed";
-
-    return (
-      <Pressable onPress={() => router.push(`/expenses/recurring/${item.id}`)}>
-        <Card
-          className={`mb-3 overflow-hidden ${item.is_paused ? "opacity-60" : ""}`}
-          style={{ borderLeftWidth: 4, borderLeftColor: borderColor }}
-        >
-          <CardContent className="pt-4">
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1 mr-3">
-                <Text className="text-base font-semibold text-foreground mb-1">
-                  {item.title}
-                </Text>
-                <Text className="text-sm text-muted-foreground mb-1">
-                  {formatInterval(item)}
-                </Text>
-                <Text className="text-sm text-muted-foreground">
-                  {item.is_paused
-                    ? "Pozastaveno"
-                    : `Příští: ${formatDate(item.next_occurrence)}`}
-                </Text>
-              </View>
-              <View className="items-end gap-2">
-                <Text className="text-base font-semibold text-foreground">
-                  {formatCurrency(item.amount)}
-                </Text>
-                <View
-                  className={`px-2 py-0.5 rounded-full ${item.is_paused ? "bg-yellow-100" : "bg-green-100"}`}
-                >
-                  <Text
-                    className={`text-xs font-medium ${item.is_paused ? "text-yellow-700" : "text-green-700"}`}
-                  >
-                    {item.is_paused ? "Pozastaveno" : "Aktivní"}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </CardContent>
-        </Card>
-      </Pressable>
-    );
-  };
-
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
@@ -145,37 +133,26 @@ const RecurringExpensesList = () => {
 
   return (
     <View className="flex-1 bg-background">
-      <FlatList
-        data={expenses}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={
-          expenses.length === 0
-            ? { flex: 1, paddingHorizontal: 16, paddingTop: 16 }
-            : { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }
-        }
-        ListHeaderComponent={
-          <Text className="text-3xl font-bold text-foreground mb-4">
-            Opakující se výdaje
+      {expenses.length === 0 ? (
+        <View className="flex-1 justify-center items-center p-10">
+          <Ionicons
+            name="repeat-outline"
+            size={64}
+            className="text-muted-foreground"
+          />
+          <Text className="text-base text-muted-foreground mt-4 w-full text-center">
+            Zatím žádné opakující se výdaje
           </Text>
-        }
-        ListEmptyComponent={
-          <View className="flex-1 justify-center items-center gap-4 pb-20">
-            <Ionicons
-              name="repeat-outline"
-              size={64}
-              className="text-muted-foreground"
-            />
-            <Text className="text-lg font-semibold text-foreground">
-              Žádné opakující se výdaje
-            </Text>
-            <Text className="text-sm text-muted-foreground text-center px-8">
-              Opakující se výdaje vám pomohou sledovat pravidelné platby, jako
-              je nájem nebo internet.
-            </Text>
-          </View>
-        }
-      />
+        </View>
+      ) : (
+        <FlatList
+          data={expenses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <RecurringExpenseItem item={item} />}
+          contentContainerStyle={{ padding: 16 }}
+          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        />
+      )}
     </View>
   );
 };

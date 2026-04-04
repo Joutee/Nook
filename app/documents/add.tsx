@@ -236,7 +236,7 @@ const DocumentAdd = () => {
               className="mb-3 bg-primary"
             >
               {isUploading ? (
-                <ActivityIndicator className="text-muted-foreground" />
+                <ActivityIndicator className="text-primary" />
               ) : (
                 <Text>Nahrát dokument</Text>
               )}

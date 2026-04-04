@@ -134,7 +134,7 @@ export const KeyForm: React.FC<KeyFormProps> = ({
               className="mb-3 bg-primary"
             >
               {isSaving ? (
-                <ActivityIndicator className="text-foreground" />
+                <ActivityIndicator className="text-primary" />
               ) : (
                 <Text>{isEditMode ? "Uložit změny" : "Přidat klíč"}</Text>
               )}

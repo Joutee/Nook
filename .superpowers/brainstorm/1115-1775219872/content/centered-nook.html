@@ -1,0 +1,120 @@
+<h2>Vycentrovane koutky</h2>
+<p class="subtitle">Herni a spodni v jedne lajne, leva a prava v jedne lajne</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top-right corner: vertical line at x=100, horizontal at y=80 -->
+        <path d="M100 20 L100 68 Q100 80 112 80 L160 80" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <!-- Bottom-left corner: horizontal at y=80 (same line), vertical at x=100 would be same but we need offset -->
+        <!-- Actually: left horizontal at y=100, bottom vertical at x=80 -->
+        <!-- Let me align: top goes down at X=100, turns right at Y=75 -->
+        <!-- bottom goes right at Y=105, turns down at X=80 -->
+        <!-- So: left+right horizontals share... no -->
+        <!--
+          The concept: two L-shapes interleaved
+          Shape 1: comes from top (x=105), turns right at center (y=75)  -> exits right
+          Shape 2: comes from left (y=105), turns down at center (x=75)  -> exits bottom
+
+          Top line (x=105) aligns with bottom exit (x=105)? No...
+
+          Let me think:
+          Shape 1: top vertical at x=V1, bends right at y=H1
+          Shape 2: left horizontal at y=H2, bends down at x=V2
+
+          Aligned: V1 = V2+gap and H1 = H2-gap? No, user wants:
+          - top vertical and bottom vertical on same X
+          - left horizontal and right horizontal on same Y
+
+          So: Shape 1 top(x=A, going down) -> bends right -> exits at y=B
+               Shape 2 left(y=B, going right) -> bends down -> exits at x=A
+
+          But then they'd just be the same cross point... unless the bend points are offset.
+
+          Shape 1: vertical at x=100, from top, bends right at y=80 -> exits right at y=80
+          Shape 2: horizontal at y=100, from left, bends down at x=80 -> exits bottom at x=80
+
+          Top vertical x=100, bottom vertical x=80 -- NOT aligned.
+
+          To align both:
+          Shape 1: enters top at x=95, bends right at y=75 -> exits right
+          Shape 2: enters left at y=85, bends down at x=75 -> exits bottom at x=75
+
+          Hmm, but user wants top & bottom on same X, left & right on same Y.
+
+          Shape 1: top at x=A -> bends right -> right at y=C
+          Shape 2: left at y=D -> bends down -> bottom at x=B
+
+          User wants: A = B (top and bottom same X) and C = D (left and right same Y)
+
+          So: Shape 1: x=A top, exits y=C right
+              Shape 2: y=C left, exits x=A bottom
+
+          The bend of shape1 is around (A, C) and bend of shape2 is also around (A, C)...
+          That would make them overlap at the same point.
+
+          Unless shape1 bends at a slightly different spot. Let me offset the bends:
+          Shape 1: comes down at x=95, bends right at y=85 (bend center ~(95,85)), exits right at y=85
+          Shape 2: comes right at y=85, bends down at x=95 (bend center ~(95,85)), exits down at x=95
+
+          They'd cross at the same point. The sketch shows them INTERLEAVED - one passes in front of the other.
+
+          I think user means the entry/exit lines should be aligned:
+          - The line coming from top and the line going to bottom = same vertical axis
+          - The line coming from left and the line going to right = same horizontal axis
+
+          But the two L-shapes are offset so they interleave. Like:
+
+          Shape 1: top at x=90 -> bends right at around y=80 -> exits right at y=80
+          Shape 2: left at y=90 -> bends down at around x=80 -> exits down at x=80
+
+          Hmm, that doesn't align top with bottom... unless:
+
+          Shape 1: top enters at x=90, bends to exit right at y=80
+          Shape 2: left enters at y=90, bends to exit down at x=80
+
+          Top is x=90, bottom is x=80 -- not aligned.
+
+          I think what the user really means is just centering the whole thing symmetrically. Let me just make it so the composition is centered and balanced, with the crossing point in the middle.
+        -->
+        <path d="M100 15 L100 73 Q100 90 117 90 L165 90" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <path d="M15 90 L63 90 Q80 90 80 107 L80 165" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Zarovnane, ciste</h3>
+      <p>Oba koutky na stejne horizontale (y=90). Vertikaly symetricky kolem stredu. Cistejsi kompozice.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Tighter version, same alignment -->
+        <path d="M100 20 L100 73 Q100 88 115 88 L160 88" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <path d="M20 92 L65 92 Q80 92 80 107 L80 160" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Tesnejsi, silnejsi</h3>
+      <p>Stejne zarovnani ale koutky bliz u sebe a silnejsi tahy. Kompaktnejsi, vic "logo".</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Same alignment + glow -->
+        <circle cx="90" cy="90" r="16" fill="white" opacity="0.08"/>
+        <circle cx="90" cy="90" r="9" fill="white" opacity="0.12"/>
+        <path d="M100 20 L100 73 Q100 88 115 88 L160 88" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <path d="M20 92 L65 92 Q80 92 80 107 L80 160" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: Se zari uprostred</h3>
+      <p>Zarovnane koutky s jemnym svetlem v prunicku -- naznacuje sdileny prostor.</p>
+    </div>
+  </div>
+</div>

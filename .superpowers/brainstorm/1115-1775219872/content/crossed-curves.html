@@ -1,0 +1,64 @@
+<h2>Prekrizene krivky</h2>
+<p class="subtitle">Dve krivky -- jedna prohnuta dolu, druha nahoru -- protinaji se uprostred</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Top curve: concave down (valley) -->
+        <path d="M20 45 Q90 110 160 45" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <!-- Bottom curve: concave up (hill), crossing the top one -->
+        <path d="M20 135 Q90 70 160 135" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Verne sketchi</h3>
+      <p>Dve symetricke krivky se protinaji uprostred. Ciste, jednoduche.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Tighter, more pointed crossing -->
+        <path d="M15 50 Q90 105 165 50" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+        <path d="M15 130 Q90 75 165 130" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Kompaktnejsi</h3>
+      <p>Krivky bliz u sebe, silnejsi linky. Vic jako bold logo mark.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Sharper curves, more angular -->
+        <path d="M15 40 L80 85 Q90 92 100 85 L165 40" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 140 L80 95 Q90 88 100 95 L165 140" fill="none" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: Ostrejsi, s malou mezerou</h3>
+      <p>Krivky se temer dotykaji uprostred ale nechavaji maly prostor -- "nook" mezi nimi.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Weaving effect: one passes over the other -->
+        <!-- Bottom curve first (behind) -->
+        <path d="M15 135 Q50 100 75 88" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <path d="M105 88 Q130 100 165 135" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+        <!-- Top curve (in front, continuous) -->
+        <path d="M15 45 Q90 110 165 45" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Propletene</h3>
+      <p>Jedna krivka prochazi pred druhou -- efekt propleteni. Pridava hloubku a pocit spojeni.</p>
+    </div>
+  </div>
+</div>

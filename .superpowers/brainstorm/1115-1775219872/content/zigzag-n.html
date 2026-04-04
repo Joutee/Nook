@@ -1,0 +1,57 @@
+<h2>Zigzag / lomene N</h2>
+<p class="subtitle">Geometricky lomeny tvar -- jako N polozene na bok</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Zigzag: up-right, down-right, up-right -->
+        <path d="M30 130 L70 70 L110 130 L150 70" fill="none" stroke="white" stroke-width="14" stroke-linecap="square" stroke-linejoin="miter"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>A: Verne sketchi</h3>
+      <p>Silny geometricky zigzag. Ostre rohy, tluste tahy. Presne jak na obrazku.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <path d="M25 135 L65 65 L115 135 L155 65" fill="none" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>B: Zaoblene konce</h3>
+      <p>Stejny tvar ale se zaoblenymi konci a spoji. Mekci, privetivejsi.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Slightly tilted/rotated for dynamism -->
+        <g transform="rotate(-8, 90, 90)">
+          <path d="M25 130 L65 65 L115 130 L155 65" fill="none" stroke="white" stroke-width="14" stroke-linecap="square" stroke-linejoin="miter"/>
+        </g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>C: Mirne nakloneny</h3>
+      <p>Stejny zigzag ale lehce nakloneny -- pridava dynamiku a energii.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;align-items:center;justify-content:center;min-height:260px;background:linear-gradient(135deg, #7c3aed, #6d28d9);">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- Thicker, bolder, more compact -->
+        <path d="M30 125 L65 70 L115 125 L150 70" fill="none" stroke="white" stroke-width="20" stroke-linecap="square" stroke-linejoin="miter"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>D: Extra tluste</h3>
+      <p>Maximalne silne tahy -- dominantni, ikonicky. Vynikne i v male velikosti.</p>
+    </div>
+  </div>
+</div>
