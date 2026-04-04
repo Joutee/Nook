@@ -1,21 +1,18 @@
-import {
-  GoogleOneTapSignIn,
-  isErrorWithCode,
-  isNoSavedCredentialFoundResponse,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
-import { digestStringAsync, CryptoDigestAlgorithm, getRandomBytes } from "expo-crypto";
 import { supabase } from "@/lib/supabase";
 
 /**
  * Configure Google Sign-In. Call once at app startup.
- * webClientId is the Web Client ID from Google Cloud Console
- * (same one used in Supabase dashboard).
+ * No-op if native module is not available (e.g. Expo Go).
  */
 export function configureGoogleSignIn() {
-  GoogleOneTapSignIn.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
-  });
+  try {
+    const { GoogleOneTapSignIn } = require("@react-native-google-signin/google-signin");
+    GoogleOneTapSignIn.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
+    });
+  } catch {
+    console.warn("[googleAuth] Native module not available — skipping configure");
+  }
 }
 
 /**
@@ -27,9 +24,10 @@ async function generateNonce(): Promise<{
   rawNonce: string;
   nonceDigest: string;
 }> {
+  const { digestStringAsync, CryptoDigestAlgorithm, getRandomBytes } = require("expo-crypto");
   const randomBytes = getRandomBytes(32);
-  const rawNonce = Array.from(randomBytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
+  const rawNonce = Array.from(randomBytes as Uint8Array)
+    .map((b: number) => b.toString(16).padStart(2, "0"))
     .join("");
   const nonceDigest = await digestStringAsync(
     CryptoDigestAlgorithm.SHA256,
@@ -51,6 +49,13 @@ export async function signInWithGoogle(): Promise<
   | { success: false; error: string; cancelled?: boolean }
 > {
   try {
+    const {
+      GoogleOneTapSignIn,
+      isErrorWithCode,
+      isNoSavedCredentialFoundResponse,
+      statusCodes,
+    } = require("@react-native-google-signin/google-signin");
+
     const { rawNonce, nonceDigest } = await generateNonce();
 
     // Try One-Tap sign-in first
@@ -89,22 +94,27 @@ export async function signInWithGoogle(): Promise<
     }
 
     return { success: true };
-  } catch (error) {
-    if (isErrorWithCode(error)) {
-      switch (error.code) {
-        case statusCodes.SIGN_IN_CANCELLED:
-          return { success: false, error: "", cancelled: true };
-        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          return {
-            success: false,
-            error: "Google Play služby nejsou dostupné.",
-          };
-        default:
-          return {
-            success: false,
-            error: "Přihlášení přes Google selhalo.",
-          };
+  } catch (error: any) {
+    try {
+      const { isErrorWithCode, statusCodes } = require("@react-native-google-signin/google-signin");
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.SIGN_IN_CANCELLED:
+            return { success: false, error: "", cancelled: true };
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            return {
+              success: false,
+              error: "Google Play služby nejsou dostupné.",
+            };
+          default:
+            return {
+              success: false,
+              error: "Přihlášení přes Google selhalo.",
+            };
+        }
       }
+    } catch {
+      // Native module not available
     }
     return { success: false, error: "Nepodařilo se připojit k Google." };
   }

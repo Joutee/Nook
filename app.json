@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#7C3AED"
     },
     "ios": {
       "supportsTablet": true
@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#7C3AED"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -33,7 +33,6 @@
       "expo-router",
       "expo-sqlite",
       "expo-secure-store",
-      "expo-crypto",
       [
         "@react-native-google-signin/google-signin",
         {
