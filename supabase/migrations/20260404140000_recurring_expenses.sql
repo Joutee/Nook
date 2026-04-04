@@ -218,8 +218,8 @@ SET search_path = public
 AS $$
 DECLARE
   v_template        RECORD;
-  v_member          RECORD;
-  v_members         RECORD[];
+  v_member          uuid;
+  v_members         uuid[];
   v_member_count    int;
   v_expense_id      uuid;
   v_base_share      numeric(10,2);
@@ -302,7 +302,7 @@ BEGIN
           v_share_amount := v_base_share;
         END IF;
 
-        INSERT INTO expense_shares (expense_id, profile_id, amount)
+        INSERT INTO expense_shares (expense_id, profile_id, owed_amount)
         VALUES (v_expense_id, v_member, v_share_amount);
 
         v_idx := v_idx + 1;
