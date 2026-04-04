@@ -29,6 +29,15 @@ function formatIban(raw: string): string {
     .trim();
 }
 
+const NAME_REGEX = /^[\p{L}\s'-]+$/u;
+
+function validateName(value: string, label: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return `${label} nesmí být prázdné`;
+  if (!NAME_REGEX.test(trimmed)) return `${label} smí obsahovat pouze písmena`;
+  return null;
+}
+
 const ProfilePage = () => {
   const params = useLocalSearchParams<{ id?: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -38,6 +47,12 @@ const ProfilePage = () => {
   const [isEditingIban, setIsEditingIban] = useState(false);
   const [ibanInput, setIbanInput] = useState("");
   const [isSavingIban, setIsSavingIban] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [isEditingSurname, setIsEditingSurname] = useState(false);
+  const [surnameInput, setSurnameInput] = useState("");
+  const [isSavingSurname, setIsSavingSurname] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -125,6 +140,84 @@ const ProfilePage = () => {
     if (!profile?.iban) return;
     await Clipboard.setStringAsync(profile.iban);
     showToast("IBAN byl zkopírován do schránky", "success");
+  };
+
+  const handleEditName = () => {
+    setNameInput(profile?.name ?? "");
+    setIsEditingName(true);
+  };
+
+  const handleCancelName = () => {
+    setIsEditingName(false);
+    setNameInput("");
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    const error = validateName(trimmed, "Jméno");
+    if (error) {
+      showToast(error, "error");
+      return;
+    }
+
+    setIsSavingName(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .update({ name: trimmed })
+      .eq("id", user!.id);
+
+    setIsSavingName(false);
+
+    if (dbError) {
+      showToast("Nepodařilo se uložit jméno", "error");
+    } else {
+      setProfile((prev) => (prev ? { ...prev, name: trimmed } : prev));
+      setIsEditingName(false);
+      showToast("Jméno bylo aktualizováno", "success");
+    }
+  };
+
+  const handleEditSurname = () => {
+    setSurnameInput(profile?.surname ?? "");
+    setIsEditingSurname(true);
+  };
+
+  const handleCancelSurname = () => {
+    setIsEditingSurname(false);
+    setSurnameInput("");
+  };
+
+  const handleSaveSurname = async () => {
+    const trimmed = surnameInput.trim();
+    const error = validateName(trimmed, "Příjmení");
+    if (error) {
+      showToast(error, "error");
+      return;
+    }
+
+    setIsSavingSurname(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .update({ surname: trimmed })
+      .eq("id", user!.id);
+
+    setIsSavingSurname(false);
+
+    if (dbError) {
+      showToast("Nepodařilo se uložit příjmení", "error");
+    } else {
+      setProfile((prev) => (prev ? { ...prev, surname: trimmed } : prev));
+      setIsEditingSurname(false);
+      showToast("Příjmení bylo aktualizováno", "success");
+    }
   };
 
   if (isLoading) {
