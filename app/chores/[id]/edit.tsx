@@ -19,7 +19,6 @@ const EditChore = () => {
     intervalMonth: number;
     customDays: number;
     recurringIntervalId?: string;
-    startDate: Date;
     selectedMembers: Member[];
   } | null>(null);
   const { showToast } = useToast();
@@ -73,7 +72,6 @@ const EditChore = () => {
         intervalMonth: choreData.recurring_interval.interval_month ?? 1,
         customDays: choreData.recurring_interval.custom_days ?? 7,
         recurringIntervalId: choreData.recurring_interval_id,
-        startDate: new Date(choreData.start_date),
         selectedMembers: assignedMembers,
       });
     } catch (error) {
