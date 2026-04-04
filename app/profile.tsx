@@ -490,6 +490,68 @@ const ProfilePage = () => {
                 </View>
               </>
             )}
+
+            <Separator />
+
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="call-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Telefon
+                  </Text>
+                  {!isEditingPhone && (
+                    <Text className="text-base text-foreground">
+                      {profile?.phone || "Nenastaveno"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingPhone && (
+                  <Button variant="ghost" size="icon" onPress={handleEditPhone}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
+              </View>
+
+              {isOwnProfile && isEditingPhone && (
+                <View className="gap-2">
+                  <Input
+                    value={phoneInput}
+                    onChangeText={setPhoneInput}
+                    placeholder="+420 123 456 789"
+                    keyboardType="phone-pad"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSavePhone}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSavePhone}
+                      disabled={isSavingPhone}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelPhone}
+                      disabled={isSavingPhone}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
+            </View>
           </Card>
         </View>
 
