@@ -1,5 +1,6 @@
 import { TurboModuleRegistry } from "react-native";
 import { supabase } from "@/lib/supabase";
+import { saveUsedAccount } from "@/lib/biometricAuth";
 
 /**
  * Check if the native Google Sign-In module is available.
@@ -64,13 +65,17 @@ export async function signInWithGoogle(): Promise<
       return { success: false, error: "Google neposkytl autentizační token." };
     }
 
-    const { error } = await supabase.auth.signInWithIdToken({
+    const { data, error } = await supabase.auth.signInWithIdToken({
       provider: "google",
       token: idToken,
     });
 
     if (error) {
       return { success: false, error: error.message };
+    }
+
+    if (data.user?.email) {
+      await saveUsedAccount(data.user.email);
     }
 
     return { success: true };
