@@ -90,58 +90,58 @@ export function calculateIntervalStartDate(
   intervalDay?: number | null,
   intervalMonth?: number | null,
   customDays?: number | null,
-): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+): string {
+  const now = new Date();
+  // Work with UTC dates to avoid timezone shift when saving to DB
+  const todayYear = now.getUTCFullYear();
+  const todayMonth = now.getUTCMonth(); // 0-indexed
+  const todayDate = now.getUTCDate();
+  const todayDow = now.getUTCDay() || 7; // Convert Sunday 0 to 7 (ISO: 1=Mon..7=Sun)
+
+  function toDateString(y: number, m: number, d: number): string {
+    return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
 
   switch (intervalType) {
     case "daily":
     case "custom":
-      return today;
+      return toDateString(todayYear, todayMonth, todayDate);
 
     case "weekly": {
-      // intervalDay: 1=Mon..7=Sun
       const targetDay = intervalDay ?? 1;
-      const currentDay = today.getDay() || 7; // Convert Sunday 0 to 7 (ISO)
-      if (currentDay === targetDay) return today;
-      // Find the most recent past occurrence of targetDay
-      const diff = currentDay - targetDay;
-      const result = new Date(today);
-      result.setDate(today.getDate() - (diff > 0 ? diff : diff + 7));
-      return result;
+      if (todayDow === targetDay) return toDateString(todayYear, todayMonth, todayDate);
+      const diff = todayDow - targetDay;
+      const daysBack = diff > 0 ? diff : diff + 7;
+      const d = new Date(Date.UTC(todayYear, todayMonth, todayDate - daysBack));
+      return toDateString(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
     }
 
     case "monthly": {
-      // intervalDay: 1-31
-      const targetDayOfMonth = intervalDay ?? 1;
-      const currentDate = today.getDate();
-      if (currentDate === targetDayOfMonth) return today;
-      // Find the most recent occurrence of this day-of-month
-      if (currentDate > targetDayOfMonth) {
-        // It's this month
-        const result = new Date(today.getFullYear(), today.getMonth(), targetDayOfMonth);
-        return result;
-      } else {
-        // It was last month
-        const result = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-        result.setDate(Math.min(targetDayOfMonth, lastDay));
-        return result;
+      const targetDom = intervalDay ?? 1;
+      if (todayDate === targetDom) return toDateString(todayYear, todayMonth, todayDate);
+      if (todayDate > targetDom) {
+        return toDateString(todayYear, todayMonth, targetDom);
       }
+      // Last month
+      const prev = new Date(Date.UTC(todayYear, todayMonth - 1, 1));
+      const lastDay = new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 0)).getUTCDate();
+      const day = Math.min(targetDom, lastDay);
+      return toDateString(prev.getUTCFullYear(), prev.getUTCMonth(), day);
     }
 
     case "yearly": {
-      // intervalDay: 1-31, intervalMonth: 1-12
       const targetDay = intervalDay ?? 1;
-      const targetMonth = (intervalMonth ?? 1) - 1; // JS months are 0-indexed
-      const thisYearDate = new Date(today.getFullYear(), targetMonth, targetDay);
-      if (thisYearDate <= today) return thisYearDate;
-      // Last year's occurrence
-      return new Date(today.getFullYear() - 1, targetMonth, targetDay);
+      const targetMonth = (intervalMonth ?? 1) - 1;
+      const thisYear = new Date(Date.UTC(todayYear, targetMonth, targetDay));
+      const todayUtc = new Date(Date.UTC(todayYear, todayMonth, todayDate));
+      if (thisYear <= todayUtc) {
+        return toDateString(todayYear, targetMonth, targetDay);
+      }
+      return toDateString(todayYear - 1, targetMonth, targetDay);
     }
 
     default:
-      return today;
+      return toDateString(todayYear, todayMonth, todayDate);
   }
 }
 
