@@ -30,6 +30,15 @@ function formatIban(raw: string): string {
     .trim();
 }
 
+const NAME_REGEX = /^[\p{L}\s'-]+$/u;
+
+function validateName(value: string, label: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return `${label} nesmí být prázdné`;
+  if (!NAME_REGEX.test(trimmed)) return `${label} smí obsahovat pouze písmena`;
+  return null;
+}
+
 const ProfilePage = () => {
   const params = useLocalSearchParams<{ id?: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -39,6 +48,12 @@ const ProfilePage = () => {
   const [isEditingIban, setIsEditingIban] = useState(false);
   const [ibanInput, setIbanInput] = useState("");
   const [isSavingIban, setIsSavingIban] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [isEditingSurname, setIsEditingSurname] = useState(false);
+  const [surnameInput, setSurnameInput] = useState("");
+  const [isSavingSurname, setIsSavingSurname] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -139,6 +154,98 @@ const ProfilePage = () => {
     showToast("IBAN byl zkopírován do schránky", "success");
   };
 
+  const handleEditName = () => {
+    if (isEditingSurname) handleCancelSurname();
+    setNameInput(profile?.name ?? "");
+    setIsEditingName(true);
+  };
+
+  const handleCancelName = () => {
+    setIsEditingName(false);
+    setNameInput("");
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    const error = validateName(trimmed, "Jméno");
+    if (error) {
+      showToast(error, "error");
+      return;
+    }
+
+    setIsSavingName(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setIsSavingName(false);
+      showToast("Relace vypršela, přihlaste se znovu", "error");
+      return;
+    }
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .update({ name: trimmed })
+      .eq("id", user.id);
+
+    setIsSavingName(false);
+
+    if (dbError) {
+      showToast("Nepodařilo se uložit jméno", "error");
+    } else {
+      setProfile((prev) => (prev ? { ...prev, name: trimmed } : prev));
+      setIsEditingName(false);
+      showToast("Jméno bylo aktualizováno", "success");
+    }
+  };
+
+  const handleEditSurname = () => {
+    if (isEditingName) handleCancelName();
+    setSurnameInput(profile?.surname ?? "");
+    setIsEditingSurname(true);
+  };
+
+  const handleCancelSurname = () => {
+    setIsEditingSurname(false);
+    setSurnameInput("");
+  };
+
+  const handleSaveSurname = async () => {
+    const trimmed = surnameInput.trim();
+    const error = validateName(trimmed, "Příjmení");
+    if (error) {
+      showToast(error, "error");
+      return;
+    }
+
+    setIsSavingSurname(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setIsSavingSurname(false);
+      showToast("Relace vypršela, přihlaste se znovu", "error");
+      return;
+    }
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .update({ surname: trimmed })
+      .eq("id", user.id);
+
+    setIsSavingSurname(false);
+
+    if (dbError) {
+      showToast("Nepodařilo se uložit příjmení", "error");
+    } else {
+      setProfile((prev) => (prev ? { ...prev, surname: trimmed } : prev));
+      setIsEditingSurname(false);
+      showToast("Příjmení bylo aktualizováno", "success");
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
@@ -175,38 +282,124 @@ const ProfilePage = () => {
             Informace
           </Text>
           <Card className="gap-0 py-0">
-            <View className="flex-row items-center gap-3 py-4 px-6">
-              <Ionicons
-                name="person-outline"
-                size={24}
-                className="text-foreground"
-              />
-              <View className="flex-1">
-                <Text className="text-xs text-muted-foreground mb-0.5">
-                  Jméno
-                </Text>
-                <Text className="text-base text-foreground">
-                  {profile?.name || "—"}
-                </Text>
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="person-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Jméno
+                  </Text>
+                  {!isEditingName && (
+                    <Text className="text-base text-foreground">
+                      {profile?.name || "—"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingName && (
+                  <Button variant="ghost" size="icon" onPress={handleEditName}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
               </View>
+
+              {isOwnProfile && isEditingName && (
+                <View className="gap-2">
+                  <Input
+                    value={nameInput}
+                    onChangeText={setNameInput}
+                    placeholder="Zadejte jméno"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSaveName}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSaveName}
+                      disabled={isSavingName}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelName}
+                      disabled={isSavingName}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
             </View>
 
             <Separator />
 
-            <View className="flex-row items-center gap-3 py-4 px-6">
-              <Ionicons
-                name="person-outline"
-                size={24}
-                className="text-foreground"
-              />
-              <View className="flex-1">
-                <Text className="text-xs text-muted-foreground mb-0.5">
-                  Příjmení
-                </Text>
-                <Text className="text-base text-foreground">
-                  {profile?.surname || "—"}
-                </Text>
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="person-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Příjmení
+                  </Text>
+                  {!isEditingSurname && (
+                    <Text className="text-base text-foreground">
+                      {profile?.surname || "—"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingSurname && (
+                  <Button variant="ghost" size="icon" onPress={handleEditSurname}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
               </View>
+
+              {isOwnProfile && isEditingSurname && (
+                <View className="gap-2">
+                  <Input
+                    value={surnameInput}
+                    onChangeText={setSurnameInput}
+                    placeholder="Zadejte příjmení"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSaveSurname}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSaveSurname}
+                      disabled={isSavingSurname}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelSurname}
+                      disabled={isSavingSurname}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
             </View>
 
             {isOwnProfile && (
