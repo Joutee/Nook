@@ -22,6 +22,8 @@ import {
   migrateLegacyBiometricCredentials,
 } from "@/lib/biometricAuth";
 import logger from "@/lib/logger";
+import { configureGoogleSignIn, signInWithGoogle } from "@/lib/googleAuth";
+import { getErrorMessage } from "@/lib/errorTranslations";
 
 export default function AuthEntry() {
   const [email, setEmail] = useState("");
@@ -32,6 +34,7 @@ export default function AuthEntry() {
   const params = useLocalSearchParams<{ skipAutoLogin?: string }>();
 
   useEffect(() => {
+    configureGoogleSignIn();
     checkForDefaultAccount();
   }, []);
 
@@ -86,6 +89,17 @@ export default function AuthEntry() {
     } catch (error: any) {
       logger.log("Error:", error);
       showToast("Chyba při přesměrování", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsLoading(true);
+    try {
+      const result = await signInWithGoogle();
+      if (result.success || result.cancelled) return;
+      showToast(getErrorMessage(result.error), "error");
     } finally {
       setIsLoading(false);
     }
@@ -175,9 +189,8 @@ export default function AuthEntry() {
             <Button
               variant="outline"
               className="w-full"
-              onPress={() => {
-                // TODO: Implement Google OAuth
-              }}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}
             >
               <Ionicons
                 name="logo-google"
