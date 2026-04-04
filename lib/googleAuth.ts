@@ -55,6 +55,7 @@ export async function signInWithGoogle(): Promise<
     } = require("@react-native-google-signin/google-signin");
 
     await GoogleSignin.hasPlayServices();
+    await GoogleSignin.signOut();
     const response = await GoogleSignin.signIn();
 
     const idToken = response.data?.idToken ?? null;
