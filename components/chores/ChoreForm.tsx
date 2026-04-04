@@ -10,7 +10,6 @@ import { router } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
-import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { MemberSelector } from "@/components/shared/MemberSelector";
 import { MemberOrderList } from "@/components/flats/MemberOrderList";
 import { Member } from "@/types/members";
@@ -18,6 +17,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
 import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
+import { calculateIntervalStartDate } from "@/lib/intervalUtils";
 
 interface ChoreFormProps {
   mode: "create" | "edit";
@@ -30,7 +30,6 @@ interface ChoreFormProps {
     intervalMonth: number;
     customDays: number;
     recurringIntervalId?: string;
-    startDate: Date;
     selectedMembers: Member[];
   };
 }
@@ -52,9 +51,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
     initialData?.intervalMonth || 1,
   );
   const [customDays, setCustomDays] = useState(initialData?.customDays || 7);
-  const [startDate, setStartDate] = useState(
-    initialData?.startDate || new Date(),
-  );
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>(
@@ -77,7 +73,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       setIntervalDay(initialData.intervalDay);
       setIntervalMonth(initialData.intervalMonth);
       setCustomDays(initialData.customDays);
-      setStartDate(initialData.startDate);
       setSelectedMembers(initialData.selectedMembers);
     }
   }, [initialData]);
@@ -134,11 +129,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       return false;
     }
 
-    if (!startDate || isNaN(startDate.getTime())) {
-      showToast("Zadejte platné datum začátku", "error");
-      return false;
-    }
-
     if (selectedMembers.length === 0) {
       showToast("Vyberte alespoň jednoho uživatele", "error");
       return false;
@@ -164,6 +154,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
   };
 
   const handleCreate = async () => {
+    const startDate = calculateIntervalStartDate(intervalType, intervalDay, intervalMonth, customDays);
     const { data: intervalData, error: intervalError } = await supabase
       .from("recurring_intervals")
       .insert({
@@ -228,6 +219,8 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
 
   const handleUpdate = async () => {
     if (!choreId) return;
+
+    const startDate = calculateIntervalStartDate(intervalType, intervalDay, intervalMonth, customDays);
 
     if (initialData?.recurringIntervalId) {
       const { error: intervalError } = await supabase
@@ -346,15 +339,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
               onIntervalMonthChange={setIntervalMonth}
               customDays={customDays}
               onCustomDaysChange={setCustomDays}
-            />
-          </View>
-
-          <View className="gap-2">
-            <Label>Datum začátku *</Label>
-            <DatePickerInput
-              value={startDate}
-              onChange={setStartDate}
-              showIcon={false}
             />
           </View>
 
