@@ -18,6 +18,23 @@ const MONTH_NAMES = [
   "prosince",
 ];
 
+export function buildIntervalPayload(
+  intervalType: RecurringInterval,
+  intervalDay: number,
+  intervalMonth: number,
+  customDays: number,
+) {
+  return {
+    type: intervalType,
+    interval_day:
+      intervalType === "weekly" || intervalType === "monthly" || intervalType === "yearly"
+        ? intervalDay
+        : null,
+    interval_month: intervalType === "yearly" ? intervalMonth : null,
+    custom_days: intervalType === "custom" ? customDays : null,
+  };
+}
+
 export function formatInterval(
   type: RecurringInterval,
   intervalDay?: number | null,
@@ -144,29 +161,5 @@ export function calculateIntervalStartDate(
 
     default:
       return toDateString(todayYear, todayMonth, todayDate);
-  }
-}
-
-/**
- * Calculate the number of days for a given interval type.
- * Used for next-cycle-date calculations in client code.
- */
-export function intervalToDays(
-  type: RecurringInterval,
-  customDays?: number | null,
-): number {
-  switch (type) {
-    case "daily":
-      return 1;
-    case "weekly":
-      return 7;
-    case "monthly":
-      return 30;
-    case "yearly":
-      return 365;
-    case "custom":
-      return customDays ?? 1;
-    default:
-      return 1;
   }
 }

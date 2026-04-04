@@ -22,6 +22,7 @@ import { RecurringInterval } from "@/types/finance";
 import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPicker";
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { Switch } from "@/components/ui/switch";
+import { buildIntervalPayload } from "@/lib/intervalUtils";
 
 interface ExpenseFormProps {
   mode: "create" | "edit";
@@ -418,13 +419,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         if (isRecurring) {
           const { data: intervalData, error: intervalError } = await supabase
             .from("recurring_intervals")
-            .insert({
-              type: recurringInterval,
-              interval_day: recurringInterval === "weekly" || recurringInterval === "monthly" || recurringInterval === "yearly"
-                ? intervalDay : null,
-              interval_month: recurringInterval === "yearly" ? intervalMonth : null,
-              custom_days: recurringInterval === "custom" ? customDays : null,
-            })
+            .insert(buildIntervalPayload(recurringInterval, intervalDay, intervalMonth, customDays))
             .select()
             .single();
 
