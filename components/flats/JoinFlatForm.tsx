@@ -42,107 +42,47 @@ export default function JoinFlatForm({
     setLoading(true);
 
     try {
-      // Najít byt podle kódu
-      const { data: flat, error: flatError } = await supabase
-        .from("flats")
-        .select("id")
-        .eq("code", code.trim())
-        .single();
+      const { data, error } = await supabase.rpc("join_flat_by_code", {
+        flat_code: code.trim(),
+      });
 
-      if (flatError || !flat) {
+      if (error) {
+        showToast("Nepodařilo se připojit k bytu", "error");
+        setLoading(false);
+        return;
+      }
+
+      if (data.error === "flat_not_found") {
         showToast("Byt s tímto kódem neexistuje", "error");
         setLoading(false);
         return;
       }
 
-      // Získat aktuálního uživatele
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      if (data.error === "already_member") {
+        showToast("Už jste aktivním členem tohoto bytu", "info");
+        setLoading(false);
+        return;
+      }
 
-      if (!user) {
+      if (data.error === "not_authenticated") {
         showToast("Nejste přihlášeni", "error");
         setLoading(false);
         return;
       }
 
-      // Zkontrolovat, jestli uživatel už má záznam v tomto bytě
-      const { data: existingMembership } = await supabase
-        .from("flat_profile")
-        .select("id, active, role")
-        .eq("flat_id", flat.id)
-        .eq("profile_id", user.id)
-        .maybeSingle();
-
-      let isRejoining = false;
-
-      if (existingMembership) {
-        // Pokud už je aktivní člen, zobrazit info
-        if (existingMembership.active) {
-          showToast("Už jste aktivním členem tohoto bytu", "info");
-          setLoading(false);
-          return;
-        }
-
-        // Pokud existuje záznam, ale není aktivní, aktualizovat na active = true
-        const { error: updateError } = await supabase
-          .from("flat_profile")
-          .update({ active: true })
-          .eq("id", existingMembership.id);
-
-        if (updateError) {
-          showToast(
-            "Nepodařilo se znovu připojit k bytu: " + updateError.message,
-            "error",
-          );
-          setLoading(false);
-          return;
-        }
-
-        isRejoining = true;
-      } else {
-        // Vytvořit nový záznam s active = true
-        const { error: insertError } = await supabase
-          .from("flat_profile")
-          .insert({
-            flat_id: flat.id,
-            profile_id: user.id,
-            role: null, // Nastaví se na další obrazovce
-            active: true,
-          });
-
-        if (insertError) {
-          showToast(
-            "Nepodařilo se přidat do bytu: " + insertError.message,
-            "error",
-          );
-          setLoading(false);
-          return;
-        }
+      if (data.success && data.flat) {
+        setCurrentFlat(data.flat);
+        await refreshFlats();
+        showToast(
+          data.is_rejoining
+            ? "Úspěšně jste se znovu připojili k bytu!"
+            : "Úspěšně jste se připojili k bytu!",
+          "success",
+        );
       }
-
-      // Načíst kompletní info o bytu a nastavit jako currentFlat
-      const { data: flatData, error: flatDataError } = await supabase
-        .from("flats")
-        .select("id, name, address")
-        .eq("id", flat.id)
-        .single();
-
-      if (!flatDataError && flatData) {
-        setCurrentFlat(flatData);
-      }
-
-      // Obnovit kontext - layout se postará o přesměrování
-      await refreshFlats();
-      setLoading(false);
-      showToast(
-        isRejoining
-          ? "Úspěšně jste se znovu připojili k bytu!"
-          : "Úspěšně jste se připojili k bytu!",
-        "success",
-      );
     } catch (error: any) {
       showToast(error.message, "error");
+    } finally {
       setLoading(false);
     }
   };
