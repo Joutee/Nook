@@ -35,6 +35,13 @@ export const getErrorMessage = (errorMessage: string): string => {
       "Síťové připojení selhalo. Zkontrolujte své připojení k internetu.",
     timeout: "Časový limit vypršel. Zkuste to prosím znovu.",
 
+    // Google OAuth errors
+    "Invalid ID token": "Neplatný Google token. Zkuste to prosím znovu.",
+    "OAuth identity already linked to a different user":
+      "Tento Google účet je již propojen s jiným uživatelem.",
+    "Unacceptable audience in ID token":
+      "Chyba konfigurace Google přihlášení.",
+
     // Validation errors
     PASSWORDS_DO_NOT_MATCH: "Hesla se neshodují.",
     PASSWORD_TOO_SHORT: "Heslo musí mít alespoň 6 znaků.",
