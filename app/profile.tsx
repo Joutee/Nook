@@ -317,20 +317,63 @@ const ProfilePage = () => {
 
             <Separator />
 
-            <View className="flex-row items-center gap-3 py-4 px-6">
-              <Ionicons
-                name="person-outline"
-                size={24}
-                className="text-foreground"
-              />
-              <View className="flex-1">
-                <Text className="text-xs text-muted-foreground mb-0.5">
-                  Příjmení
-                </Text>
-                <Text className="text-base text-foreground">
-                  {profile?.surname || "—"}
-                </Text>
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="person-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Příjmení
+                  </Text>
+                  {!isEditingSurname && (
+                    <Text className="text-base text-foreground">
+                      {profile?.surname || "—"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingSurname && (
+                  <Button variant="ghost" size="icon" onPress={handleEditSurname}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
               </View>
+
+              {isOwnProfile && isEditingSurname && (
+                <View className="gap-2">
+                  <Input
+                    value={surnameInput}
+                    onChangeText={setSurnameInput}
+                    placeholder="Zadejte příjmení"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSaveSurname}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSaveSurname}
+                      disabled={isSavingSurname}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelSurname}
+                      disabled={isSavingSurname}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
             </View>
 
             {isOwnProfile && (
