@@ -174,7 +174,7 @@ const Finance = () => {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="hsl(270, 89.1%, 49%)" />
+        <ActivityIndicator size="large" className="text-primary" />
       </View>
     );
   }
@@ -234,13 +234,28 @@ const Finance = () => {
 
         {/* History Section */}
         <Card className="mb-4">
-          <CardHeader className="flex-row items-center gap-2">
-            <Ionicons
-              name="time-outline"
-              size={24}
-              className="text-foreground"
-            />
-            <CardTitle>Historie</CardTitle>
+          <CardHeader className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <Ionicons
+                name="time-outline"
+                size={24}
+                className="text-foreground"
+              />
+              <CardTitle>Historie</CardTitle>
+            </View>
+            <Pressable
+              className="flex-row items-center gap-1"
+              onPress={() => router.push("/expenses/recurring")}
+            >
+              <Text className="text-sm font-medium text-primary">
+                Opakující se
+              </Text>
+              <Ionicons
+                name="repeat-outline"
+                size={16}
+                className="text-primary"
+              />
+            </Pressable>
           </CardHeader>
           <CardContent>
             {expenses.length === 0 ? (
