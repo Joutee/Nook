@@ -20,6 +20,7 @@ interface Profile {
   surname: string | null;
   email: string | null;
   iban: string | null;
+  phone: string | null;
 }
 
 function formatIban(raw: string): string {
@@ -39,6 +40,15 @@ function validateName(value: string, label: string): string | null {
   return null;
 }
 
+const PHONE_REGEX = /^\+?[0-9\s\-()]{6,20}$/;
+
+function validatePhone(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null; // phone is optional
+  if (!PHONE_REGEX.test(trimmed)) return "Neplatný formát telefonního čísla";
+  return null;
+}
+
 const ProfilePage = () => {
   const params = useLocalSearchParams<{ id?: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -54,6 +64,9 @@ const ProfilePage = () => {
   const [isEditingSurname, setIsEditingSurname] = useState(false);
   const [surnameInput, setSurnameInput] = useState("");
   const [isSavingSurname, setIsSavingSurname] = useState(false);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -75,7 +88,7 @@ const ProfilePage = () => {
 
       const { data } = await supabase
         .from("profiles")
-        .select("name, surname, iban")
+        .select("name, surname, iban, phone")
         .eq("id", profileId)
         .single();
 
@@ -84,6 +97,7 @@ const ProfilePage = () => {
         surname: data?.surname ?? null,
         email: ownProfile ? (user?.email ?? null) : null,
         iban: data?.iban ?? null,
+        phone: data?.phone ?? null,
       });
       setIsLoading(false);
     };
@@ -110,6 +124,7 @@ const ProfilePage = () => {
   const handleEditIban = () => {
     if (isEditingName) handleCancelName();
     if (isEditingSurname) handleCancelSurname();
+    if (isEditingPhone) handleCancelPhone();
     setIbanInput(profile?.iban ?? "");
     setIsEditingIban(true);
   };
@@ -159,6 +174,7 @@ const ProfilePage = () => {
   const handleEditName = () => {
     if (isEditingSurname) handleCancelSurname();
     if (isEditingIban) handleCancelIban();
+    if (isEditingPhone) handleCancelPhone();
     setNameInput(profile?.name ?? "");
     setIsEditingName(true);
   };
@@ -206,6 +222,7 @@ const ProfilePage = () => {
   const handleEditSurname = () => {
     if (isEditingName) handleCancelName();
     if (isEditingIban) handleCancelIban();
+    if (isEditingPhone) handleCancelPhone();
     setSurnameInput(profile?.surname ?? "");
     setIsEditingSurname(true);
   };
@@ -247,6 +264,54 @@ const ProfilePage = () => {
       setProfile((prev) => (prev ? { ...prev, surname: trimmed } : prev));
       setIsEditingSurname(false);
       showToast("Příjmení bylo aktualizováno", "success");
+    }
+  };
+
+  const handleEditPhone = () => {
+    if (isEditingName) handleCancelName();
+    if (isEditingSurname) handleCancelSurname();
+    if (isEditingIban) handleCancelIban();
+    setPhoneInput(profile?.phone ?? "");
+    setIsEditingPhone(true);
+  };
+
+  const handleCancelPhone = () => {
+    setIsEditingPhone(false);
+    setPhoneInput("");
+  };
+
+  const handleSavePhone = async () => {
+    const trimmed = phoneInput.trim();
+    const error = validatePhone(trimmed);
+    if (error) {
+      showToast(error, "error");
+      return;
+    }
+
+    setIsSavingPhone(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setIsSavingPhone(false);
+      showToast("Relace vypršela, přihlaste se znovu", "error");
+      return;
+    }
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .update({ phone: trimmed || null })
+      .eq("id", user.id);
+
+    setIsSavingPhone(false);
+
+    if (dbError) {
+      showToast("Nepodařilo se uložit telefonní číslo", "error");
+    } else {
+      setProfile((prev) => (prev ? { ...prev, phone: trimmed || null } : prev));
+      setIsEditingPhone(false);
+      showToast("Telefonní číslo bylo aktualizováno", "success");
     }
   };
 
@@ -437,6 +502,68 @@ const ProfilePage = () => {
                 </View>
               </>
             )}
+
+            <Separator />
+
+            <View className="py-4 px-6 gap-3">
+              <View className="flex-row items-center gap-3">
+                <Ionicons
+                  name="call-outline"
+                  size={24}
+                  className="text-foreground"
+                />
+                <View className="flex-1">
+                  <Text className="text-xs text-muted-foreground mb-0.5">
+                    Telefon
+                  </Text>
+                  {!isEditingPhone && (
+                    <Text className="text-base text-foreground">
+                      {profile?.phone || "Nenastaveno"}
+                    </Text>
+                  )}
+                </View>
+                {isOwnProfile && !isEditingPhone && (
+                  <Button variant="ghost" size="icon" onPress={handleEditPhone}>
+                    <Ionicons
+                      name="pencil-outline"
+                      size={18}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                )}
+              </View>
+
+              {isOwnProfile && isEditingPhone && (
+                <View className="gap-2">
+                  <Input
+                    value={phoneInput}
+                    onChangeText={setPhoneInput}
+                    placeholder="+420 123 456 789"
+                    keyboardType="phone-pad"
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={handleSavePhone}
+                  />
+                  <View className="flex-row gap-2">
+                    <Button
+                      className="flex-1"
+                      onPress={handleSavePhone}
+                      disabled={isSavingPhone}
+                    >
+                      <Text>Uložit</Text>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onPress={handleCancelPhone}
+                      disabled={isSavingPhone}
+                    >
+                      <Text>Zrušit</Text>
+                    </Button>
+                  </View>
+                </View>
+              )}
+            </View>
           </Card>
         </View>
 
