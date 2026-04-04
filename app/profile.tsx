@@ -143,6 +143,7 @@ const ProfilePage = () => {
   };
 
   const handleEditName = () => {
+    if (isEditingSurname) handleCancelSurname();
     setNameInput(profile?.name ?? "");
     setIsEditingName(true);
   };
@@ -165,10 +166,16 @@ const ProfilePage = () => {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      setIsSavingName(false);
+      showToast("Relace vypršela, přihlaste se znovu", "error");
+      return;
+    }
+
     const { error: dbError } = await supabase
       .from("profiles")
       .update({ name: trimmed })
-      .eq("id", user!.id);
+      .eq("id", user.id);
 
     setIsSavingName(false);
 
@@ -182,6 +189,7 @@ const ProfilePage = () => {
   };
 
   const handleEditSurname = () => {
+    if (isEditingName) handleCancelName();
     setSurnameInput(profile?.surname ?? "");
     setIsEditingSurname(true);
   };
@@ -204,10 +212,16 @@ const ProfilePage = () => {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      setIsSavingSurname(false);
+      showToast("Relace vypršela, přihlaste se znovu", "error");
+      return;
+    }
+
     const { error: dbError } = await supabase
       .from("profiles")
       .update({ surname: trimmed })
-      .eq("id", user!.id);
+      .eq("id", user.id);
 
     setIsSavingSurname(false);
 
