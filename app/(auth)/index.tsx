@@ -21,6 +21,8 @@ import {
   getDefaultUsedAccount,
   migrateLegacyBiometricCredentials,
 } from "@/lib/biometricAuth";
+import { configureGoogleSignIn, signInWithGoogle } from "@/lib/googleAuth";
+import { getErrorMessage } from "@/lib/errorTranslations";
 
 export default function AuthEntry() {
   const [email, setEmail] = useState("");
@@ -32,6 +34,10 @@ export default function AuthEntry() {
 
   useEffect(() => {
     checkForDefaultAccount();
+  }, []);
+
+  useEffect(() => {
+    configureGoogleSignIn();
   }, []);
 
   async function checkForDefaultAccount() {
@@ -88,6 +94,20 @@ export default function AuthEntry() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsLoading(true);
+    const result = await signInWithGoogle();
+    if (!result.success) {
+      if (!result.cancelled) {
+        showToast(
+          result.error ? getErrorMessage(result.error) : "Přihlášení přes Google selhalo.",
+          "error",
+        );
+      }
+    }
+    setIsLoading(false);
   }
 
   async function handleRegister() {
@@ -174,9 +194,8 @@ export default function AuthEntry() {
             <Button
               variant="outline"
               className="w-full"
-              onPress={() => {
-                // TODO: Implement Google OAuth
-              }}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}
             >
               <Ionicons
                 name="logo-google"
