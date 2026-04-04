@@ -1,9 +1,15 @@
+import { RecurringInterval } from "./finance";
+
 export interface Chore {
   id: string;
   flat_id: string;
   name: string;
   description: string | null;
-  interval_days: number;
+  recurring_interval_id: string;
+  interval_type: RecurringInterval;
+  interval_day: number | null;
+  interval_month: number | null;
+  custom_days: number | null;
   current_cycle_index: number;
   current_assignee_id: string | null;
   assignee_name: string | null;
