@@ -1,6 +1,5 @@
 -- Update handle_new_user to support Google OAuth metadata
--- Google classic API provides: name (full name), full_name, picture, avatar_url
--- Google One-Tap API provides: given_name, family_name, picture
+-- Google provides: name (full name), full_name, picture, avatar_url
 -- Email signup provides: name (first name), surname, avatar_url
 -- When only full_name is available, split on first space into name + surname
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
