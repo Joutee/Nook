@@ -209,7 +209,7 @@ const Chores = () => {
             </View>
           </Pressable>
 
-          {isMyTurn && !isCompleted && (
+          {isMyTurn && !isCompleted && !isFutureStart && (
             <>
               <Separator className="my-3" />
               <View className="px-4 pb-4">
@@ -237,7 +237,7 @@ const Chores = () => {
               </View>
             </>
           )}
-          {isMyTurn && isCompleted && (
+          {isMyTurn && isCompleted && !isFutureStart && (
             <>
               <Separator className="my-3" />
               <View className="px-4 pb-4">
