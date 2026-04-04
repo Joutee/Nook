@@ -186,7 +186,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
         name: name.trim(),
         description: description.trim() || null,
         recurring_interval_id: intervalData.id,
-        start_date: startDate.toISOString().split("T")[0],
+        start_date: startDate,
       })
       .select()
       .single();
@@ -252,7 +252,7 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
       .update({
         name: name.trim(),
         description: description.trim() || null,
-        start_date: startDate.toISOString().split("T")[0],
+        start_date: startDate,
       })
       .eq("id", choreId);
 
