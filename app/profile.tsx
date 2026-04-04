@@ -1,4 +1,4 @@
-import { View, ActivityIndicator, Linking } from "react-native";
+import { View, ActivityIndicator, Linking, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -515,7 +515,16 @@ const ProfilePage = () => {
 
             <Separator />
 
-            <View className="py-4 px-6 gap-3">
+            <Pressable
+              className="py-4 px-6 gap-3"
+              onPress={() => {
+                if (!isOwnProfile && profile?.phone) {
+                  const digits = profile.phone.replace(/[^\d+]/g, "");
+                  Linking.openURL(`tel:${digits}`);
+                }
+              }}
+              disabled={isOwnProfile || !profile?.phone}
+            >
               <View className="flex-row items-center gap-3">
                 <Ionicons
                   name="call-outline"
@@ -545,13 +554,13 @@ const ProfilePage = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onPress={() => {
-                      const digits = profile.phone!.replace(/[^\d+]/g, "");
-                      Linking.openURL(`tel:${digits}`);
+                    onPress={async () => {
+                      await Clipboard.setStringAsync(profile.phone!);
+                      showToast("Telefonní číslo zkopírováno do schránky", "success");
                     }}
                   >
                     <Ionicons
-                      name="call-outline"
+                      name="copy-outline"
                       size={18}
                       className="text-muted-foreground"
                     />
@@ -589,7 +598,7 @@ const ProfilePage = () => {
                   </View>
                 </View>
               )}
-            </View>
+            </Pressable>
           </Card>
         </View>
 
