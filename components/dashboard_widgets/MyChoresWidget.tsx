@@ -113,7 +113,10 @@ export const MyChoresWidget = () => {
         if (error) {
           logger.error("Error loading my chores:", error);
         } else {
-          const allChoresData = data || [];
+          const now = new Date();
+          const allChoresData = (data || []).filter(
+            (c) => !c.start_date || new Date(c.start_date) <= now,
+          );
           setTotalCount(allChoresData.length);
 
           // Seřadit: 1) nesplněné nahoře, 2) podle data nového cyklu (nejbližší nahoře)
