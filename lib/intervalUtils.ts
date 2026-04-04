@@ -80,10 +80,9 @@ export function calculateNextCycleDate(chore: Chore): Date | null {
 }
 
 /**
- * Calculate the most recent past (or today) occurrence of the interval's
+ * Calculate the nearest future (or today) occurrence of the interval's
  * matching day. Used to auto-set start_date when creating/editing chores.
- * The DB view uses start_date to compute current_cycle_index, so start_date
- * must never be in the future.
+ * If today matches, returns today. Otherwise returns the next matching date.
  */
 export function calculateIntervalStartDate(
   intervalType: RecurringInterval,
@@ -110,34 +109,37 @@ export function calculateIntervalStartDate(
     case "weekly": {
       const targetDay = intervalDay ?? 1;
       if (todayDow === targetDay) return toDateString(todayYear, todayMonth, todayDate);
-      const diff = todayDow - targetDay;
-      const daysBack = diff > 0 ? diff : diff + 7;
-      const d = new Date(Date.UTC(todayYear, todayMonth, todayDate - daysBack));
+      const diff = targetDay - todayDow;
+      const daysForward = diff > 0 ? diff : diff + 7;
+      const d = new Date(Date.UTC(todayYear, todayMonth, todayDate + daysForward));
       return toDateString(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
     }
 
     case "monthly": {
       const targetDom = intervalDay ?? 1;
       if (todayDate === targetDom) return toDateString(todayYear, todayMonth, todayDate);
-      if (todayDate > targetDom) {
-        return toDateString(todayYear, todayMonth, targetDom);
+      if (todayDate < targetDom) {
+        // Later this month (clamp to last day of month)
+        const lastDay = new Date(Date.UTC(todayYear, todayMonth + 1, 0)).getUTCDate();
+        const day = Math.min(targetDom, lastDay);
+        return toDateString(todayYear, todayMonth, day);
       }
-      // Last month
-      const prev = new Date(Date.UTC(todayYear, todayMonth - 1, 1));
-      const lastDay = new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 0)).getUTCDate();
+      // Next month
+      const next = new Date(Date.UTC(todayYear, todayMonth + 1, 1));
+      const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
       const day = Math.min(targetDom, lastDay);
-      return toDateString(prev.getUTCFullYear(), prev.getUTCMonth(), day);
+      return toDateString(next.getUTCFullYear(), next.getUTCMonth(), day);
     }
 
     case "yearly": {
       const targetDay = intervalDay ?? 1;
       const targetMonth = (intervalMonth ?? 1) - 1;
-      const thisYear = new Date(Date.UTC(todayYear, targetMonth, targetDay));
       const todayUtc = new Date(Date.UTC(todayYear, todayMonth, todayDate));
-      if (thisYear <= todayUtc) {
+      const thisYear = new Date(Date.UTC(todayYear, targetMonth, targetDay));
+      if (thisYear >= todayUtc) {
         return toDateString(todayYear, targetMonth, targetDay);
       }
-      return toDateString(todayYear - 1, targetMonth, targetDay);
+      return toDateString(todayYear + 1, targetMonth, targetDay);
     }
 
     default:
