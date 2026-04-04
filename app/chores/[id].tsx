@@ -302,7 +302,7 @@ const ChoreDetail = () => {
                 )}
               </Button>
             </View>
-            {isMyTurn && !isCompleted && (
+            {isMyTurn && !isCompleted && !isFutureStart && (
               <Button
                 variant="default"
                 className="flex-1 flex-row gap-2"
@@ -326,7 +326,7 @@ const ChoreDetail = () => {
                 )}
               </Button>
             )}
-            {isMyTurn && isCompleted && (
+            {isMyTurn && isCompleted && !isFutureStart && (
               <Button
                 variant="secondary"
                 className="flex-1 flex-row gap-2"
