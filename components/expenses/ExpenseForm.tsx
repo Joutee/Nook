@@ -19,6 +19,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
+import { RecurringIntervalPicker } from "@/components/expenses/RecurringIntervalPicker";
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { Switch } from "@/components/ui/switch";
 
@@ -578,9 +579,11 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           {/* Recurring Toggle */}
           {mode === "create" && (
             <View className="gap-3">
-              <View className="flex-row items-center gap-2">
-                <Ionicons name="repeat-outline" size={20} className="text-foreground" />
-                <Label className="flex-1">Opakovat</Label>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="repeat-outline" size={20} className="text-foreground" />
+                  <Label>Opakovat</Label>
+                </View>
                 <Switch
                   value={isRecurring}
                   onValueChange={setIsRecurring}
@@ -588,166 +591,14 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               </View>
 
               {isRecurring && (
-                <Card>
-                  <CardContent className="gap-4 pt-4">
-                    {/* Interval picker */}
-                    <View className="gap-2">
-                      <Label>Interval</Label>
-                      <View className="flex-row gap-2">
-                        {(
-                          [
-                            { value: "daily", label: "Denně" },
-                            { value: "weekly", label: "Týdně" },
-                            { value: "monthly", label: "Měsíčně" },
-                            { value: "yearly", label: "Ročně" },
-                          ] as { value: RecurringInterval; label: string }[]
-                        ).map((item) => (
-                          <Pressable
-                            key={item.value}
-                            onPress={() => setRecurringInterval(item.value)}
-                            className={`flex-1 py-2 rounded-md items-center ${
-                              recurringInterval === item.value
-                                ? "bg-primary"
-                                : "bg-muted"
-                            }`}
-                          >
-                            <Text
-                              className={`text-xs font-medium ${
-                                recurringInterval === item.value
-                                  ? "text-primary-foreground"
-                                  : "text-muted-foreground"
-                              }`}
-                            >
-                              {item.label}
-                            </Text>
-                          </Pressable>
-                        ))}
-                      </View>
-                    </View>
-
-                    {/* Weekly: day-of-week picker */}
-                    {recurringInterval === "weekly" && (
-                      <View className="gap-2">
-                        <Label>Den v týdnu</Label>
-                        <View className="flex-row gap-1">
-                          {[
-                            { value: 1, label: "Po" },
-                            { value: 2, label: "Út" },
-                            { value: 3, label: "St" },
-                            { value: 4, label: "Čt" },
-                            { value: 5, label: "Pá" },
-                            { value: 6, label: "So" },
-                            { value: 7, label: "Ne" },
-                          ].map((day) => (
-                            <Pressable
-                              key={day.value}
-                              onPress={() => setIntervalDay(day.value)}
-                              className={`flex-1 py-2 rounded-md items-center ${
-                                intervalDay === day.value
-                                  ? "bg-primary"
-                                  : "bg-muted"
-                              }`}
-                            >
-                              <Text
-                                className={`text-xs font-medium ${
-                                  intervalDay === day.value
-                                    ? "text-primary-foreground"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {day.label}
-                              </Text>
-                            </Pressable>
-                          ))}
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Monthly: day-of-month input */}
-                    {recurringInterval === "monthly" && (
-                      <View className="gap-2">
-                        <Label>Den v měsíci</Label>
-                        <View className="flex-row items-center gap-3">
-                          <Input
-                            className="w-20"
-                            keyboardType="number-pad"
-                            maxLength={2}
-                            value={String(intervalDay)}
-                            onChangeText={(text) => {
-                              const num = parseInt(text, 10);
-                              if (!isNaN(num) && num >= 1 && num <= 31) {
-                                setIntervalDay(num);
-                              } else if (text === "") {
-                                setIntervalDay(1);
-                              }
-                            }}
-                          />
-                          <Text className="text-muted-foreground">každého měsíce</Text>
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Yearly: day + month picker */}
-                    {recurringInterval === "yearly" && (
-                      <View className="gap-2">
-                        <Label>Den a měsíc</Label>
-                        <View className="flex-row items-center gap-3 mb-2">
-                          <Input
-                            className="w-20"
-                            keyboardType="number-pad"
-                            maxLength={2}
-                            value={String(intervalDay)}
-                            onChangeText={(text) => {
-                              const num = parseInt(text, 10);
-                              if (!isNaN(num) && num >= 1 && num <= 31) {
-                                setIntervalDay(num);
-                              } else if (text === "") {
-                                setIntervalDay(1);
-                              }
-                            }}
-                          />
-                          <Text className="text-muted-foreground">dne</Text>
-                        </View>
-                        <View className="flex-row flex-wrap gap-1">
-                          {[
-                            { value: 1, label: "Led" },
-                            { value: 2, label: "Úno" },
-                            { value: 3, label: "Bře" },
-                            { value: 4, label: "Dub" },
-                            { value: 5, label: "Kvě" },
-                            { value: 6, label: "Čer" },
-                            { value: 7, label: "Čvc" },
-                            { value: 8, label: "Srp" },
-                            { value: 9, label: "Zář" },
-                            { value: 10, label: "Říj" },
-                            { value: 11, label: "Lis" },
-                            { value: 12, label: "Pro" },
-                          ].map((month) => (
-                            <Pressable
-                              key={month.value}
-                              onPress={() => setIntervalMonth(month.value)}
-                              className={`px-3 py-2 rounded-md items-center ${
-                                intervalMonth === month.value
-                                  ? "bg-primary"
-                                  : "bg-muted"
-                              }`}
-                            >
-                              <Text
-                                className={`text-xs font-medium ${
-                                  intervalMonth === month.value
-                                    ? "text-primary-foreground"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {month.label}
-                              </Text>
-                            </Pressable>
-                          ))}
-                        </View>
-                      </View>
-                    )}
-                  </CardContent>
-                </Card>
+                <RecurringIntervalPicker
+                  interval={recurringInterval}
+                  onIntervalChange={setRecurringInterval}
+                  intervalDay={intervalDay}
+                  onIntervalDayChange={setIntervalDay}
+                  intervalMonth={intervalMonth}
+                  onIntervalMonthChange={setIntervalMonth}
+                />
               )}
             </View>
           )}
