@@ -97,9 +97,8 @@ export default function AuthEntry() {
     setIsLoading(true);
     try {
       const result = await signInWithGoogle();
-      if (!result.success && !result.cancelled) {
-        showToast(getErrorMessage(result.error), "error");
-      }
+      if (result.success || result.cancelled) return;
+      showToast(getErrorMessage(result.error), "error");
     } finally {
       setIsLoading(false);
     }

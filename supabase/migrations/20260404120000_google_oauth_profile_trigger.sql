@@ -11,6 +11,7 @@ CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     coalesce(new.raw_user_meta_data->>'given_name', new.raw_user_meta_data->>'name'),
     coalesce(new.raw_user_meta_data->>'surname', new.raw_user_meta_data->>'family_name'),
     coalesce(new.raw_user_meta_data->>'avatar_url', new.raw_user_meta_data->>'picture')
-  );
+  )
+  on conflict (id) do nothing;
   return new;
 end;$$;
