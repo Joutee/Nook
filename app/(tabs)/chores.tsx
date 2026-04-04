@@ -14,7 +14,7 @@ import { Chore } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
-import { formatInterval, intervalToDays } from "@/lib/intervalUtils";
+import { formatInterval, calculateNextCycleDate } from "@/lib/intervalUtils";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -124,19 +124,6 @@ const Chores = () => {
     }
     setCompletingChoreId(null);
     setChoreToUncomplete(null);
-  };
-
-  const calculateNextCycleDate = (chore: Chore): Date | null => {
-    if (!chore.start_date) return null;
-
-    const startDate = new Date(chore.start_date);
-    const days = intervalToDays(chore.interval_type, chore.custom_days);
-    const nextCycleDate = new Date(startDate);
-    nextCycleDate.setDate(
-      startDate.getDate() + (chore.current_cycle_index + 1) * days,
-    );
-
-    return nextCycleDate;
   };
 
   const formatNextCycle = (date: Date | null): string => {

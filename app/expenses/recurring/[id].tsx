@@ -281,6 +281,13 @@ const RecurringExpenseDetail = () => {
       }
 
       showToast("Opakující se výdaj byl smazán", "success");
+      // Clean up orphaned interval
+      if (recurringIntervalId) {
+        await supabase
+          .from("recurring_intervals")
+          .delete()
+          .eq("id", recurringIntervalId);
+      }
       router.back();
     } catch (error) {
       logger.error("Error deleting recurring expense:", error);

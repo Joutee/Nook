@@ -145,6 +145,13 @@ const ChoreDetail = () => {
         showToast("Nepodařilo se smazat úkol: " + error.message, "error");
       } else {
         showToast("Úkol byl smazán", "success");
+        // Clean up orphaned interval
+        if (chore?.recurring_interval_id) {
+          await supabase
+            .from("recurring_intervals")
+            .delete()
+            .eq("id", chore.recurring_interval_id);
+        }
         router.replace("/(tabs)/chores");
       }
     } catch (error: any) {
