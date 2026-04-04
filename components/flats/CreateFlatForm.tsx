@@ -17,6 +17,7 @@ import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
 import CodeModal from "@/components/keys/CodeModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import * as Crypto from "expo-crypto";
 
 interface CreateFlatFormProps {
   showBackButton?: boolean;
@@ -38,8 +39,13 @@ export default function CreateFlatForm({
   const { showToast } = useToast();
 
   const generateCode = () => {
-    // Generovat 6-místný náhodný kód
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
+    const bytes = Crypto.getRandomBytes(6);
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < 6; i++) {
+      code += chars[bytes[i] % chars.length];
+    }
+    return code;
   };
 
   const waitForModalClose = (): Promise<void> => {
@@ -81,8 +87,8 @@ export default function CreateFlatForm({
       attempts++;
     }
 
-    // Fallback - použít timestamp + random
-    return `${Date.now().toString(36).substring(-4)}${Math.random().toString(36).substring(2, 4)}`.toUpperCase();
+    // Fallback - použít kryptograficky bezpečný generátor
+    return generateCode();
   };
 
   const handleCreateFlat = async () => {
