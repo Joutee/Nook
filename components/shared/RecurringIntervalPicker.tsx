@@ -3,7 +3,7 @@ import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { RecurringInterval } from "@/types/finance";
 
 interface RecurringIntervalPickerProps {
@@ -50,13 +50,30 @@ const MONTHS = [
   { value: 12, label: "Pro" },
 ];
 
-function handleDayInput(text: string, setter: (day: number) => void) {
-  const num = parseInt(text, 10);
-  if (!isNaN(num) && num >= 1 && num <= 31) {
-    setter(num);
-  } else if (text === "") {
-    setter(1);
-  }
+function useNumberInput(value: number, onChange: (n: number) => void, min: number, max: number) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => { setText(String(value)); }, [value]);
+
+  const onChangeText = (t: string) => {
+    setText(t);
+    const num = parseInt(t, 10);
+    if (!isNaN(num) && num >= min && num <= max) {
+      onChange(num);
+    }
+  };
+
+  const onBlur = () => {
+    const num = parseInt(text, 10);
+    if (isNaN(num) || num < min) {
+      onChange(min);
+      setText(String(min));
+    } else if (num > max) {
+      onChange(max);
+      setText(String(max));
+    }
+  };
+
+  return { text, onChangeText, onBlur };
 }
 
 export const RecurringIntervalPicker: React.FC<
@@ -71,6 +88,8 @@ export const RecurringIntervalPicker: React.FC<
   customDays,
   onCustomDaysChange,
 }) => {
+  const dayInput = useNumberInput(intervalDay, onIntervalDayChange, 1, 31);
+  const customInput = useNumberInput(customDays, onCustomDaysChange, 1, 365);
   return (
     <Card>
       <CardContent className="gap-4">
@@ -141,10 +160,9 @@ export const RecurringIntervalPicker: React.FC<
                 className="w-20"
                 keyboardType="number-pad"
                 maxLength={2}
-                value={String(intervalDay)}
-                onChangeText={(text) =>
-                  handleDayInput(text, onIntervalDayChange)
-                }
+                value={dayInput.text}
+                onChangeText={dayInput.onChangeText}
+                onBlur={dayInput.onBlur}
               />
               <Text className="text-muted-foreground text-sm flex-1">
                 každého měsíce
@@ -162,10 +180,9 @@ export const RecurringIntervalPicker: React.FC<
                 className="w-20"
                 keyboardType="number-pad"
                 maxLength={2}
-                value={String(intervalDay)}
-                onChangeText={(text) =>
-                  handleDayInput(text, onIntervalDayChange)
-                }
+                value={dayInput.text}
+                onChangeText={dayInput.onChangeText}
+                onBlur={dayInput.onBlur}
               />
               <Text className="text-muted-foreground text-sm flex-1">dne</Text>
             </View>
@@ -203,15 +220,9 @@ export const RecurringIntervalPicker: React.FC<
                 className="w-20"
                 keyboardType="number-pad"
                 maxLength={3}
-                value={String(customDays)}
-                onChangeText={(text) => {
-                  const num = parseInt(text, 10);
-                  if (!isNaN(num) && num >= 1 && num <= 365) {
-                    onCustomDaysChange(num);
-                  } else if (text === "") {
-                    onCustomDaysChange(1);
-                  }
-                }}
+                value={customInput.text}
+                onChangeText={customInput.onChangeText}
+                onBlur={customInput.onBlur}
               />
               <Text className="text-muted-foreground text-sm flex-1">
                 {customDays === 1 ? "den" : "dní"}
