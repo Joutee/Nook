@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as Clipboard from "expo-clipboard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Profile {
   name: string | null;
@@ -76,6 +77,17 @@ const ProfilePage = () => {
   }, [params.id]);
 
   const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("@current_flat_id");
+      const allKeys = await AsyncStorage.getAllKeys();
+      const layoutKeys = allKeys.filter((k) => k.startsWith("@dashboard_layout_"));
+      if (layoutKeys.length > 0) {
+        await AsyncStorage.multiRemove(layoutKeys);
+      }
+    } catch {
+      // Non-critical cleanup, proceed with logout
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) showToast("Nepodařilo se odhlásit", "error");
   };

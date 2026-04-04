@@ -23,9 +23,9 @@ import {
   hasBiometricCredentials,
   authenticateWithBiometrics,
   deleteBiometricCredentials,
-  getBiometricCredentials,
   saveUsedAccount,
 } from "@/lib/biometricAuth";
+import logger from "@/lib/logger";
 
 export default function Login() {
   const params = useLocalSearchParams<{ email?: string }>();
@@ -70,7 +70,7 @@ export default function Login() {
       setCanUseBiometric(hasSaved);
       setHasTriedBiometric(false); // Reset pro nový email
     } catch (error) {
-      console.log("Error checking biometric:", error);
+      logger.log("Error checking biometric:", error);
       setCanUseBiometric(false);
       setHasTriedBiometric(false);
     }
@@ -100,7 +100,7 @@ export default function Login() {
       }
 
       showToast(getErrorMessage(error.message), "error");
-      console.log("Login error:", error);
+      logger.log("Login error:", error);
       setButtonLoading(false);
     } else {
       // Úspěšné přihlášení - uložit účet do seznamu použitých účtů
@@ -120,7 +120,7 @@ export default function Login() {
         return;
       }
 
-      // Ověřit, že email odpovídá (dodatečná kontrola)
+      // Ověřit, že email odpovídá
       if (credentials.email !== email) {
         showToast("Uložený email neodpovídá", "error");
         setButtonLoading(false);
@@ -137,8 +137,6 @@ export default function Login() {
         await deleteBiometricCredentials(email);
         setCanUseBiometric(false);
       } else {
-        // Úspěšné biometrické přihlášení - účet už je uložený,
-        // ale aktualizujeme čas posledního použití
         await saveUsedAccount(email);
         showToast("Přihlášení bylo úspěšné", "success");
       }

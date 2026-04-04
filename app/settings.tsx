@@ -14,6 +14,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import PasswordVerification from "@/components/shared/PasswordVerification";
 import {
   isBiometricAvailable,
@@ -21,6 +22,7 @@ import {
   saveBiometricCredentials,
   deleteBiometricCredentials,
 } from "@/lib/biometricAuth";
+import logger from "@/lib/logger";
 
 const Settings = () => {
   const router = useRouter();
@@ -60,7 +62,7 @@ const Settings = () => {
         setBiometricEnabled(hasSaved);
       }
     } catch (error) {
-      console.log("Error checking biometric:", error);
+      logger.log("Error checking biometric:", error);
     }
   }
 
@@ -90,6 +92,17 @@ const Settings = () => {
   };
 
   const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("@current_flat_id");
+      const allKeys = await AsyncStorage.getAllKeys();
+      const layoutKeys = allKeys.filter((k) => k.startsWith("@dashboard_layout_"));
+      if (layoutKeys.length > 0) {
+        await AsyncStorage.multiRemove(layoutKeys);
+      }
+    } catch {
+      // Non-critical cleanup, proceed with logout
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       showToast("Nepodařilo se odhlásit", "error");
@@ -123,7 +136,6 @@ const Settings = () => {
     }
 
     try {
-      // Heslo už bylo ověřené, takže můžeme přímo uložit pro biometriku
       await saveBiometricCredentials(currentEmail, password);
       setBiometricEnabled(true);
       setShowPasswordDialog(false);

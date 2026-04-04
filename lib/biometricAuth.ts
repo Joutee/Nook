@@ -1,5 +1,6 @@
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
+import logger from "@/lib/logger";
 
 const BIOMETRIC_ACCOUNTS_LIST_KEY = "biometric_accounts_list";
 const USED_ACCOUNTS_LIST_KEY = "used_accounts_list";
@@ -20,33 +21,17 @@ export interface UsedAccount {
 }
 
 /**
- * Vytvoří bezpečný klíč pro uložení emailu
+ * Vytvoří bezpečný klíč pro SecureStore z emailu.
+ * SecureStore klíče musí odpovídat [a-zA-Z0-9._-] na Androidu.
  */
-function getEmailStorageKey(email: string): string {
-  // Jednoduchý hash na základě email adresy
+function getStorageKey(prefix: string, email: string): string {
   let hash = 0;
-  const saltedEmail = `email_${email}_salt_2024`;
-  for (let i = 0; i < saltedEmail.length; i++) {
-    const char = saltedEmail.charCodeAt(i);
+  for (let i = 0; i < email.length; i++) {
+    const char = email.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
-  return `be_${Math.abs(hash).toString(36)}`;
-}
-
-/**
- * Vytvoří bezpečný klíč pro uložení hesla
- */
-function getPasswordStorageKey(email: string): string {
-  // Jednoduchý hash na základě email adresy
-  let hash = 0;
-  const saltedEmail = `password_${email}_salt_2024`;
-  for (let i = 0; i < saltedEmail.length; i++) {
-    const char = saltedEmail.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return `bp_${Math.abs(hash).toString(36)}`;
+  return `${prefix}_${Math.abs(hash).toString(36)}`;
 }
 
 /**
@@ -78,7 +63,7 @@ export async function getAllBiometricAccounts(): Promise<BiometricAccount[]> {
     if (!accountsJson) return [];
     return JSON.parse(accountsJson);
   } catch (error) {
-    console.log("Error loading biometric accounts:", error);
+    logger.log("Error loading biometric accounts:", error);
     return [];
   }
 }
@@ -91,14 +76,16 @@ async function updateBiometricAccountsList(accounts: BiometricAccount[]): Promis
 }
 
 /**
- * Uloží credentials pro biometrickou autentizaci pro konkrétní email
+ * Uloží credentials pro biometrickou autentizaci pro konkrétní email.
+ * Heslo je uloženo v SecureStore (iOS Keychain / Android Keystore),
+ * což poskytuje hardwarově šifrované úložiště.
  */
 export async function saveBiometricCredentials(
   email: string,
   password: string,
 ): Promise<void> {
-  const emailKey = getEmailStorageKey(email);
-  const passwordKey = getPasswordStorageKey(email);
+  const emailKey = getStorageKey("be", email);
+  const passwordKey = getStorageKey("bp", email);
 
   await SecureStore.setItemAsync(emailKey, email);
   await SecureStore.setItemAsync(passwordKey, password);
@@ -124,8 +111,8 @@ export async function saveBiometricCredentials(
  */
 export async function getBiometricCredentials(email: string): Promise<BiometricCredentials | null> {
   try {
-    const emailKey = getEmailStorageKey(email);
-    const passwordKey = getPasswordStorageKey(email);
+    const emailKey = getStorageKey("be", email);
+    const passwordKey = getStorageKey("bp", email);
 
     const storedEmail = await SecureStore.getItemAsync(emailKey);
     const password = await SecureStore.getItemAsync(passwordKey);
@@ -134,7 +121,6 @@ export async function getBiometricCredentials(email: string): Promise<BiometricC
 
     return { email: storedEmail, password };
   } catch (error) {
-    console.log("Error loading biometric credentials:", error);
     return null;
   }
 }
@@ -144,18 +130,22 @@ export async function getBiometricCredentials(email: string): Promise<BiometricC
  */
 export async function deleteBiometricCredentials(email: string): Promise<void> {
   try {
-    const emailKey = getEmailStorageKey(email);
-    const passwordKey = getPasswordStorageKey(email);
+    const emailKey = getStorageKey("be", email);
+    const passwordKey = getStorageKey("bp", email);
 
     await SecureStore.deleteItemAsync(emailKey);
     await SecureStore.deleteItemAsync(passwordKey);
+
+    // Také smazat případný starý refresh token klíč
+    const rtKey = getStorageKey("bio_rt", email);
+    await SecureStore.deleteItemAsync(rtKey).catch(() => {});
 
     // Odebrat z hlavního seznamu
     const accounts = await getAllBiometricAccounts();
     const filteredAccounts = accounts.filter(acc => acc.email !== email);
     await updateBiometricAccountsList(filteredAccounts);
   } catch (error) {
-    console.log("Error deleting biometric credentials:", error);
+    // Non-critical
   }
 }
 
@@ -190,7 +180,7 @@ export async function getAllUsedAccounts(): Promise<UsedAccount[]> {
     if (!accountsJson) return [];
     return JSON.parse(accountsJson);
   } catch (error) {
-    console.log("Error loading used accounts:", error);
+    logger.log("Error loading used accounts:", error);
     return [];
   }
 }
@@ -221,7 +211,7 @@ export async function saveUsedAccount(email: string): Promise<void> {
 
     await updateUsedAccountsList(accounts);
   } catch (error) {
-    console.log("Error saving used account:", error);
+    logger.log("Error saving used account:", error);
   }
 }
 
@@ -246,7 +236,7 @@ export async function removeUsedAccount(email: string): Promise<void> {
     const filteredAccounts = accounts.filter(acc => acc.email !== email);
     await updateUsedAccountsList(filteredAccounts);
   } catch (error) {
-    console.log("Error removing used account:", error);
+    logger.log("Error removing used account:", error);
   }
 }
 
@@ -289,26 +279,10 @@ export async function authenticateWithBiometrics(email: string): Promise<Biometr
  */
 export async function migrateLegacyBiometricCredentials(): Promise<void> {
   try {
-    // Zkusit načíst staré klíče
-    const legacyEmail = await SecureStore.getItemAsync("biometric_email");
-    const legacyPassword = await SecureStore.getItemAsync("biometric_password");
-
-    if (legacyEmail && legacyPassword) {
-      console.log("Migrating legacy biometric credentials...");
-
-      // Uložit do nového formátu
-      await saveBiometricCredentials(legacyEmail, legacyPassword);
-
-      // Také uložit jako použitý účet
-      await saveUsedAccount(legacyEmail);
-
-      // Smazat staré klíče
-      await SecureStore.deleteItemAsync("biometric_email");
-      await SecureStore.deleteItemAsync("biometric_password");
-
-      console.log("Legacy biometric credentials migrated successfully");
-    }
+    // Smazat staré klíče z původního formátu
+    await SecureStore.deleteItemAsync("biometric_email").catch(() => {});
+    await SecureStore.deleteItemAsync("biometric_password").catch(() => {});
   } catch (error) {
-    console.log("Error during legacy migration:", error);
+    // Non-critical
   }
 }
