@@ -14,8 +14,8 @@ CREATE EXTENSION IF NOT EXISTS "pg_cron" WITH SCHEMA "extensions";
 CREATE TABLE IF NOT EXISTS "public"."recurring_expenses" (
     "id"               uuid              DEFAULT gen_random_uuid() NOT NULL,
     "flat_id"          uuid              NOT NULL,
-    "created_by"       uuid,
-    "payer_id"         uuid,
+    "created_by"       uuid              NOT NULL,
+    "payer_id"         uuid              NOT NULL,
     "title"            text              NOT NULL,
     "amount"           numeric(10,2)     NOT NULL,
     "currency"         text              DEFAULT 'CZK',
@@ -38,11 +38,11 @@ ALTER TABLE ONLY "public"."recurring_expenses"
 
 ALTER TABLE ONLY "public"."recurring_expenses"
     ADD CONSTRAINT "recurring_expenses_created_by_fkey"
-        FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("id") ON DELETE SET NULL;
+        FOREIGN KEY ("created_by") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
 
 ALTER TABLE ONLY "public"."recurring_expenses"
     ADD CONSTRAINT "recurring_expenses_payer_id_fkey"
-        FOREIGN KEY ("payer_id") REFERENCES "public"."profiles"("id") ON DELETE SET NULL;
+        FOREIGN KEY ("payer_id") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
 
 -- ============================================================
 -- 3. recurring_expense_members table

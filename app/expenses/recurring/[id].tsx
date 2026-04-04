@@ -15,6 +15,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { MemberSelector } from "@/components/shared/MemberSelector";
 import { Member } from "@/types/members";
 import { RecurringInterval } from "@/types/finance";
+import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import logger from "@/lib/logger";
 
 const RecurringExpenseDetail = () => {
@@ -29,7 +30,7 @@ const RecurringExpenseDetail = () => {
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("0");
-  const [interval, setInterval] = useState<RecurringInterval>("monthly");
+  const [recurringInterval, setRecurringInterval] = useState<RecurringInterval>("monthly");
   const [intervalDay, setIntervalDay] = useState(1);
   const [intervalMonth, setIntervalMonth] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
@@ -119,7 +120,7 @@ const RecurringExpenseDetail = () => {
       // Set state from fetched data
       setTitle(expenseData.title);
       setAmount(String(expenseData.amount));
-      setInterval(expenseData.interval as RecurringInterval);
+      setRecurringInterval(expenseData.interval as RecurringInterval);
       setIntervalDay(expenseData.interval_day ?? 1);
       setIntervalMonth(expenseData.interval_month ?? 1);
       setIsPaused(expenseData.is_paused);
@@ -149,43 +150,6 @@ const RecurringExpenseDetail = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const calculateNextOccurrence = (): string => {
-    const today = new Date();
-    let next: Date;
-
-    switch (interval) {
-      case "daily":
-        next = new Date(today);
-        next.setDate(next.getDate() + 1);
-        break;
-      case "weekly":
-        next = new Date(today);
-        const currentDay = next.getDay() || 7; // Convert Sunday 0 to 7
-        const daysUntil =
-          intervalDay > currentDay
-            ? intervalDay - currentDay
-            : 7 - (currentDay - intervalDay);
-        next.setDate(next.getDate() + daysUntil);
-        break;
-      case "monthly":
-        next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const lastDayOfMonth = new Date(
-          next.getFullYear(),
-          next.getMonth() + 1,
-          0,
-        ).getDate();
-        next.setDate(Math.min(intervalDay, lastDayOfMonth));
-        break;
-      case "yearly":
-        next = new Date(today.getFullYear() + 1, intervalMonth - 1, 1);
-        const lastDay = new Date(next.getFullYear(), intervalMonth, 0).getDate();
-        next.setDate(Math.min(intervalDay, lastDay));
-        break;
-    }
-
-    return next.toISOString().split("T")[0];
   };
 
   const handleSave = async () => {
@@ -221,11 +185,11 @@ const RecurringExpenseDetail = () => {
           title: trimmedTitle,
           amount: amountNum,
           payer_id: selectedPayer[0].id,
-          interval,
-          interval_day: interval === "daily" ? null : intervalDay,
-          interval_month: interval === "yearly" ? intervalMonth : null,
+          interval: recurringInterval,
+          interval_day: recurringInterval === "daily" ? null : intervalDay,
+          interval_month: recurringInterval === "yearly" ? intervalMonth : null,
           is_paused: isPaused,
-          next_occurrence: calculateNextOccurrence(),
+          next_occurrence: calculateNextOccurrence(recurringInterval, intervalDay, intervalMonth),
         })
         .eq("id", id);
 
@@ -385,14 +349,14 @@ const RecurringExpenseDetail = () => {
                 ).map((item) => (
                   <Pressable
                     key={item.value}
-                    onPress={() => setInterval(item.value)}
+                    onPress={() => setRecurringInterval(item.value)}
                     className={`flex-1 py-2 rounded-md items-center ${
-                      interval === item.value ? "bg-primary" : "bg-muted"
+                      recurringInterval === item.value ? "bg-primary" : "bg-muted"
                     }`}
                   >
                     <Text
                       className={`text-xs font-medium ${
-                        interval === item.value
+                        recurringInterval === item.value
                           ? "text-primary-foreground"
                           : "text-muted-foreground"
                       }`}
@@ -405,7 +369,7 @@ const RecurringExpenseDetail = () => {
             </View>
 
             {/* Weekly: day-of-week picker */}
-            {interval === "weekly" && (
+            {recurringInterval === "weekly" && (
               <View className="gap-2">
                 <Label>Den v týdnu</Label>
                 <View className="flex-row gap-1">
@@ -441,7 +405,7 @@ const RecurringExpenseDetail = () => {
             )}
 
             {/* Monthly: day-of-month input */}
-            {interval === "monthly" && (
+            {recurringInterval === "monthly" && (
               <View className="gap-2">
                 <Label>Den v měsíci</Label>
                 <View className="flex-row items-center gap-3">
@@ -465,7 +429,7 @@ const RecurringExpenseDetail = () => {
             )}
 
             {/* Yearly: day + month picker */}
-            {interval === "yearly" && (
+            {recurringInterval === "yearly" && (
               <View className="gap-2">
                 <Label>Den a měsíc</Label>
                 <View className="flex-row items-center gap-3 mb-2">

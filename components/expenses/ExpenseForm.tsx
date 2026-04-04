@@ -19,6 +19,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
 import { RecurringInterval } from "@/types/finance";
+import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { Switch } from "@/components/ui/switch";
 
 interface ExpenseFormProps {
@@ -194,47 +195,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       setIsDeleting(false);
       setShowDeleteDialog(false);
     }
-  };
-
-  const calculateNextOccurrence = (): string => {
-    const today = new Date();
-    let next: Date;
-
-    switch (recurringInterval) {
-      case "daily":
-        next = new Date(today);
-        next.setDate(next.getDate() + 1);
-        break;
-      case "weekly":
-        next = new Date(today);
-        const currentDay = next.getDay() || 7; // Convert Sunday 0 to 7
-        const daysUntil =
-          intervalDay > currentDay
-            ? intervalDay - currentDay
-            : 7 - (currentDay - intervalDay);
-        next.setDate(next.getDate() + daysUntil);
-        break;
-      case "monthly":
-        next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const lastDayOfMonth = new Date(
-          next.getFullYear(),
-          next.getMonth() + 1,
-          0,
-        ).getDate();
-        next.setDate(Math.min(intervalDay, lastDayOfMonth));
-        break;
-      case "yearly":
-        next = new Date(today.getFullYear() + 1, intervalMonth - 1, 1);
-        const lastDay = new Date(
-          next.getFullYear(),
-          intervalMonth,
-          0,
-        ).getDate();
-        next.setDate(Math.min(intervalDay, lastDay));
-        break;
-    }
-
-    return next.toISOString().split("T")[0];
   };
 
   const handleSave = async () => {
@@ -464,7 +424,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               interval: recurringInterval,
               interval_day: recurringInterval === "daily" ? null : intervalDay,
               interval_month: recurringInterval === "yearly" ? intervalMonth : null,
-              next_occurrence: calculateNextOccurrence(),
+              next_occurrence: calculateNextOccurrence(recurringInterval, intervalDay, intervalMonth),
             })
             .select()
             .single();
