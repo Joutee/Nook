@@ -13,10 +13,12 @@ import { KeyWithAssignee } from "@/types/keys";
 import { Member } from "@/types/members";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
+import { useFlatHasLandlord } from "@/hooks/useFlatHasLandlord";
 
 const Keys = () => {
   const { currentFlat, userRole } = useFlatContext();
   const { showToast } = useToast();
+  const { hasLandlord, isLoading: landlordLoading } = useFlatHasLandlord();
 
   const [keys, setKeys] = useState<KeyWithAssignee[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -243,6 +245,30 @@ const Keys = () => {
     return (
       <View className="flex-1 justify-center items-center bg-background">
         <ActivityIndicator size="large" className="text-primary" />
+      </View>
+    );
+  }
+
+  if (!landlordLoading && !hasLandlord) {
+    return (
+      <View className="flex-1 bg-background">
+        <ScrollView className="flex-1 p-4">
+          <Text className="text-3xl font-bold text-foreground mb-4">Klíče</Text>
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="key-outline"
+              size={64}
+              className="text-muted-foreground"
+            />
+            <Text className="text-lg font-semibold text-foreground mt-4 text-center">
+              V domácnosti chybí pronajímatel
+            </Text>
+            <Text className="text-sm text-muted-foreground mt-2 text-center px-8">
+              Pro používání této funkce musí být v domácnosti alespoň jeden
+              pronajímatel.
+            </Text>
+          </View>
+        </ScrollView>
       </View>
     );
   }
