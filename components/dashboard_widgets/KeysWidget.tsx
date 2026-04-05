@@ -9,11 +9,13 @@ import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { KeyWithAssignee } from "@/types/keys";
 import logger from "@/lib/logger";
+import { useFlatHasLandlord } from "@/hooks/useFlatHasLandlord";
 
 export const KeysWidget = () => {
   const [keys, setKeys] = useState<KeyWithAssignee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentFlat, userRole } = useFlatContext();
+  const { hasLandlord } = useFlatHasLandlord();
 
   useEffect(() => {
     loadKeys();
@@ -69,6 +71,8 @@ export const KeysWidget = () => {
 
   const keysPath =
     userRole === "pronajimatel" ? "/(tabs)/keys" : "/(tabs)/more";
+
+  if (!hasLandlord) return null;
 
   return (
     <Pressable onPress={() => router.push(keysPath as any)}>
