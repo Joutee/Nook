@@ -18,28 +18,32 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
   const senderName = [message.sender.name, message.sender.surname].filter(Boolean).join(" ");
 
   return (
-    <View className={`flex-row ${isOwn ? "justify-end" : "justify-start"} ${showSender ? "mt-3" : "mt-0.5"}`}>
-      {!isOwn && (
-        <View className="w-8 mr-2 justify-end">
-          {showSender && (
-            <Avatar
-              name={senderName}
-              imageUrl={message.sender.avatar_url}
-              size="lg"
-            />
-          )}
-        </View>
+    <View className={`${showSender ? "mt-3" : "mt-0.5"}`}>
+      {/* Sender name */}
+      {showSender && !isOwn && (
+        <Text className="text-xs text-muted-foreground mb-1 ml-11">
+          {senderName}
+        </Text>
       )}
 
-      <View style={{ maxWidth: "75%", flexShrink: 1 }} className={isOwn ? "items-end" : "items-start"}>
-        {showSender && !isOwn && (
-          <Text className="text-xs text-muted-foreground mb-1 ml-1">
-            {senderName}
-          </Text>
+      <View className={`flex-row ${isOwn ? "justify-end" : "justify-start"}`}>
+        {/* Avatar */}
+        {!isOwn && (
+          <View className="w-8 mr-2 justify-end">
+            {showSender && (
+              <Avatar
+                name={senderName}
+                imageUrl={message.sender.avatar_url}
+                size="lg"
+              />
+            )}
+          </View>
         )}
 
+        {/* Bubble */}
         <View
-          className={`shrink px-3 py-2 rounded-2xl ${
+          style={{ maxWidth: "75%" }}
+          className={`px-3 py-2 rounded-2xl ${
             isOwn
               ? "bg-primary rounded-br-sm"
               : "bg-muted rounded-bl-sm"
@@ -49,11 +53,12 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
             {message.content}
           </Text>
         </View>
-
-        <Text className="text-[10px] text-muted-foreground mt-0.5 mx-1">
-          {formatTime(message.created_at)}
-        </Text>
       </View>
+
+      {/* Timestamp */}
+      <Text className={`text-[10px] text-muted-foreground mt-0.5 ${isOwn ? "text-right mr-1" : "ml-11"}`}>
+        {formatTime(message.created_at)}
+      </Text>
     </View>
   );
 }
