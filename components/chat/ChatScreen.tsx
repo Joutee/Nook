@@ -98,11 +98,6 @@ export function ChatScreen() {
         },
         async (payload) => {
           const newMsg = payload.new as any;
-          // Skip if we already have this message (optimistic update)
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return prev;
-          });
 
           // Fetch the full message with sender join
           const { data } = await supabase
