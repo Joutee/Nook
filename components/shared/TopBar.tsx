@@ -16,6 +16,7 @@ const TopBar = () => {
   const { currentFlat, flats } = useFlatContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -23,10 +24,13 @@ const TopBar = () => {
       if (!user) return;
       supabase
         .from("profiles")
-        .select("name")
+        .select("name, avatar_url")
         .eq("id", user.id)
         .single()
-        .then(({ data }) => setUserName(data?.name ?? null));
+        .then(({ data }) => {
+          setUserName(data?.name ?? null);
+          setUserAvatarUrl(data?.avatar_url ?? null);
+        });
     });
   }, []);
 
@@ -94,7 +98,7 @@ const TopBar = () => {
             />
           </TouchableOpacity>
           <TouchableOpacity className="p-1" onPress={handleProfilePress}>
-            <Avatar name={userName} size="md" />
+            <Avatar name={userName} imageUrl={userAvatarUrl} size="md" />
           </TouchableOpacity>
         </View>
       </View>
