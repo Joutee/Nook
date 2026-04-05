@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
@@ -16,6 +16,8 @@ function formatTime(dateStr: string): string {
 
 export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps) {
   const senderName = [message.sender.name, message.sender.surname].filter(Boolean).join(" ");
+  const { width } = useWindowDimensions();
+  const maxBubbleWidth = width * 0.75;
 
   return (
     <View className={`${showSender ? "mt-3" : "mt-0.5"}`}>
@@ -42,7 +44,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
 
         {/* Bubble */}
         <View
-          style={{ maxWidth: "75%" }}
+          style={{ maxWidth: maxBubbleWidth }}
           className={`px-3 py-2 rounded-2xl ${
             isOwn
               ? "bg-primary rounded-br-sm"
