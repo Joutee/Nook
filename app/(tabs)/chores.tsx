@@ -171,7 +171,7 @@ const Chores = () => {
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2 flex-1">
-                <Avatar name={item.assignee_name} size="lg" />
+                <Avatar name={item.assignee_name} imageUrl={item.assignee_avatar} size="lg" />
                 <Text className="text-sm text-foreground font-medium flex-1">
                   {item.assignee_name && item.assignee_surname
                     ? `${item.assignee_name} ${item.assignee_surname}`

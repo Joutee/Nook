@@ -50,7 +50,7 @@ export const MemberOrderList: React.FC<MemberOrderListProps> = ({
             <Text className="text-base font-semibold text-primary w-6">
               {index + 1}.
             </Text>
-            <Avatar name={member.name} size="lg" />
+            <Avatar name={member.name} imageUrl={member.avatar_url} size="lg" />
             <Text className="text-sm text-foreground font-medium flex-1">
               {member.name} {member.surname}
             </Text>

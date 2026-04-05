@@ -38,6 +38,7 @@ export const ChoreHistoryItem: React.FC<ChoreHistoryItemProps> = ({ item }) => {
             <View className="flex-row items-center">
               <Avatar
                 name={item.expected_profile_name}
+                imageUrl={item.expected_profile_avatar}
                 size="md"
                 className="mr-2"
               />
