@@ -76,3 +76,25 @@ export interface RecurringExpenseWithDetails extends RecurringExpense {
     custom_days: number | null;
   };
 }
+
+export interface ExpenseItem {
+  id?: string;
+  name: string;
+  price: number;
+  position: number;
+  memberIds: string[];
+}
+
+export interface ReceiptParseResponse {
+  store_name: string | null;
+  date: string | null;
+  items: Array<{
+    name: string;
+    price: number;
+  }>;
+  total: number;
+}
+
+export interface ReceiptParseError {
+  error: string;
+}
