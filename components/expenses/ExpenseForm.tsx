@@ -86,6 +86,13 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const { showToast } = useToast();
 
   useEffect(() => {
+    if (splitMode === "items") {
+      const total = expenseItems.reduce((sum, item) => sum + item.price, 0);
+      setAmount(total.toFixed(2));
+    }
+  }, [expenseItems, splitMode]);
+
+  useEffect(() => {
     loadFlatMembers();
     getCurrentUser();
   }, [currentFlat]);
