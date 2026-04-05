@@ -31,7 +31,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
         </View>
       )}
 
-      <View className={`max-w-[75%] shrink ${isOwn ? "items-end" : "items-start"}`}>
+      <View style={{ maxWidth: "75%", flexShrink: 1 }} className={isOwn ? "items-end" : "items-start"}>
         {showSender && !isOwn && (
           <Text className="text-xs text-muted-foreground mb-1 ml-1">
             {senderName}
