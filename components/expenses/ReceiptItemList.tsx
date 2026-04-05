@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Ionicons } from "@expo/vector-icons";
 import { MemberSelectorSheet } from "@/components/shared/MemberSelectorSheet";
