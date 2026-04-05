@@ -177,7 +177,7 @@ const Keys = () => {
           <View className="flex-row items-center gap-1.5 mt-1.5">
             {item.assignee ? (
               <>
-                <Avatar name={item.assignee.name} size="sm" />
+                <Avatar name={item.assignee.name} imageUrl={item.assignee.avatar_url} size="sm" />
                 <Text className="text-xs flex-1 text-foreground">
                   {item.assignee.name} {item.assignee.surname}
                 </Text>

@@ -61,7 +61,7 @@ export const MemberSelectorSheet: React.FC<MemberSelectorSheetProps> = ({
               onPress={() => handleMemberPress(member)}
             >
               <View className="flex-row items-center flex-1">
-                <Avatar name={member.name} size="lg" className="mr-2" />
+                <Avatar name={member.name} imageUrl={member.avatar_url} size="lg" className="mr-2" />
                 <Text className="text-base text-foreground font-medium flex-1">
                   {member.surname
                     ? `${member.name} ${member.surname}`

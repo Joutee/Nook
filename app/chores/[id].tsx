@@ -217,6 +217,7 @@ const ChoreDetail = () => {
               <View className="flex-row items-center rounded-lg h-7 ">
                 <Avatar
                   name={chore.assignee_name}
+                  imageUrl={chore.assignee_avatar}
                   size="base"
                   className="mr-3"
                 />

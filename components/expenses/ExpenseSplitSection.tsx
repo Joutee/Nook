@@ -227,7 +227,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
                   onPress={() => handleMemberToggle(member)}
                 >
                   <View className="flex-row items-center gap-3">
-                    <Avatar name={member.name} size="xl" />
+                    <Avatar name={member.name} imageUrl={member.avatar_url} size="xl" />
                     <Text className="text-base text-foreground font-medium flex-1">
                       {member.name} {member.surname}
                     </Text>
