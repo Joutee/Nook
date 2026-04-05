@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { Member } from "@/types/members";
+import { ExpenseItem } from "@/types/finance";
 import logger from "@/lib/logger";
 
 const EditExpense = () => {
@@ -18,13 +19,7 @@ const EditExpense = () => {
     selectedMembers: Member[];
     manualAmounts: Record<string, string>;
     splitMode: "auto" | "manual" | "items";
-    expenseItems?: Array<{
-      id: string;
-      name: string;
-      price: number;
-      position: number;
-      memberIds: string[];
-    }>;
+    expenseItems?: ExpenseItem[];
   } | null>(null);
   const { showToast } = useToast();
 

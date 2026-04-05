@@ -150,8 +150,8 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
     }
   };
 
-  const handleSplitModeChange = (isManual: boolean) => {
-    if (isManual) {
+  const handleSplitModeChange = (newMode: "auto" | "manual" | "items") => {
+    if (newMode === "manual") {
       // Switching to manual - pre-fill with equal amounts
       const amountNum = parseFloat(amount);
       if (!isNaN(amountNum) && selectedMembers.length > 0) {
@@ -162,7 +162,6 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
 
         selectedMembers.forEach((member, index) => {
           if (index === selectedMembers.length - 1) {
-            // Last member gets the remainder to ensure exact total
             const remainder = amountNum - total;
             newManualAmounts[member.id] = remainder.toFixed(2);
           } else {
@@ -172,13 +171,13 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
         });
         onManualAmountsChange(newManualAmounts);
       }
-      // Reset touched members when switching to manual
       onTouchedMembersChange(new Set());
       onSplitModeChange("manual");
-    } else {
-      // Switching to auto
+    } else if (newMode === "auto") {
       onTouchedMembersChange(new Set());
       onSplitModeChange("auto");
+    } else {
+      onSplitModeChange("items");
     }
   };
 
@@ -190,15 +189,7 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
           {(["auto", "manual", "items"] as const).map((mode) => (
             <Pressable
               key={mode}
-              onPress={() => {
-                if (mode === "manual") {
-                  handleSplitModeChange(true);
-                } else if (mode === "auto") {
-                  handleSplitModeChange(false);
-                } else {
-                  onSplitModeChange("items");
-                }
-              }}
+              onPress={() => handleSplitModeChange(mode)}
               className={`flex-1 py-2 rounded-md items-center ${
                 splitMode === mode ? "bg-primary" : ""
               }`}

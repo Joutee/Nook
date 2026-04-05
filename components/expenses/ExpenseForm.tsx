@@ -283,6 +283,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     const shares: Record<string, number> = {};
 
     for (const item of items) {
+      if (item.memberIds.length === 0) continue;
       const perPerson = item.price / item.memberIds.length;
       for (const memberId of item.memberIds) {
         shares[memberId] = (shares[memberId] || 0) + perPerson;
@@ -295,6 +296,88 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     }
 
     return shares;
+  };
+
+  const saveExpenseItems = async (expenseId: string) => {
+    const itemRows = expenseItems.map((item) => ({
+      expense_id: expenseId,
+      name: item.name,
+      price: item.price,
+      position: item.position,
+    }));
+
+    const { data: savedItems, error: itemsError } = await supabase
+      .from("expense_items")
+      .insert(itemRows)
+      .select();
+
+    if (itemsError) {
+      logger.error("Error inserting expense items:", itemsError);
+      showToast("Výdaj uložen, ale nepodařilo se uložit položky", "error");
+      return;
+    }
+
+    if (savedItems) {
+      const memberRows = savedItems.flatMap(
+        (savedItem: any, idx: number) =>
+          expenseItems[idx].memberIds.map((profileId) => ({
+            item_id: savedItem.id,
+            profile_id: profileId,
+          })),
+      );
+
+      if (memberRows.length > 0) {
+        const { error: membersError } = await supabase
+          .from("expense_item_members")
+          .insert(memberRows);
+
+        if (membersError) {
+          logger.error("Error inserting item members:", membersError);
+        }
+      }
+    }
+  };
+
+  const buildExpenseShares = (
+    expenseId: string,
+    finalAmount: number,
+  ): Array<{
+    expense_id: string;
+    profile_id: string;
+    owed_amount: number;
+  }> => {
+    if (splitMode === "items") {
+      const sharesMap = computeSharesFromItems(expenseItems);
+      return Object.entries(sharesMap).map(([profileId, amount]) => ({
+        expense_id: expenseId,
+        profile_id: profileId,
+        owed_amount: amount,
+      }));
+    }
+
+    return selectedMembers.map((member, index) => {
+      let shareAmount: number;
+
+      if (splitMode === "auto") {
+        if (index === selectedMembers.length - 1) {
+          const baseShare =
+            Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+          const totalBeforeLast = baseShare * (selectedMembers.length - 1);
+          shareAmount = finalAmount - totalBeforeLast;
+        } else {
+          shareAmount =
+            Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+        }
+      } else {
+        shareAmount = parseFloat(manualAmounts[member.id] || "0");
+      }
+
+      return {
+        expense_id: expenseId,
+        profile_id: member.id,
+        owed_amount: shareAmount,
+      };
+    });
   };
 
   const handleSave = async () => {
@@ -435,55 +518,12 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
 
         // Delete existing expense items (CASCADE deletes item_members too)
-        if (splitMode === "items") {
-          await supabase
-            .from("expense_items")
-            .delete()
-            .eq("expense_id", expenseId);
-        }
+        await supabase
+          .from("expense_items")
+          .delete()
+          .eq("expense_id", expenseId);
 
-        // Build expense shares
-        let expenseShares: Array<{
-          expense_id: string;
-          profile_id: string;
-          owed_amount: number;
-        }>;
-
-        if (splitMode === "items") {
-          const sharesMap = computeSharesFromItems(expenseItems);
-          expenseShares = Object.entries(sharesMap).map(
-            ([profileId, amount]) => ({
-              expense_id: expenseId!,
-              profile_id: profileId,
-              owed_amount: amount,
-            }),
-          );
-        } else {
-          expenseShares = selectedMembers.map((member, index) => {
-            let shareAmount: number;
-
-            if (splitMode === "auto") {
-              if (index === selectedMembers.length - 1) {
-                const baseShare =
-                  Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-                const totalBeforeLast =
-                  baseShare * (selectedMembers.length - 1);
-                shareAmount = finalAmount - totalBeforeLast;
-              } else {
-                shareAmount =
-                  Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-              }
-            } else {
-              shareAmount = parseFloat(manualAmounts[member.id] || "0");
-            }
-
-            return {
-              expense_id: expenseId!,
-              profile_id: member.id,
-              owed_amount: shareAmount,
-            };
-          });
-        }
+        const expenseShares = buildExpenseShares(expenseId!, finalAmount);
 
         const { error: sharesError } = await supabase
           .from("expense_shares")
@@ -498,36 +538,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Save expense items if in items mode
         if (splitMode === "items") {
-          const itemRows = expenseItems.map((item) => ({
-            expense_id: expenseId!,
-            name: item.name,
-            price: item.price,
-            position: item.position,
-          }));
-
-          const { data: savedItems, error: itemsError } = await supabase
-            .from("expense_items")
-            .insert(itemRows)
-            .select();
-
-          if (itemsError) {
-            logger.error("Error inserting expense items:", itemsError);
-          } else if (savedItems) {
-            const memberRows = savedItems.flatMap((savedItem: any, idx: number) =>
-              expenseItems[idx].memberIds.map((profileId) => ({
-                item_id: savedItem.id,
-                profile_id: profileId,
-              })),
-            );
-
-            if (memberRows.length > 0) {
-              await supabase
-                .from("expense_item_members")
-                .insert(memberRows);
-            }
-          }
+          await saveExpenseItems(expenseId!);
         }
 
         showToast("Výdaj byl úspěšně upraven", "success");
@@ -555,48 +567,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Build and insert expense shares
-        let expenseShares: Array<{
-          expense_id: string;
-          profile_id: string;
-          owed_amount: number;
-        }>;
-
-        if (splitMode === "items") {
-          const sharesMap = computeSharesFromItems(expenseItems);
-          expenseShares = Object.entries(sharesMap).map(
-            ([profileId, amount]) => ({
-              expense_id: expenseData.id,
-              profile_id: profileId,
-              owed_amount: amount,
-            }),
-          );
-        } else {
-          expenseShares = selectedMembers.map((member, index) => {
-            let shareAmount: number;
-
-            if (splitMode === "auto") {
-              if (index === selectedMembers.length - 1) {
-                const baseShare =
-                  Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-                const totalBeforeLast =
-                  baseShare * (selectedMembers.length - 1);
-                shareAmount = finalAmount - totalBeforeLast;
-              } else {
-                shareAmount =
-                  Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-              }
-            } else {
-              shareAmount = parseFloat(manualAmounts[member.id] || "0");
-            }
-
-            return {
-              expense_id: expenseData.id,
-              profile_id: member.id,
-              owed_amount: shareAmount,
-            };
-          });
-        }
+        const expenseShares = buildExpenseShares(expenseData.id, finalAmount);
 
         const { error: sharesError } = await supabase
           .from("expense_shares")
@@ -611,44 +582,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Save expense items if in items mode
         if (splitMode === "items") {
-          const itemRows = expenseItems.map((item) => ({
-            expense_id: expenseData.id,
-            name: item.name,
-            price: item.price,
-            position: item.position,
-          }));
-
-          const { data: savedItems, error: itemsError } = await supabase
-            .from("expense_items")
-            .insert(itemRows)
-            .select();
-
-          if (itemsError) {
-            logger.error("Error inserting expense items:", itemsError);
-            showToast(
-              "Výdaj uložen, ale nepodařilo se uložit položky",
-              "error",
-            );
-          } else if (savedItems) {
-            const memberRows = savedItems.flatMap((savedItem: any, idx: number) =>
-              expenseItems[idx].memberIds.map((profileId) => ({
-                item_id: savedItem.id,
-                profile_id: profileId,
-              })),
-            );
-
-            if (memberRows.length > 0) {
-              const { error: membersError } = await supabase
-                .from("expense_item_members")
-                .insert(memberRows);
-
-              if (membersError) {
-                logger.error("Error inserting item members:", membersError);
-              }
-            }
-          }
+          await saveExpenseItems(expenseData.id);
         }
 
         showToast("Výdaj byl úspěšně přidán", "success");
