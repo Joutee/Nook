@@ -1,4 +1,4 @@
-import { View, useWindowDimensions } from "react-native";
+import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
@@ -16,8 +16,6 @@ function formatTime(dateStr: string): string {
 
 export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps) {
   const senderName = [message.sender.name, message.sender.surname].filter(Boolean).join(" ");
-  const { width } = useWindowDimensions();
-  const maxBubbleWidth = width * 0.75;
 
   return (
     <View className={`${showSender ? "mt-3" : "mt-0.5"}`}>
@@ -28,7 +26,11 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
         </Text>
       )}
 
-      <View className={`flex-row ${isOwn ? "justify-end" : "justify-start"}`}>
+      {/* Row: constrain width via padding on the opposite side */}
+      <View
+        className={`flex-row ${isOwn ? "justify-end" : "justify-start"}`}
+        style={isOwn ? { paddingLeft: "25%" } : { paddingRight: "25%" }}
+      >
         {/* Avatar */}
         {!isOwn && (
           <View className="w-8 mr-2 justify-end">
@@ -42,10 +44,9 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
           </View>
         )}
 
-        {/* Bubble */}
+        {/* Bubble — no maxWidth, constrained by row padding instead */}
         <View
-          style={{ maxWidth: maxBubbleWidth }}
-          className={`pl-3 pr-4 py-2 rounded-2xl ${
+          className={`px-3 py-2 rounded-2xl ${
             isOwn
               ? "bg-primary rounded-br-sm"
               : "bg-muted rounded-bl-sm"
