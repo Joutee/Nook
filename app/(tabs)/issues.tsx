@@ -6,6 +6,7 @@ import { router, useFocusEffect } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
+import { useFlatHasLandlord } from "@/hooks/useFlatHasLandlord";
 import { Ionicons } from "@expo/vector-icons";
 import { Issue } from "@/types/issues";
 import { getStatusColor, getStatusText } from "@/lib/issueUtils";
@@ -14,6 +15,7 @@ import logger from "@/lib/logger";
 const Issues = () => {
   const { currentFlat, userRole } = useFlatContext();
   const { showToast } = useToast();
+  const { hasLandlord, isLoading: landlordLoading } = useFlatHasLandlord();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -114,6 +116,30 @@ const Issues = () => {
     return (
       <View className="flex-1 justify-center items-center bg-background">
         <ActivityIndicator size="large" className="text-primary" />
+      </View>
+    );
+  }
+
+  if (!landlordLoading && !hasLandlord) {
+    return (
+      <View className="flex-1 bg-background">
+        <ScrollView className="flex-1 p-4">
+          <Text className="text-3xl font-bold text-foreground mb-4">Závady</Text>
+          <View className="flex-1 justify-center items-center py-20">
+            <Ionicons
+              name="warning-outline"
+              size={64}
+              className="text-muted-foreground"
+            />
+            <Text className="text-lg font-semibold text-foreground mt-4 text-center">
+              V domácnosti chybí pronajímatel
+            </Text>
+            <Text className="text-sm text-muted-foreground mt-2 text-center px-8">
+              Pro používání této funkce musí být v domácnosti alespoň jeden
+              pronajímatel.
+            </Text>
+          </View>
+        </ScrollView>
       </View>
     );
   }
