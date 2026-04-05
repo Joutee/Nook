@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { Member } from "@/types/members";
+import { ExpenseItem } from "@/types/finance";
 import logger from "@/lib/logger";
 
 const EditExpense = () => {
@@ -17,7 +18,8 @@ const EditExpense = () => {
     selectedPayer: Member[];
     selectedMembers: Member[];
     manualAmounts: Record<string, string>;
-    splitMode: "auto" | "manual";
+    splitMode: "auto" | "manual" | "items";
+    expenseItems?: ExpenseItem[];
   } | null>(null);
   const { showToast } = useToast();
 
@@ -75,6 +77,23 @@ const EditExpense = () => {
         return;
       }
 
+      // Load expense items (if any)
+      const { data: itemsData } = await supabase
+        .from("expense_items")
+        .select(`
+          id,
+          name,
+          price,
+          position,
+          expense_item_members (
+            profile_id
+          )
+        `)
+        .eq("expense_id", id)
+        .order("position");
+
+      const hasItems = itemsData && itemsData.length > 0;
+
       // Process the data
       const selectedMembers: Member[] = sharesData
         .map((share: any) => share.profile)
@@ -86,10 +105,30 @@ const EditExpense = () => {
         manualAmounts[share.profile_id] = share.owed_amount.toFixed(2);
       });
 
-      // Determine split mode - if amounts are equal (within 0.01), it's auto mode
-      const amounts = Object.values(manualAmounts).map((a) => parseFloat(a));
-      const avgAmount = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-      const isAutoSplit = amounts.every((a) => Math.abs(a - avgAmount) < 0.5); // Allow small variations for rounding
+      // Determine split mode
+      let detectedSplitMode: "auto" | "manual" | "items" = "auto";
+
+      if (hasItems) {
+        detectedSplitMode = "items";
+      } else {
+        const amounts = Object.values(manualAmounts).map((a) => parseFloat(a));
+        const avgAmount =
+          amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
+        const isAutoSplit = amounts.every((a) => Math.abs(a - avgAmount) < 0.5);
+        detectedSplitMode = isAutoSplit ? "auto" : "manual";
+      }
+
+      const loadedItems = hasItems
+        ? itemsData!.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            price: Number(item.price),
+            position: item.position,
+            memberIds: item.expense_item_members.map(
+              (m: any) => m.profile_id,
+            ),
+          }))
+        : [];
 
       setInitialData({
         title: expenseData.title,
@@ -104,7 +143,8 @@ const EditExpense = () => {
         ],
         selectedMembers,
         manualAmounts,
-        splitMode: isAutoSplit ? "auto" : "manual",
+        splitMode: detectedSplitMode,
+        expenseItems: loadedItems,
       });
     } catch (error) {
       logger.error("Error:", error);

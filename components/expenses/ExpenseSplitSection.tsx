@@ -3,24 +3,26 @@ import { View, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Member } from "@/types/members";
+import { ExpenseItem } from "@/types/finance";
 import { formatCurrency } from "@/lib/financeUtils";
 import { Avatar } from "@/components/ui/avatar";
+import { ReceiptItemList } from "@/components/expenses/ReceiptItemList";
 
 interface ExpenseSplitSectionProps {
   flatMembers: Member[];
   selectedMembers: Member[];
   onSelectedMembersChange: (members: Member[]) => void;
-  splitMode: "auto" | "manual";
-  onSplitModeChange: (mode: "auto" | "manual") => void;
+  splitMode: "auto" | "manual" | "items";
+  onSplitModeChange: (mode: "auto" | "manual" | "items") => void;
   amount: string;
   onAmountChange: (amount: string) => void;
   manualAmounts: Record<string, string>;
   onManualAmountsChange: (amounts: Record<string, string>) => void;
   touchedMembers: Set<string>;
   onTouchedMembersChange: (touched: Set<string>) => void;
+  expenseItems: ExpenseItem[];
+  onExpenseItemsChange: (items: ExpenseItem[]) => void;
 }
 
 export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
@@ -35,6 +37,8 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
   onManualAmountsChange,
   touchedMembers,
   onTouchedMembersChange,
+  expenseItems,
+  onExpenseItemsChange,
 }) => {
   const calculateTotalManualAmount = () => {
     return Object.values(manualAmounts).reduce((sum, val) => {
@@ -146,8 +150,8 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
     }
   };
 
-  const handleSplitModeChange = (isManual: boolean) => {
-    if (isManual) {
+  const handleSplitModeChange = (newMode: "auto" | "manual" | "items") => {
+    if (newMode === "manual") {
       // Switching to manual - pre-fill with equal amounts
       const amountNum = parseFloat(amount);
       if (!isNaN(amountNum) && selectedMembers.length > 0) {
@@ -158,7 +162,6 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
 
         selectedMembers.forEach((member, index) => {
           if (index === selectedMembers.length - 1) {
-            // Last member gets the remainder to ensure exact total
             const remainder = amountNum - total;
             newManualAmounts[member.id] = remainder.toFixed(2);
           } else {
@@ -168,112 +171,143 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
         });
         onManualAmountsChange(newManualAmounts);
       }
-      // Reset touched members when switching to manual
       onTouchedMembersChange(new Set());
       onSplitModeChange("manual");
-    } else {
-      // Switching to auto
+    } else if (newMode === "auto") {
       onTouchedMembersChange(new Set());
       onSplitModeChange("auto");
+    } else {
+      onSplitModeChange("items");
     }
   };
 
   return (
     <View>
-      <View className="flex-row justify-between items-center mb-2">
-        <Label>Rozdělit mezi</Label>
-        <Switch
-          value={splitMode === "manual"}
-          onValueChange={handleSplitModeChange}
-          leftIcon="calculator-outline"
-          rightIcon="hand-right-outline"
-        />
+      <View className="mb-2">
+        <Label className="mb-2">Rozdělit mezi</Label>
+        <View className="flex-row bg-secondary rounded-lg p-0.5">
+          {(["auto", "manual", "items"] as const).map((mode) => (
+            <Pressable
+              key={mode}
+              onPress={() => handleSplitModeChange(mode)}
+              className={`flex-1 py-2 rounded-md items-center ${
+                splitMode === mode ? "bg-primary" : ""
+              }`}
+            >
+              <Text
+                className={`text-xs font-medium ${
+                  splitMode === mode
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {mode === "auto"
+                  ? "Rovným dílem"
+                  : mode === "manual"
+                    ? "Ručně"
+                    : "Položky"}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
-      {flatMembers.map((member) => {
-        const isSelected = selectedMembers.some((m) => m.id === member.id);
-        return (
-          <View key={member.id} className="mb-2">
-            <Pressable
-              className={`flex-row justify-between items-center py-3 px-3 rounded-lg ${
-                isSelected
-                  ? "bg-secondary border border-primary"
-                  : "bg-secondary"
-              }`}
-              onPress={() => handleMemberToggle(member)}
-            >
-              <View className="flex-row items-center gap-3">
-                <Avatar name={member.name} size="xl" />
-                <Text className="text-base text-foreground font-medium flex-1">
-                  {member.name} {member.surname}
-                </Text>
-              </View>
-            </Pressable>
-
-            {splitMode === "manual" && isSelected && (
-              <View className="mt-2 relative">
-                <Input
-                  placeholder="0.00"
-                  value={manualAmounts[member.id] || ""}
-                  onChangeText={(value) =>
-                    handleManualAmountChange(member.id, value)
-                  }
-                  onBlur={() => handleAmountBlur(member.id)}
-                  keyboardType="decimal-pad"
-                  className={
-                    touchedMembers.has(member.id)
-                      ? "border-2 border-primary"
-                      : ""
-                  }
-                />
-                {!touchedMembers.has(member.id) && (
-                  <View className="absolute -top-2 right-2 bg-primary px-1.5 py-0.5 rounded">
-                    <Text className="text-primary-foreground text-[10px] font-semibold">
-                      Auto
+      {splitMode !== "items" && (
+        <>
+          {flatMembers.map((member) => {
+            const isSelected = selectedMembers.some((m) => m.id === member.id);
+            return (
+              <View key={member.id} className="mb-2">
+                <Pressable
+                  className={`flex-row justify-between items-center py-3 px-3 rounded-lg ${
+                    isSelected
+                      ? "bg-secondary border border-primary"
+                      : "bg-secondary"
+                  }`}
+                  onPress={() => handleMemberToggle(member)}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <Avatar name={member.name} size="xl" />
+                    <Text className="text-base text-foreground font-medium flex-1">
+                      {member.name} {member.surname}
                     </Text>
+                  </View>
+                </Pressable>
+
+                {splitMode === "manual" && isSelected && (
+                  <View className="mt-2 relative">
+                    <Input
+                      placeholder="0.00"
+                      value={manualAmounts[member.id] || ""}
+                      onChangeText={(value) =>
+                        handleManualAmountChange(member.id, value)
+                      }
+                      onBlur={() => handleAmountBlur(member.id)}
+                      keyboardType="decimal-pad"
+                      className={
+                        touchedMembers.has(member.id)
+                          ? "border-2 border-primary"
+                          : ""
+                      }
+                    />
+                    {!touchedMembers.has(member.id) && (
+                      <View className="absolute -top-2 right-2 bg-primary px-1.5 py-0.5 rounded">
+                        <Text className="text-primary-foreground text-[10px] font-semibold">
+                          Auto
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
-            )}
-          </View>
-        );
-      })}
+            );
+          })}
 
-      {splitMode === "auto" && selectedMembers.length > 0 && (
-        <Text className="text-sm text-muted-foreground mb-3 font-light italic">
-          {(() => {
-            const amountNum = parseFloat(amount) || 0;
-            if (selectedMembers.length === 1) {
-              return `Jediný člen zaplatí: ${formatCurrency(amountNum)}`;
-            }
-            const baseShare =
-              Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
-            const lastShare =
-              amountNum - baseShare * (selectedMembers.length - 1);
-            if (Math.abs(baseShare - lastShare) < 0.01) {
-              return `Každý zaplatí: ${formatCurrency(baseShare)}`;
-            }
-            return `Každý zaplatí: ${formatCurrency(baseShare)} (poslední ${formatCurrency(lastShare)})`;
-          })()}
-        </Text>
+          {splitMode === "auto" && selectedMembers.length > 0 && (
+            <Text className="text-sm text-muted-foreground mb-3 font-light italic">
+              {(() => {
+                const amountNum = parseFloat(amount) || 0;
+                if (selectedMembers.length === 1) {
+                  return `Jediný člen zaplatí: ${formatCurrency(amountNum)}`;
+                }
+                const baseShare =
+                  Math.ceil((amountNum / selectedMembers.length) * 100) / 100;
+                const lastShare =
+                  amountNum - baseShare * (selectedMembers.length - 1);
+                if (Math.abs(baseShare - lastShare) < 0.01) {
+                  return `Každý zaplatí: ${formatCurrency(baseShare)}`;
+                }
+                return `Každý zaplatí: ${formatCurrency(baseShare)} (poslední ${formatCurrency(lastShare)})`;
+              })()}
+            </Text>
+          )}
+
+          {splitMode === "manual" && (
+            <Text className="text-sm text-muted-foreground mb-3 font-light italic">
+              {(() => {
+                const total = calculateTotalManualAmount();
+                const targetAmount = parseFloat(amount) || 0;
+                const untouchedCount = selectedMembers.filter(
+                  (m) => !touchedMembers.has(m.id),
+                ).length;
+
+                if (untouchedCount > 0) {
+                  return `Součet: ${formatCurrency(total)} / ${formatCurrency(targetAmount)}`;
+                } else {
+                  return `Součet: ${formatCurrency(total)} (celková částka se upravuje automaticky)`;
+                }
+              })()}
+            </Text>
+          )}
+        </>
       )}
 
-      {splitMode === "manual" && (
-        <Text className="text-sm text-muted-foreground mb-3 font-light italic">
-          {(() => {
-            const total = calculateTotalManualAmount();
-            const targetAmount = parseFloat(amount) || 0;
-            const untouchedCount = selectedMembers.filter(
-              (m) => !touchedMembers.has(m.id),
-            ).length;
-
-            if (untouchedCount > 0) {
-              return `Součet: ${formatCurrency(total)} / ${formatCurrency(targetAmount)}`;
-            } else {
-              return `Součet: ${formatCurrency(total)} (celková částka se upravuje automaticky)`;
-            }
-          })()}
-        </Text>
+      {splitMode === "items" && (
+        <ReceiptItemList
+          items={expenseItems}
+          onItemsChange={onExpenseItemsChange}
+          flatMembers={flatMembers}
+        />
       )}
     </View>
   );

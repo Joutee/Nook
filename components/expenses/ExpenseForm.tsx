@@ -23,6 +23,10 @@ import { RecurringIntervalPicker } from "@/components/shared/RecurringIntervalPi
 import { calculateNextOccurrence } from "@/lib/recurringUtils";
 import { Switch } from "@/components/ui/switch";
 import { buildIntervalPayload } from "@/lib/intervalUtils";
+import BottomSheet from "@/components/shared/BottomSheet";
+import { takePhoto, pickGalleryPhoto } from "@/lib/fileService";
+import { parseReceipt } from "@/lib/receiptService";
+import { ExpenseItem } from "@/types/finance";
 
 interface ExpenseFormProps {
   mode: "create" | "edit";
@@ -34,7 +38,8 @@ interface ExpenseFormProps {
     selectedPayer: Member[];
     selectedMembers: Member[];
     manualAmounts: Record<string, string>;
-    splitMode: "auto" | "manual";
+    splitMode: "auto" | "manual" | "items";
+    expenseItems?: ExpenseItem[];
   };
 }
 
@@ -58,7 +63,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [splitMode, setSplitMode] = useState<"auto" | "manual">(
+  const [splitMode, setSplitMode] = useState<"auto" | "manual" | "items">(
     initialData?.splitMode || "auto",
   );
   const [manualAmounts, setManualAmounts] = useState<Record<string, string>>(
@@ -71,6 +76,11 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [intervalDay, setIntervalDay] = useState(new Date().getDate());
   const [intervalMonth, setIntervalMonth] = useState(new Date().getMonth() + 1);
   const [customDays, setCustomDays] = useState(1);
+  const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>(
+    initialData?.expenseItems || [],
+  );
+  const [showReceiptSheet, setShowReceiptSheet] = useState(false);
+  const [isParsingReceipt, setIsParsingReceipt] = useState(false);
 
   const { currentFlat } = useFlatContext();
   const { showToast } = useToast();
@@ -171,6 +181,72 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     });
   };
 
+  const handleReceiptImage = async (imageUri: string | null) => {
+    if (!imageUri) return;
+
+    setShowReceiptSheet(false);
+    setIsParsingReceipt(true);
+
+    try {
+      const result = await parseReceipt(imageUri);
+
+      // Pre-fill form fields
+      setTitle(result.store_name || "Účtenka");
+      if (result.date) {
+        const parsedDate = new Date(result.date);
+        if (!isNaN(parsedDate.getTime())) {
+          setDate(parsedDate);
+        }
+      }
+      setAmount(result.total.toFixed(2));
+
+      // Check if item sum matches receipt total
+      const itemSum = result.items.reduce((sum, item) => sum + item.price, 0);
+      if (Math.abs(itemSum - result.total) > 1) {
+        showToast(
+          `Součet položek (${itemSum.toFixed(2)} Kč) se liší od celkové částky na účtence (${result.total.toFixed(2)} Kč)`,
+          "info",
+        );
+      }
+
+      // Convert to ExpenseItems with all members assigned by default
+      const allMemberIds = flatMembers.map((m) => m.id);
+      const items: ExpenseItem[] = result.items.map((item, index) => ({
+        name: item.name,
+        price: item.price,
+        position: index,
+        memberIds: [...allMemberIds],
+      }));
+
+      setExpenseItems(items);
+      setSplitMode("items");
+
+      showToast("Účtenka byla načtena", "success");
+    } catch (error: any) {
+      showToast(error.message || "Nepodařilo se zpracovat účtenku", "error");
+    } finally {
+      setIsParsingReceipt(false);
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const uri = await takePhoto();
+      handleReceiptImage(uri);
+    } catch (error: any) {
+      showToast(error.message, "error");
+    }
+  };
+
+  const handlePickGallery = async () => {
+    try {
+      const uri = await pickGalleryPhoto();
+      handleReceiptImage(uri);
+    } catch (error: any) {
+      showToast(error.message, "error");
+    }
+  };
+
   const handleDelete = () => {
     setShowDeleteDialog(true);
   };
@@ -201,6 +277,109 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     }
   };
 
+  const computeSharesFromItems = (
+    items: ExpenseItem[],
+  ): Record<string, number> => {
+    const shares: Record<string, number> = {};
+
+    for (const item of items) {
+      if (item.memberIds.length === 0) continue;
+      const perPerson = item.price / item.memberIds.length;
+      for (const memberId of item.memberIds) {
+        shares[memberId] = (shares[memberId] || 0) + perPerson;
+      }
+    }
+
+    // Round to 2 decimal places
+    for (const key of Object.keys(shares)) {
+      shares[key] = Math.round(shares[key] * 100) / 100;
+    }
+
+    return shares;
+  };
+
+  const saveExpenseItems = async (expenseId: string) => {
+    const itemRows = expenseItems.map((item) => ({
+      expense_id: expenseId,
+      name: item.name,
+      price: item.price,
+      position: item.position,
+    }));
+
+    const { data: savedItems, error: itemsError } = await supabase
+      .from("expense_items")
+      .insert(itemRows)
+      .select();
+
+    if (itemsError) {
+      logger.error("Error inserting expense items:", itemsError);
+      showToast("Výdaj uložen, ale nepodařilo se uložit položky", "error");
+      return;
+    }
+
+    if (savedItems) {
+      const memberRows = savedItems.flatMap(
+        (savedItem: any, idx: number) =>
+          expenseItems[idx].memberIds.map((profileId) => ({
+            item_id: savedItem.id,
+            profile_id: profileId,
+          })),
+      );
+
+      if (memberRows.length > 0) {
+        const { error: membersError } = await supabase
+          .from("expense_item_members")
+          .insert(memberRows);
+
+        if (membersError) {
+          logger.error("Error inserting item members:", membersError);
+        }
+      }
+    }
+  };
+
+  const buildExpenseShares = (
+    expenseId: string,
+    finalAmount: number,
+  ): Array<{
+    expense_id: string;
+    profile_id: string;
+    owed_amount: number;
+  }> => {
+    if (splitMode === "items") {
+      const sharesMap = computeSharesFromItems(expenseItems);
+      return Object.entries(sharesMap).map(([profileId, amount]) => ({
+        expense_id: expenseId,
+        profile_id: profileId,
+        owed_amount: amount,
+      }));
+    }
+
+    return selectedMembers.map((member, index) => {
+      let shareAmount: number;
+
+      if (splitMode === "auto") {
+        if (index === selectedMembers.length - 1) {
+          const baseShare =
+            Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+          const totalBeforeLast = baseShare * (selectedMembers.length - 1);
+          shareAmount = finalAmount - totalBeforeLast;
+        } else {
+          shareAmount =
+            Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
+        }
+      } else {
+        shareAmount = parseFloat(manualAmounts[member.id] || "0");
+      }
+
+      return {
+        expense_id: expenseId,
+        profile_id: member.id,
+        owed_amount: shareAmount,
+      };
+    });
+  };
+
   const handleSave = async () => {
     // Validation
     const finalTitle = title.trim() || `Výdaj z ${formatDate(date)}`;
@@ -216,7 +395,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       return;
     }
 
-    if (selectedMembers.length === 0) {
+    if (splitMode !== "items" && selectedMembers.length === 0) {
       showToast("Vyberte alespoň jednoho člena pro rozdělení", "error");
       return;
     }
@@ -258,6 +437,28 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       }
     }
 
+    // Validate items mode
+    if (splitMode === "items") {
+      if (expenseItems.length === 0) {
+        showToast("Přidejte alespoň jednu položku", "error");
+        return;
+      }
+      for (const item of expenseItems) {
+        if (!item.name.trim()) {
+          showToast("Vyplňte název u všech položek", "error");
+          return;
+        }
+        if (item.price <= 0) {
+          showToast(`Zadejte platnou cenu pro "${item.name}"`, "error");
+          return;
+        }
+        if (item.memberIds.length === 0) {
+          showToast(`Přiřaďte členy k položce "${item.name}"`, "error");
+          return;
+        }
+      }
+    }
+
     if (!currentFlat?.id) {
       showToast("Není vybrán žádný byt", "error");
       return;
@@ -274,6 +475,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         if (untouchedCount === 0) {
           finalAmount = calculateTotalManualAmount();
         }
+      }
+
+      if (splitMode === "items") {
+        finalAmount = expenseItems.reduce((sum, item) => sum + item.price, 0);
       }
 
       if (mode === "edit" && expenseId) {
@@ -312,30 +517,13 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Insert new shares
-        const expenseShares = selectedMembers.map((member, index) => {
-          let shareAmount: number;
+        // Delete existing expense items (CASCADE deletes item_members too)
+        await supabase
+          .from("expense_items")
+          .delete()
+          .eq("expense_id", expenseId);
 
-          if (splitMode === "auto") {
-            if (index === selectedMembers.length - 1) {
-              const baseShare =
-                Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-              const totalBeforeLast = baseShare * (selectedMembers.length - 1);
-              shareAmount = finalAmount - totalBeforeLast;
-            } else {
-              shareAmount =
-                Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-            }
-          } else {
-            shareAmount = parseFloat(manualAmounts[member.id] || "0");
-          }
-
-          return {
-            expense_id: expenseId,
-            profile_id: member.id,
-            owed_amount: shareAmount,
-          };
-        });
+        const expenseShares = buildExpenseShares(expenseId!, finalAmount);
 
         const { error: sharesError } = await supabase
           .from("expense_shares")
@@ -348,6 +536,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             "error",
           );
           return;
+        }
+
+        if (splitMode === "items") {
+          await saveExpenseItems(expenseId!);
         }
 
         showToast("Výdaj byl úspěšně upraven", "success");
@@ -375,30 +567,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Insert expense shares for each selected member
-        const expenseShares = selectedMembers.map((member, index) => {
-          let shareAmount: number;
-
-          if (splitMode === "auto") {
-            if (index === selectedMembers.length - 1) {
-              const baseShare =
-                Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-              const totalBeforeLast = baseShare * (selectedMembers.length - 1);
-              shareAmount = finalAmount - totalBeforeLast;
-            } else {
-              shareAmount =
-                Math.ceil((finalAmount / selectedMembers.length) * 100) / 100;
-            }
-          } else {
-            shareAmount = parseFloat(manualAmounts[member.id] || "0");
-          }
-
-          return {
-            expense_id: expenseData.id,
-            profile_id: member.id,
-            owed_amount: shareAmount,
-          };
-        });
+        const expenseShares = buildExpenseShares(expenseData.id, finalAmount);
 
         const { error: sharesError } = await supabase
           .from("expense_shares")
@@ -411,6 +580,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             "error",
           );
           return;
+        }
+
+        if (splitMode === "items") {
+          await saveExpenseItems(expenseData.id);
         }
 
         showToast("Výdaj byl úspěšně přidán", "success");
@@ -501,6 +674,37 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       extraScrollHeight={20}
       className="flex-1"
     >
+      {/* Receipt Upload */}
+      <Card className="mb-4 mx-4">
+        <CardContent>
+          <Pressable
+            onPress={() => setShowReceiptSheet(true)}
+            disabled={isParsingReceipt}
+            className="flex-row items-center justify-center gap-2 py-3 border border-dashed border-primary rounded-lg"
+          >
+            {isParsingReceipt ? (
+              <>
+                <ActivityIndicator size="small" className="text-primary" />
+                <Text className="text-primary font-medium">
+                  Zpracovávám účtenku...
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons
+                  name="receipt-outline"
+                  size={20}
+                  className="text-primary"
+                />
+                <Text className="text-primary font-medium">
+                  Nahrát účtenku
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </CardContent>
+      </Card>
+
       {/* Title Input */}
       <Card className="mb-4 mx-4">
         <CardContent className="gap-4">
@@ -618,6 +822,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             onManualAmountsChange={setManualAmounts}
             touchedMembers={touchedMembers}
             onTouchedMembersChange={setTouchedMembers}
+            expenseItems={expenseItems}
+            onExpenseItemsChange={setExpenseItems}
           />
 
           {/* Bottom Actions */}
@@ -674,6 +880,41 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         onAction={confirmDelete}
         destructive
       />
+      {/* Receipt Source BottomSheet */}
+      <BottomSheet
+        visible={showReceiptSheet}
+        onClose={() => setShowReceiptSheet(false)}
+        title="Nahrát účtenku"
+      >
+        <View className="px-4 gap-3 pb-4">
+          <Pressable
+            onPress={handleTakePhoto}
+            className="flex-row items-center gap-4 py-4 px-4 bg-secondary rounded-lg"
+          >
+            <Ionicons
+              name="camera-outline"
+              size={24}
+              className="text-foreground"
+            />
+            <Text className="text-base text-foreground font-medium">
+              Vyfotit
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={handlePickGallery}
+            className="flex-row items-center gap-4 py-4 px-4 bg-secondary rounded-lg"
+          >
+            <Ionicons
+              name="image-outline"
+              size={24}
+              className="text-foreground"
+            />
+            <Text className="text-base text-foreground font-medium">
+              Vybrat z galerie
+            </Text>
+          </Pressable>
+        </View>
+      </BottomSheet>
     </KeyboardAwareScrollView>
   );
 };
