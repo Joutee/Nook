@@ -85,6 +85,12 @@ export interface ExpenseItem {
   memberIds: string[];
 }
 
+export interface ExpenseItemMember {
+  id: string;
+  item_id: string;
+  profile_id: string;
+}
+
 export interface ReceiptParseResponse {
   store_name: string | null;
   date: string | null;

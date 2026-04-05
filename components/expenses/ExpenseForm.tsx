@@ -191,9 +191,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       const result = await parseReceipt(imageUri);
 
       // Pre-fill form fields
-      if (result.store_name) {
-        setTitle(result.store_name);
-      }
+      setTitle(result.store_name || "Účtenka");
       if (result.date) {
         const parsedDate = new Date(result.date);
         if (!isNaN(parsedDate.getTime())) {
@@ -201,6 +199,15 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
       }
       setAmount(result.total.toFixed(2));
+
+      // Check if item sum matches receipt total
+      const itemSum = result.items.reduce((sum, item) => sum + item.price, 0);
+      if (Math.abs(itemSum - result.total) > 1) {
+        showToast(
+          `Součet položek (${itemSum.toFixed(2)} Kč) se liší od celkové částky na účtence (${result.total.toFixed(2)} Kč)`,
+          "info",
+        );
+      }
 
       // Convert to ExpenseItems with all members assigned by default
       const allMemberIds = flatMembers.map((m) => m.id);
@@ -305,7 +312,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       return;
     }
 
-    if (selectedMembers.length === 0) {
+    if (splitMode !== "items" && selectedMembers.length === 0) {
       showToast("Vyberte alespoň jednoho člena pro rozdělení", "error");
       return;
     }
