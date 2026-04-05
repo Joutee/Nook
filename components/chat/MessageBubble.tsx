@@ -57,7 +57,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
             textBreakStrategy="simple"
             includeFontPadding={false}
           >
-            {message.content}
+            {message.content + '\u200B'.repeat(20)}
           </Text>
         </View>
       </View>
