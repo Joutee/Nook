@@ -42,7 +42,7 @@ export function Avatar({
 
   return (
     <View
-      className={`${container} rounded-full bg-primary items-center justify-center overflow-hidden border-2 border-primary${className ? ` ${className}` : ""}`}
+      className={`${container} rounded-full bg-primary items-center justify-center overflow-hidden${className ? ` ${className}` : ""}`}
     >
       {showImage ? (
         <Image
