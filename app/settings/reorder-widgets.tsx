@@ -40,7 +40,7 @@ export default function ReorderWidgets() {
 
   useEffect(() => {
     loadCurrentLayout();
-  }, [userRole]); // Reload when role changes
+  }, [userRole, hasLandlord]);
 
   const loadCurrentLayout = async () => {
     if (!currentFlat?.id) {
