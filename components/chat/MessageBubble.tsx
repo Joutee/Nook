@@ -1,4 +1,4 @@
-import { View, Text as RNText } from "react-native";
+import { View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
@@ -52,15 +52,12 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
               : "bg-muted rounded-bl-sm"
           }`}
         >
-          <RNText
-            style={{
-              fontSize: 16,
-              color: isOwn ? "hsl(0, 0%, 98%)" : "hsl(0, 0%, 3.9%)",
-            }}
+          <Text
+            className={isOwn ? "text-primary-foreground" : "text-foreground"}
             textBreakStrategy="simple"
           >
             {message.content + '\u200A'}
-          </RNText>
+          </Text>
         </View>
       </View>
 
