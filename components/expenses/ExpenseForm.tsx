@@ -1,4 +1,4 @@
-import { View, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { View, ActivityIndicator, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -737,27 +737,32 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               maxLength={10}
               editable={
                 !(
-                  splitMode === "manual" &&
-                  selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                    .length === 0 &&
-                  selectedMembers.length > 0
+                  splitMode === "items" ||
+                  (splitMode === "manual" &&
+                    selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                      .length === 0 &&
+                    selectedMembers.length > 0)
                 )
               }
               className={
-                splitMode === "manual" &&
-                selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                  .length === 0 &&
-                selectedMembers.length > 0
+                splitMode === "items" ||
+                (splitMode === "manual" &&
+                  selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                    .length === 0 &&
+                  selectedMembers.length > 0)
                   ? "bg-muted"
                   : ""
               }
             />
-            {splitMode === "manual" &&
-              selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                .length === 0 &&
-              selectedMembers.length > 0 && (
+            {(splitMode === "items" ||
+              (splitMode === "manual" &&
+                selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                  .length === 0 &&
+                selectedMembers.length > 0)) && (
                 <Text className="text-xs text-muted-foreground italic">
-                  Částka se počítá automaticky z rozdělení
+                  {splitMode === "items"
+                    ? "Částka se počítá automaticky z položek"
+                    : "Částka se počítá automaticky z rozdělení"}
                 </Text>
               )}
           </View>
