@@ -39,7 +39,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
         )}
 
         <View
-          className={`px-3 py-2 rounded-2xl ${
+          className={`shrink px-3 py-2 rounded-2xl ${
             isOwn
               ? "bg-primary rounded-br-sm"
               : "bg-muted rounded-bl-sm"
