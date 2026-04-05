@@ -93,44 +93,43 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Klíče - pouze pro pronajímatele */}
+      {/* Chat - pouze pro pronajímatele jako tab */}
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Chat",
+          href: !isTenant ? "/(tabs)/chat" : null,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "chatbubbles" : "chatbubbles-outline"}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* Klíče - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="keys"
         options={{
-          title: "Klíče",
-          href: !isTenant ? "/(tabs)/keys" : null,
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "key" : "key-outline"}
-              size={22}
-              color={color}
-            />
-          ),
+          href: null,
         }}
       />
 
-      {/* Dokumenty - pouze pro pronajímatele */}
+      {/* Dokumenty - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="documents"
         options={{
-          title: "Dokumenty",
-          href: !isTenant ? "/(tabs)/documents" : null,
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "document" : "document-outline"}
-              size={22}
-              color={color}
-            />
-          ),
+          href: null,
         }}
       />
 
-      {/* Další - pouze pro nájemníky */}
+      {/* Další - zobrazit všem */}
       <Tabs.Screen
         name="more"
         options={{
           title: "Další",
-          href: isTenant ? "/(tabs)/more" : null,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "menu" : "menu-outline"}
