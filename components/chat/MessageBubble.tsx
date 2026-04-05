@@ -51,7 +51,10 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
               : "bg-muted rounded-bl-sm"
           }`}
         >
-          <Text className={isOwn ? "text-primary-foreground" : "text-foreground"}>
+          <Text
+            className={isOwn ? "text-primary-foreground" : "text-foreground"}
+            textBreakStrategy="simple"
+          >
             {message.content}
           </Text>
         </View>
