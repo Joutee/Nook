@@ -59,7 +59,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
             }}
             textBreakStrategy="simple"
           >
-            {message.content}
+            {message.content + '\u200A'}
           </RNText>
         </View>
       </View>
