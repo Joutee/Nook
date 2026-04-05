@@ -199,30 +199,30 @@ const DocumentAdd = () => {
               ) : (
                 <View className="flex-row justify-between">
                   <Pressable
-                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center justify-center bg-secondary"
+                    className="w-[48%] rounded-lg p-3 items-center justify-center bg-secondary active:opacity-60"
                     onPress={handleTakePhoto}
                     disabled={isUploading}
                   >
                     <Ionicons
-                      name="camera"
-                      size={32}
-                      className="text-primary"
+                      name="camera-outline"
+                      size={22}
+                      className="text-foreground"
                     />
-                    <Text className="mt-2 text-base text-primary text-center font-semibold">
+                    <Text className="mt-1 text-sm text-foreground text-center font-semibold">
                       Vyfotit
                     </Text>
                   </Pressable>
                   <Pressable
-                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center justify-center bg-secondary"
+                    className="w-[48%] rounded-lg p-3 items-center justify-center bg-secondary active:opacity-60"
                     onPress={handlePickFile}
                     disabled={isUploading}
                   >
                     <Ionicons
-                      name="document"
-                      size={32}
-                      className="text-primary"
+                      name="document-outline"
+                      size={22}
+                      className="text-foreground"
                     />
-                    <Text className="mt-2 text-base text-primary text-center font-semibold">
+                    <Text className="mt-1 text-sm text-foreground text-center font-semibold">
                       Vybrat soubor
                     </Text>
                   </Pressable>
