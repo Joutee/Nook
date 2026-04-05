@@ -12,6 +12,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/contexts/ToastContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { takePhoto, pickGalleryPhoto } from "@/lib/fileService";
+import { uploadAvatar, deleteAvatar } from "@/lib/avatarService";
+import BottomSheet from "@/components/shared/BottomSheet";
 import * as Clipboard from "expo-clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -21,6 +24,7 @@ interface Profile {
   email: string | null;
   iban: string | null;
   phone: string | null;
+  avatar_url: string | null;
 }
 
 function formatPhone(raw: string): string {
@@ -77,6 +81,10 @@ const ProfilePage = () => {
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarSheetVisible, setAvatarSheetVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -96,9 +104,13 @@ const ProfilePage = () => {
       const ownProfile = user?.id === profileId;
       setIsOwnProfile(ownProfile);
 
+      if (ownProfile && user?.id) {
+        setCurrentUserId(user.id);
+      }
+
       const { data } = await supabase
         .from("profiles")
-        .select("name, surname, iban, phone")
+        .select("name, surname, iban, phone, avatar_url")
         .eq("id", profileId)
         .single();
 
@@ -108,7 +120,9 @@ const ProfilePage = () => {
         email: ownProfile ? (user?.email ?? null) : null,
         iban: data?.iban ?? null,
         phone: data?.phone ?? null,
+        avatar_url: data?.avatar_url ?? null,
       });
+      setAvatarUrl(data?.avatar_url ?? null);
       setIsLoading(false);
     };
 
@@ -325,6 +339,45 @@ const ProfilePage = () => {
     }
   };
 
+  const handleAvatarAction = async (action: "camera" | "gallery" | "delete") => {
+    setAvatarSheetVisible(false);
+
+    if (!currentUserId) return;
+
+    if (action === "delete") {
+      setIsUploadingAvatar(true);
+      try {
+        await deleteAvatar(currentUserId, avatarUrl);
+        setAvatarUrl(null);
+        showToast("Profilová fotka byla smazána", "success");
+      } catch {
+        showToast("Nepodařilo se smazat fotku", "error");
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+      return;
+    }
+
+    try {
+      const uri =
+        action === "camera" ? await takePhoto() : await pickGalleryPhoto();
+
+      if (!uri) return;
+
+      setIsUploadingAvatar(true);
+      const publicUrl = await uploadAvatar(currentUserId, uri);
+      setAvatarUrl(publicUrl);
+      showToast("Profilová fotka byla aktualizována", "success");
+    } catch (error: any) {
+      showToast(
+        error?.message || "Nepodařilo se nahrát fotku",
+        "error",
+      );
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
@@ -349,7 +402,36 @@ const ProfilePage = () => {
       <View className="p-5 gap-6">
         {/* Avatar + jméno */}
         <View className="items-center gap-3 pt-4">
-          <Avatar name={profile?.name} size="xl" />
+          {isOwnProfile ? (
+            <Pressable
+              onPress={() => setAvatarSheetVisible(true)}
+              disabled={isUploadingAvatar}
+            >
+              <View>
+                {isUploadingAvatar ? (
+                  <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
+                    <ActivityIndicator size="small" color="white" />
+                  </View>
+                ) : (
+                  <Avatar
+                    name={profile?.name}
+                    imageUrl={avatarUrl}
+                    size="xl"
+                  />
+                )}
+                {/* Camera badge */}
+                <View className="absolute -bottom-0.5 -right-0.5 bg-primary rounded-full w-4 h-4 items-center justify-center border-2 border-background">
+                  <Ionicons name="camera" size={9} color="white" />
+                </View>
+              </View>
+            </Pressable>
+          ) : (
+            <Avatar
+              name={profile?.name}
+              imageUrl={avatarUrl}
+              size="xl"
+            />
+          )}
           <Text className="text-xl font-bold text-foreground">
             {displayName}
           </Text>
@@ -719,6 +801,56 @@ const ProfilePage = () => {
         onAction={handleLogout}
         destructive
       />
+
+      <BottomSheet
+        visible={avatarSheetVisible}
+        onClose={() => setAvatarSheetVisible(false)}
+        title="Profilová fotka"
+      >
+        <View className="px-5 pb-4 gap-1">
+          <Pressable
+            className="flex-row items-center gap-4 py-3.5 px-2"
+            onPress={() => handleAvatarAction("camera")}
+          >
+            <Ionicons
+              name="camera-outline"
+              size={24}
+              className="text-foreground"
+            />
+            <Text className="text-base text-foreground">Vyfotit</Text>
+          </Pressable>
+
+          <Pressable
+            className="flex-row items-center gap-4 py-3.5 px-2"
+            onPress={() => handleAvatarAction("gallery")}
+          >
+            <Ionicons
+              name="image-outline"
+              size={24}
+              className="text-foreground"
+            />
+            <Text className="text-base text-foreground">
+              Vybrat z galerie
+            </Text>
+          </Pressable>
+
+          {avatarUrl && (
+            <Pressable
+              className="flex-row items-center gap-4 py-3.5 px-2"
+              onPress={() => handleAvatarAction("delete")}
+            >
+              <Ionicons
+                name="trash-outline"
+                size={24}
+                className="text-destructive"
+              />
+              <Text className="text-base text-destructive">
+                Smazat fotku
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      </BottomSheet>
     </KeyboardAwareScrollView>
   );
 };
