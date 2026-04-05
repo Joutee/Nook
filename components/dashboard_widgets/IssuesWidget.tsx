@@ -10,11 +10,13 @@ import { Issue } from "@/types/issues";
 import { getStatusColor, getStatusText } from "@/lib/issueUtils";
 import { Separator } from "@/components/ui/separator";
 import logger from "@/lib/logger";
+import { useFlatHasLandlord } from "@/hooks/useFlatHasLandlord";
 
 export const IssuesWidget = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentFlat } = useFlatContext();
+  const { hasLandlord } = useFlatHasLandlord();
 
   useEffect(() => {
     // 1. Prvotní načtení dat
@@ -79,6 +81,8 @@ export const IssuesWidget = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString("cs-CZ");
   };
+
+  if (!hasLandlord) return null;
 
   return (
     <Pressable onPress={() => router.push("/(tabs)/issues")}>
