@@ -1,15 +1,32 @@
-import { Tabs } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useColorScheme } from "nativewind";
 import { THEME } from "@/lib/theme";
+import { useCallback, useState } from "react";
+import { getUnreadCount } from "@/lib/chatService";
+import { supabase } from "@/lib/supabase";
 
 export default function TabLayout() {
-  const { userRole } = useFlatContext();
+  const { userRole, currentFlat } = useFlatContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
   const isTenant = userRole !== "pronajimatel";
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!currentFlat?.id) return;
+      const load = async () => {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return;
+        const count = await getUnreadCount(currentFlat.id, data.user.id);
+        setUnreadCount(count);
+      };
+      load();
+    }, [currentFlat?.id])
+  );
 
   return (
     <Tabs
@@ -99,6 +116,7 @@ export default function TabLayout() {
         options={{
           title: "Chat",
           href: !isTenant ? "/(tabs)/chat" : null,
+          tabBarBadge: !isTenant && unreadCount > 0 ? unreadCount : undefined,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "chatbubbles" : "chatbubbles-outline"}
@@ -130,6 +148,7 @@ export default function TabLayout() {
         name="more"
         options={{
           title: "Další",
+          tabBarBadge: isTenant && unreadCount > 0 ? unreadCount : undefined,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "menu" : "menu-outline"}
