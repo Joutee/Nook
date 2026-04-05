@@ -409,19 +409,19 @@ const ProfilePage = () => {
             >
               <View>
                 {isUploadingAvatar ? (
-                  <View className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-                    <ActivityIndicator size="small" color="white" />
+                  <View className="w-20 h-20 rounded-full bg-primary items-center justify-center">
+                    <ActivityIndicator size="large" color="white" />
                   </View>
                 ) : (
                   <Avatar
                     name={profile?.name}
                     imageUrl={avatarUrl}
-                    size="xl"
+                    size="2xl"
                   />
                 )}
                 {/* Camera badge */}
-                <View className="absolute -bottom-0.5 -right-0.5 bg-primary rounded-full w-4 h-4 items-center justify-center border-2 border-background">
-                  <Ionicons name="camera" size={9} color="white" />
+                <View className="absolute bottom-0 right-0 bg-primary rounded-full w-7 h-7 items-center justify-center border-2 border-background">
+                  <Ionicons name="camera" size={14} color="white" />
                 </View>
               </View>
             </Pressable>
@@ -429,7 +429,7 @@ const ProfilePage = () => {
             <Avatar
               name={profile?.name}
               imageUrl={avatarUrl}
-              size="xl"
+              size="2xl"
             />
           )}
           <Text className="text-xl font-bold text-foreground">

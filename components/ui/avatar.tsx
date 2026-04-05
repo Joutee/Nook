@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Image, View } from "react-native";
 import { Text } from "@/components/ui/text";
 
-type AvatarSize = "xs" | "sm" | "md" | "base" | "lg" | "xl";
+type AvatarSize = "xs" | "sm" | "md" | "base" | "lg" | "xl" | "2xl";
 
 interface AvatarProps {
   name?: string | null;
@@ -18,6 +18,7 @@ const SIZE_CONFIG: Record<AvatarSize, { container: string; text: string }> = {
   base: { container: "w-7 h-7", text: "text-sm font-semibold" },
   lg: { container: "w-8 h-8", text: "text-sm font-semibold" },
   xl: { container: "w-10 h-10", text: "text-base font-semibold" },
+  "2xl": { container: "w-20 h-20", text: "text-3xl font-bold" },
 };
 
 function getInitials(name?: string | null): string {
