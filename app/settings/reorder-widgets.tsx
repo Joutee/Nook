@@ -20,6 +20,9 @@ import {
 } from "@/config/widgetConfig";
 import { WidgetReorderItem } from "@/components/shared/WidgetReorderItem";
 import logger from "@/lib/logger";
+import { useFlatHasLandlord } from "@/hooks/useFlatHasLandlord";
+
+const LANDLORD_ONLY_WIDGETS = ["issues_widget", "keys_widget"];
 
 export default function ReorderWidgets() {
   const [activeWidgets, setActiveWidgets] = useState<string[]>([]);
@@ -28,9 +31,12 @@ export default function ReorderWidgets() {
   const [isSaving, setIsSaving] = useState(false);
   const { currentFlat, userRole } = useFlatContext();
   const { showToast } = useToast();
+  const { hasLandlord } = useFlatHasLandlord();
 
-  // Získat widgety dostupné pro aktuální roli
-  const allowedWidgets = getWidgetsByRole(userRole);
+  // Získat widgety dostupné pro aktuální roli, odfiltrovat widgety vyžadující pronajímatele
+  const allowedWidgets = getWidgetsByRole(userRole).filter(
+    (w) => hasLandlord || !LANDLORD_ONLY_WIDGETS.includes(w),
+  );
 
   useEffect(() => {
     loadCurrentLayout();
