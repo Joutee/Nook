@@ -1,15 +1,32 @@
-import { Tabs } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useColorScheme } from "nativewind";
 import { THEME } from "@/lib/theme";
+import { useCallback, useState } from "react";
+import { getUnreadCount } from "@/lib/chatService";
+import { supabase } from "@/lib/supabase";
 
 export default function TabLayout() {
-  const { userRole } = useFlatContext();
+  const { userRole, currentFlat } = useFlatContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 
   const isTenant = userRole !== "pronajimatel";
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!currentFlat?.id) return;
+      const load = async () => {
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) return;
+        const count = await getUnreadCount(currentFlat.id, data.user.id);
+        setUnreadCount(count);
+      };
+      load();
+    }, [currentFlat?.id])
+  );
 
   return (
     <Tabs
@@ -93,44 +110,45 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Klíče - pouze pro pronajímatele */}
+      {/* Chat - pouze pro pronajímatele jako tab */}
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Chat",
+          href: !isTenant ? "/(tabs)/chat" : null,
+          tabBarBadge: !isTenant && unreadCount > 0 ? unreadCount : undefined,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "chatbubbles" : "chatbubbles-outline"}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* Klíče - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="keys"
         options={{
-          title: "Klíče",
-          href: !isTenant ? "/(tabs)/keys" : null,
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "key" : "key-outline"}
-              size={22}
-              color={color}
-            />
-          ),
+          href: null,
         }}
       />
 
-      {/* Dokumenty - pouze pro pronajímatele */}
+      {/* Dokumenty - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="documents"
         options={{
-          title: "Dokumenty",
-          href: !isTenant ? "/(tabs)/documents" : null,
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "document" : "document-outline"}
-              size={22}
-              color={color}
-            />
-          ),
+          href: null,
         }}
       />
 
-      {/* Další - pouze pro nájemníky */}
+      {/* Další - zobrazit všem */}
       <Tabs.Screen
         name="more"
         options={{
           title: "Další",
-          href: isTenant ? "/(tabs)/more" : null,
+          tabBarBadge: isTenant && unreadCount > 0 ? unreadCount : undefined,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "menu" : "menu-outline"}
