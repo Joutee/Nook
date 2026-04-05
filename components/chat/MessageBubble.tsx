@@ -55,9 +55,8 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
           <Text
             className={isOwn ? "text-primary-foreground" : "text-foreground"}
             textBreakStrategy="simple"
-            includeFontPadding={false}
           >
-            {message.content + '\u200B'.repeat(20)}
+            {message.content + '\u200A'.repeat(20)}
           </Text>
         </View>
       </View>
