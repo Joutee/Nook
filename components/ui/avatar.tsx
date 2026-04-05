@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Image, View } from "react-native";
 import { Text } from "@/components/ui/text";
 
@@ -33,6 +33,11 @@ export function Avatar({
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
   const { container, text } = SIZE_CONFIG[size];
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageUrl]);
+
   const showImage = !!imageUrl && !imageError;
 
   return (
