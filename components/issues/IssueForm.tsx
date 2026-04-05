@@ -17,6 +17,7 @@ import {
   uploadFile,
 } from "@/lib/fileService";
 import DocumentViewerModal from "@/components/documents/DocumentViewerModal";
+import { PhotoPickerTiles } from "@/components/shared/PhotoPickerTiles";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import logger from "@/lib/logger";
 
@@ -254,34 +255,10 @@ export const IssueForm: React.FC<IssueFormProps> = ({
                   </CardContent>
                 </Card>
               ) : (
-                <View className="flex-row justify-between">
-                  <Pressable
-                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center bg-secondary active:opacity-60"
-                    onPress={handleTakePhoto}
-                  >
-                    <Ionicons
-                      name="camera"
-                      size={32}
-                      className="text-primary"
-                    />
-                    <Text className="mt-2 text-base text-primary font-semibold">
-                      Vyfotit
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    className="w-[48%] border-2 border-primary rounded-lg p-5 items-center bg-secondary active:opacity-60"
-                    onPress={handlePickImage}
-                  >
-                    <Ionicons
-                      name="images"
-                      size={32}
-                      className="text-primary"
-                    />
-                    <Text className="mt-2 text-base text-primary font-semibold">
-                      Z galerie
-                    </Text>
-                  </Pressable>
-                </View>
+                <PhotoPickerTiles
+                  onTakePhoto={handleTakePhoto}
+                  onPickGallery={handlePickImage}
+                />
               )}
             </View>
 

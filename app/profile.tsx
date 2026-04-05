@@ -15,6 +15,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { takePhoto, pickGalleryPhoto } from "@/lib/fileService";
 import { uploadAvatar, deleteAvatar } from "@/lib/avatarService";
 import BottomSheet from "@/components/shared/BottomSheet";
+import { PhotoPickerTiles } from "@/components/shared/PhotoPickerTiles";
 import * as Clipboard from "expo-clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -807,36 +808,15 @@ const ProfilePage = () => {
         onClose={() => setAvatarSheetVisible(false)}
         title="Profilová fotka"
       >
-        <View className="px-5 pb-4 gap-1">
-          <Pressable
-            className="flex-row items-center gap-4 py-3.5 px-2"
-            onPress={() => handleAvatarAction("camera")}
-          >
-            <Ionicons
-              name="camera-outline"
-              size={24}
-              className="text-foreground"
-            />
-            <Text className="text-base text-foreground">Vyfotit</Text>
-          </Pressable>
-
-          <Pressable
-            className="flex-row items-center gap-4 py-3.5 px-2"
-            onPress={() => handleAvatarAction("gallery")}
-          >
-            <Ionicons
-              name="image-outline"
-              size={24}
-              className="text-foreground"
-            />
-            <Text className="text-base text-foreground">
-              Vybrat z galerie
-            </Text>
-          </Pressable>
+        <View className="px-5 pb-4 gap-3">
+          <PhotoPickerTiles
+            onTakePhoto={() => handleAvatarAction("camera")}
+            onPickGallery={() => handleAvatarAction("gallery")}
+          />
 
           {avatarUrl && (
             <Pressable
-              className="flex-row items-center gap-4 py-3.5 px-2"
+              className="border-2 border-destructive rounded-lg p-3 items-center bg-secondary active:opacity-60"
               onPress={() => handleAvatarAction("delete")}
             >
               <Ionicons
@@ -844,7 +824,7 @@ const ProfilePage = () => {
                 size={24}
                 className="text-destructive"
               />
-              <Text className="text-base text-destructive">
+              <Text className="mt-1 text-base text-destructive font-semibold">
                 Smazat fotku
               </Text>
             </Pressable>
