@@ -46,7 +46,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
 
         {/* Bubble — no maxWidth, constrained by row padding instead */}
         <View
-          className={`px-3 py-2 rounded-2xl ${
+          className={`px-3 py-2 rounded-2xl overflow-visible ${
             isOwn
               ? "bg-primary rounded-br-sm"
               : "bg-muted rounded-bl-sm"
