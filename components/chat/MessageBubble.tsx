@@ -56,7 +56,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
             className={isOwn ? "text-primary-foreground" : "text-foreground"}
             textBreakStrategy="simple"
           >
-            {message.content + '\u200A'}
+            {message.content + ' '}
           </Text>
         </View>
       </View>
