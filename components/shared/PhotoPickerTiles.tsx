@@ -14,20 +14,20 @@ export function PhotoPickerTiles({
   return (
     <View className="flex-row justify-between">
       <Pressable
-        className="w-[48%] rounded-lg p-5 items-center bg-secondary active:opacity-60"
+        className="w-[48%] rounded-lg p-3 items-center bg-secondary active:opacity-60"
         onPress={onTakePhoto}
       >
-        <Ionicons name="camera" size={32} className="text-foreground" />
-        <Text className="mt-2 text-base text-foreground font-semibold">
+        <Ionicons name="camera-outline" size={22} className="text-foreground" />
+        <Text className="mt-1 text-sm text-foreground font-semibold">
           Vyfotit
         </Text>
       </Pressable>
       <Pressable
-        className="w-[48%] rounded-lg p-5 items-center bg-secondary active:opacity-60"
+        className="w-[48%] rounded-lg p-3 items-center bg-secondary active:opacity-60"
         onPress={onPickGallery}
       >
-        <Ionicons name="images" size={32} className="text-foreground" />
-        <Text className="mt-2 text-base text-foreground font-semibold">
+        <Ionicons name="images-outline" size={22} className="text-foreground" />
+        <Text className="mt-1 text-sm text-foreground font-semibold">
           Z galerie
         </Text>
       </Pressable>
