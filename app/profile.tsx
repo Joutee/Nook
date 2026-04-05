@@ -815,19 +815,12 @@ const ProfilePage = () => {
           />
 
           {avatarUrl && (
-            <Pressable
-              className="border-2 border-destructive rounded-lg p-3 items-center bg-secondary active:opacity-60"
+            <Button
+              variant="destructive"
               onPress={() => handleAvatarAction("delete")}
             >
-              <Ionicons
-                name="trash-outline"
-                size={24}
-                className="text-destructive"
-              />
-              <Text className="mt-1 text-base text-destructive font-semibold">
-                Smazat fotku
-              </Text>
-            </Pressable>
+              <Text>Smazat fotku</Text>
+            </Button>
           )}
         </View>
       </BottomSheet>
