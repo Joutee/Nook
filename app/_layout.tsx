@@ -193,6 +193,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
           options={{ title: "Opakující se výdaj", headerShown: true }}
         />
         <Stack.Screen name="profile" options={{ title: "Profil" }} />
+        <Stack.Screen name="chat" options={{ title: "Chat" }} />
         <Stack.Screen
           name="change-password"
           options={{ title: "Změna hesla" }}
