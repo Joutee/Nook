@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, Text as RNText } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
@@ -44,7 +44,7 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
           </View>
         )}
 
-        {/* Bubble — no maxWidth, constrained by row padding instead */}
+        {/* Bubble */}
         <View
           className={`px-3 py-2 rounded-2xl overflow-visible ${
             isOwn
@@ -52,13 +52,15 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
               : "bg-muted rounded-bl-sm"
           }`}
         >
-          <Text
-            className={isOwn ? "text-primary-foreground" : "text-foreground"}
+          <RNText
+            style={{
+              fontSize: 16,
+              color: isOwn ? "hsl(0, 0%, 98%)" : "hsl(0, 0%, 3.9%)",
+            }}
             textBreakStrategy="simple"
-            style={{ marginRight: 4 }}
           >
             {message.content}
-          </Text>
+          </RNText>
         </View>
       </View>
 
