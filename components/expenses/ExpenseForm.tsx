@@ -86,13 +86,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const { showToast } = useToast();
 
   useEffect(() => {
-    if (splitMode === "items") {
-      const total = expenseItems.reduce((sum, item) => sum + item.price, 0);
-      setAmount(total.toFixed(2));
-    }
-  }, [expenseItems, splitMode]);
-
-  useEffect(() => {
     loadFlatMembers();
     getCurrentUser();
   }, [currentFlat]);
@@ -464,6 +457,15 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
       }
+      // Check if item sum matches the entered amount
+      const itemSum = expenseItems.reduce((sum, item) => sum + item.price, 0);
+      if (Math.abs(itemSum - amountNum) > 1) {
+        showToast(
+          `Součet položek (${formatCurrency(itemSum)}) neodpovídá zadané částce (${formatCurrency(amountNum)})`,
+          "error",
+        );
+        return;
+      }
     }
 
     if (!currentFlat?.id) {
@@ -737,32 +739,27 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               maxLength={10}
               editable={
                 !(
-                  splitMode === "items" ||
-                  (splitMode === "manual" &&
-                    selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                      .length === 0 &&
-                    selectedMembers.length > 0)
+                  splitMode === "manual" &&
+                  selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                    .length === 0 &&
+                  selectedMembers.length > 0
                 )
               }
               className={
-                splitMode === "items" ||
-                (splitMode === "manual" &&
-                  selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                    .length === 0 &&
-                  selectedMembers.length > 0)
+                splitMode === "manual" &&
+                selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                  .length === 0 &&
+                selectedMembers.length > 0
                   ? "bg-muted"
                   : ""
               }
             />
-            {(splitMode === "items" ||
-              (splitMode === "manual" &&
-                selectedMembers.filter((m) => !touchedMembers.has(m.id))
-                  .length === 0 &&
-                selectedMembers.length > 0)) && (
+            {splitMode === "manual" &&
+              selectedMembers.filter((m) => !touchedMembers.has(m.id))
+                .length === 0 &&
+              selectedMembers.length > 0 && (
                 <Text className="text-xs text-muted-foreground italic">
-                  {splitMode === "items"
-                    ? "Částka se počítá automaticky z položek"
-                    : "Částka se počítá automaticky z rozdělení"}
+                  Částka se počítá automaticky z rozdělení
                 </Text>
               )}
           </View>
