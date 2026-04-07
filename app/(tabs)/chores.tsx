@@ -172,16 +172,11 @@ const Chores = () => {
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2 flex-1">
                 <Avatar name={item.assignee_name} size="lg" />
-                <View className="flex-1">
-                  <Text className="text-sm text-foreground font-medium">
-                    {item.assignee_name
-                      ? `${item.assignee_name}${item.assignee_surname ? ` ${item.assignee_surname}` : ""}`
-                      : "Nepřiřazeno"}
-                  </Text>
-                  {item.assignee_name && (
-                    <Text className="text-xs text-muted-foreground">na řadě</Text>
-                  )}
-                </View>
+                <Text className="text-sm text-foreground font-medium flex-1">
+                  {item.assignee_name && item.assignee_surname
+                    ? `${item.assignee_name} ${item.assignee_surname}`
+                    : item.assignee_name || "Nepřiřazeno"}
+                </Text>
               </View>
 
               <View className="items-end">
