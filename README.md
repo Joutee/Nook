@@ -1,324 +1,169 @@
-# Nook 🏠
+# Nook
 
-> Mobilní aplikace pro inteligentní správu sdíleného bydlení
+Mobilni aplikace pro spravu sdileneho bydleni. Projekt je postaveny na React Native, Expo Routeru a Supabase. Vznika jako soucast bakalarske prace.
 
-[![React Native](https://img.shields.io/badge/React%20Native-0.81.5-blue.svg)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-~54.0-black.svg)](https://expo.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-green.svg)](https://supabase.com/)
+Nook resi bezne agendy ve sdilenem byte: finance, uklidove ukoly, zavadovy system, dokumenty, klice, role clenu a prepinani mezi vice byty.
 
-## 📖 O projektu
+## Stack
 
-Nook je multiplatformní mobilní aplikace (iOS, Android) vyvinutá v rámci bakalářské práce. Aplikace řeší komplexní správu sdíleného bydlení - od evidence financí, přes správu úkolů a jejich automatickou rotaci, až po správu dokumentů, klíčů a hlášení závad.
+- React Native 0.81.5
+- Expo 54
+- Expo Router 6
+- TypeScript 5.9
+- NativeWind 4
+- Supabase Auth, PostgreSQL, Storage a Row Level Security
 
-### 🎯 Motivace
+Projekt je klientsky. Vlastni API server zde neni; aplikace komunikuje primo se Supabase pres `@supabase/supabase-js`.
 
-Sdílené bydlení přináší řadu výzev v oblasti organizace, komunikace a správy společných zdrojů. Nook poskytuje centralizované řešení, které eliminuje potřebu používat množství různých aplikací a tabulek pro správu domácnosti.
+## Hlavni moduly
 
-## ✨ Hlavní funkce
+- Finance: sdilene vydaje, podily, vyrovnani dluhu a opakovane platby.
+- Uklid: rotace ukolu mezi cleny, historie splneni a dashboard widgety.
+- Zavady: evidence zavad s popisem, stavem a fotodokumentaci.
+- Dokumenty: nahravani a prohlizeni dokumentu pres Supabase Storage.
+- Klice: evidence fyzickych klicu a jejich prirazeni clenum.
+- Byty a role: vice bytu na uzivatele, role `najemce` a `pronajimatel`.
+- Dashboard: konfigurovatelne widgety podle role uzivatele.
 
-### 👥 Pro nájemce
+## Struktura projektu
 
-- **💰 Finance** - Evidence sdílených výdajů s automatickým výpočtem dluhů a optimalizací vyrovnávacích plateb
-- **🧹 Úklid** - Automatická rotace úkolů mezi členy s historií plnění a žebříčkem
-- **📊 Dashboard** - Plně přizpůsobitelný přehled s widgety pro každý modul
-- **👤 Správa členů** - Správa členství a rolí v bytě
-
-### 🏠 Pro pronajímatele
-
-- **⚠️ Závady** - Hlášení a správa poruch s fotodokumentací
-- **📄 Dokumenty** - Ukládání důležitých dokumentů (smlouvy, protokoly)
-- **🔑 Klíče** - Evidence a přiřazování fyzických klíčů členům
-
-### 🔄 Společné funkce
-
-- **Multi-flat podpora** - Správa více domácností s různými rolemi
-- **🌓 Tmavý režim** - Automatický nebo manuální přepínač motivu
-- **🔐 Zabezpečení** - Row Level Security na úrovni databáze
-- **📱 Offline-first** - Lokální cache pro rychlý přístup
-
-## 🛠️ Technologický stack
-
-### Frontend
-
-- **React Native 0.81.5** - Cross-platform mobilní framework
-- **Expo 54** (Managed Workflow) - Vývojové nástroje a nativní moduly
-- **TypeScript 5.9** - Typová bezpečnost
-- **Expo Router 6** - File-based navigace
-- **NativeWind 4** - Tailwind CSS pro React Native
-- **@rn-primitives** - Přístupnostní UI komponenty
-
-### Backend
-
-- **Supabase** - Backend-as-a-Service platforma
-  - **Auth** - E-mail/heslo autentizace s JWT tokeny
-  - **Database** - PostgreSQL s Row Level Security (RLS)
-  - **Storage** - S3-kompatibilní objektové úložiště
-  - **Realtime** (připraveno) - WebSocket subscriptions
-
-### Klíčové knihovny
-
-- `@supabase/supabase-js` - Supabase klient
-- `react-native-draggable-flatlist` - Drag-and-drop seznamy
-- `expo-document-picker` / `expo-image-picker` - Správa souborů
-- `@react-native-async-storage/async-storage` - Lokální úložiště
-
-## 🏗️ Architektura
-
-```
-Nook/
-├── app/                          # Expo Router - file-based navigace
-│   ├── _layout.tsx               # Kořenový layout s auth guardem
-│   ├── (auth)/                   # Přihlášení, registrace
-│   ├── (setup)/                  # Onboarding (vytvoření/připojení bytu)
-│   ├── (tabs)/                   # Hlavní obrazovky s bottom tabs
-│   │   ├── index.tsx             # Dashboard
-│   │   ├── finance.tsx           # Správa financí
-│   │   ├── chores.tsx            # Úkoly domácnosti
-│   │   ├── issues.tsx            # Závady
-│   │   ├── documents.tsx         # Dokumenty
-│   │   ├── keys.tsx              # Klíče
-│   │   └── more.tsx              # Další (navigační hub)
-│   └── [detaily].tsx             # Stack screens pro detail/edit
-├── components/                   # React komponenty
-│   ├── ui/                       # Primitivní UI komponenty
-│   └── dashboard_widgets/        # Widgety pro dashboard
-├── contexts/                     # React kontexty
-│   ├── FlatContext.tsx           # Globální stav bytu a role
-│   └── ToastContext.tsx          # Notifikační systém
-├── lib/                          # Utility funkce
-│   ├── supabase.ts               # Supabase klient
-│   ├── choreUtils.ts             # Logika úkolů
-│   ├── financeUtils.ts           # Finanční výpočty
-│   └── fileService.ts            # Správa souborů
-├── types/                        # TypeScript typy
-├── config/                       # Konfigurace
-│   └── widgetConfig.ts           # Registr dashboard widgetů
-└── assets/                       # Statická aktiva
+```text
+app/                         Expo Router routes
+  _layout.tsx                Root layout, providers and auth guard
+  (auth)/                    Login, registration and password reset
+  (setup)/                   Flat onboarding and role selection
+  (tabs)/                    Main authenticated tabs
+components/                  Reusable React Native components
+  ui/                        Primitive UI components
+  dashboard_widgets/         Dashboard widgets
+config/                      App configuration, widget registry
+contexts/                    React contexts
+hooks/                       Shared hooks
+lib/                         Supabase client, services and utilities
+supabase/
+  migrations/                Database migrations
+  functions/                 Supabase Edge Functions
+types/                       Shared TypeScript types
 ```
 
-## 📸 Screenshots
+## Pozadavky
 
-_Screenshoty aplikace budou přidány po dokončení implementace všech plánovaných funkcí._
+- Node.js 24.13.0 nebo novejsi
+- npm 11.6.2 nebo novejsi
+- Expo Go nebo Expo Dev Client
+- Supabase projekt
 
-<!-- Placeholder pro screenshoty:
-- Dashboard s widgety
-- Seznam výdajů a vyrovnání dluhů
-- Rotace úkolů domácnosti
-- Hlášení závad s fotografií
-- Správa dokumentů
-- Tmavý režim
--->
-
-## 🚀 Instalace a spuštění
-
-### Požadavky
-
-- **Node.js** >= 24.13.0
-- **npm** >= 11.6.2
-- **Expo CLI** (nainstaluje se automaticky)
-- **Expo Go** (mobilní aplikace pro testování) nebo **Expo Dev Client**
-- **Supabase účet** - [supabase.com](https://supabase.com)
-
-### 1. Klonování repozitáře
-
-```bash
-git clone <url-repozitare>
-cd Nook
-```
-
-### 2. Instalace závislostí
+## Instalace
 
 ```bash
 npm install
 ```
 
-### 3. Konfigurace Supabase
-
-#### 3.1 Vytvoření Supabase projektu
-
-1. Vytvořte nový projekt na [supabase.com](https://supabase.com)
-2. Zkopírujte **Project URL** a **anon public key** z nastavení API
-
-#### 3.2 Inicializace databázového schématu
-
-Databázové schéma je k dispozici v adresáři `supabase/migrations/`. Pro inicializaci databáze:
-
-**Možnost 1: Manuální import přes SQL Editor**
-
-1. Otevřete Supabase Dashboard → SQL Editor
-2. Zkopírujte obsah souboru `supabase/migrations/20260314101841_remote_schema.sql`
-3. Spusťte SQL dotaz (Run)
-
-**Možnost 2: Použití Supabase CLI** _(doporučeno)_
-
-```bash
-# Instalace Supabase CLI
-npm install -g supabase
-
-# Link projektu
-supabase link --project-ref your-project-ref
-
-# Spuštění migrace
-supabase db push
-```
-
-**Hlavní tabulky:**
-
-- `profiles` - Uživatelské profily
-- `flats` - Byty/domácnosti
-- `flat_profile` - Členství uživatelů v bytech (s rolí)
-- `expenses`, `expense_shares` - Finance
-- `chores`, `chore_profile`, `chore_completions` - Úkoly
-- `issues` - Závady
-- `documents` - Dokumenty
-- `keys` - Klíče
-
-**Databázové pohledy:**
-
-- `view_chore_dashboard` - Aktuální stav úkolů
-- `view_chore_history` - Historie úkolů
-- `view_flat_balances` - Finanční zůstatky členů
-
-**Storage Buckety:**
-
-```sql
--- Vytvořte dva buckety v Supabase Storage:
--- 1. "documents" - pro dokumenty
--- 2. "issue-images" - pro fotografie závad
-```
-
-#### 3.3 Environment proměnné
-
-Vytvořte soubor `.env` v kořenovém adresáři projektu:
+Vytvor `.env` podle `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Vyplňte hodnoty z Supabase projektu:
+Vypln Supabase hodnoty:
 
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_KEY=your-anon-public-key
 ```
 
-### 4. Spuštění aplikace
+Promenne s prefixem `EXPO_PUBLIC_` jsou dostupne v klientskem kodu. Autorizace je resena pres RLS politiky v databazi.
+
+## Databaze
+
+Migrace jsou v `supabase/migrations/`.
+
+Pri pouziti Supabase CLI:
 
 ```bash
-# Vývojový server
+npx supabase link --project-ref your-project-ref
+npx supabase db push
+```
+
+Alternativne lze obsah migraci spustit rucne v Supabase SQL Editoru.
+
+Zakladni tabulky:
+
+- `profiles`
+- `flats`
+- `flat_profile`
+- `expenses`
+- `expense_shares`
+- `chores`
+- `chore_profile`
+- `chore_completions`
+- `issues`
+- `documents`
+- `keys`
+
+Zakladni views:
+
+- `view_chore_dashboard`
+- `view_chore_history`
+- `view_flat_balances`
+
+Storage buckety:
+
+- `documents`
+- `issue-images`
+
+## Spusteni
+
+```bash
 npm start
-
-# Spuštění na Android
 npm run android
-
-# Spuštění na iOS (pouze macOS)
 npm run ios
-
-# Web verze (experimentální)
 npm run web
 ```
 
-### 5. Testování v Expo Go
+`npm run ios` vyzaduje macOS. Web verze slouzi hlavne pro rychle overeni UI.
 
-1. Nainstalujte **Expo Go** na mobilní zařízení
-   - [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)
-   - [iOS](https://apps.apple.com/app/expo-go/id982107779)
+## Navigace a pristup
 
-2. Naskenujte QR kód z terminálu po spuštění `npm start`
+Expo Router mapuje soubory v `app/` na routy. Auth guard je v `app/_layout.tsx` a smeruje uzivatele podle stavu session, vybraneho bytu a role.
 
-## 🎨 Přizpůsobení tématu
+Role jsou ulozene v tabulce `flat_profile`:
 
-Aplikace podporuje světlé/tmavé téma s plně přizpůsobitelnými barvami. Konfigurace se nachází v:
+- `najemce`: finance, uklid, bezne clenstvi v byte
+- `pronajimatel`: zavady, dokumenty, klice a sprava bytu
 
-- `global.css` - CSS custom properties (HSL hodnoty)
-- `tailwind.config.js` - Tailwind token registry
+Pristup k datum je omezeny pres PostgreSQL Row Level Security.
 
-Primární barva: **Lila/Fialová** (`hsl(270, 89.1%, 49%)`)
+## Stav a data
 
-## 📊 Datový model
+Projekt nepouziva externi state management. Globalni stav je reseny pres React Context:
 
-### Klíčové relace
+- `contexts/FlatContext.tsx`: vybrany byt, role a souvisejici odvozene hodnoty
+- `contexts/ToastContext.tsx`: notifikace v aplikaci
 
-```
-profiles (1) ----< (N) flat_profile (N) >---- (1) flats
-                        |
-                        ├─< expenses
-                        ├─< chores
-                        ├─< issues
-                        ├─< documents
-                        └─< keys
-```
+Sdilene utility a servisni funkce jsou v `lib/`, napr. `fileService`, `choreUtils`, `financeUtils`, `biometricAuth` a `theme`.
 
-### Automatizace (Triggery)
+## Vzhled
 
-- `set_first_user_as_admin()` - Automatické přidělení admin role prvnímu členovi
-- `reassign_admin_on_delete()` - Předání admin role při odstranění správce
+Styling je postaveny na NativeWindu. Tokeny jsou definovane v:
 
-## 🔒 Bezpečnost
+- `global.css`
+- `tailwind.config.js`
 
-### Row Level Security (RLS)
+Primarni barva aplikace je `hsl(270 89.1% 49%)`. Aplikace podporuje svetly i tmavy rezim.
 
-Všechny tabulky jsou chráněny RLS politikami na úrovni PostgreSQL:
+## Build
 
-- Uživatelé vidí pouze data bytů, kde jsou aktivními členy
-- `auth.uid()` funkce PostgreSQL automaticky filtruje dotazy
-- JWT tokeny jsou bezpečně persistovány v nativním úložišti (iOS Keychain / Android EncryptedSharedPreferences)
-
-### Autentizace
-
-- E-mail/heslo přes Supabase Auth
-- Automatická obnova JWT tokenů
-- Session validace při startu aplikace
-
-### Storage
-
-- Signed URLs s omezenou platností
-- Přístup pouze pro autentizované uživatele
-- Automatická komprese obrázků před nahráním (1080px, 60% kvalita)
-
-## 📚 Použité návrhové vzory
-
-- **File-based routing** (Expo Router) - Konvence > konfigurace
-- **Context API** - Globální state management bez externích knihoven
-- **Compound Components** - Složené UI komponenty (BottomSheet, Modal)
-- **Optimistic UI** - Okamžitá zpětná vazba před potvrzením serveru
-- **Database Views** - Agregace dat na straně databáze
-- **Trigger-based automation** - Business logika v databázových triggerech
-
-## 🎓 Akademický kontext
-
-Tento projekt byl vytvořen jako součást bakalářské práce na téma **"Návrh a implementace mobilní aplikace pro správu sdíleného bydlení"**.
-
-## 📄 Dokumentace
-
-Podrobná technická dokumentace je k dispozici v souboru [`MASTER_CONTEXT.md`](./MASTER_CONTEXT.md), který obsahuje:
-
-- Kompletní popis architektury
-- Detailní popis všech modulů a jejich business logiky
-- Datový model s přehledem všech tabulek
-- Bezpečnostní model
-- Popis triggerů a databázových funkcí
-
-## 📦 Build
-
-Pro vytvoření produkčního buildu použijte Expo Application Services (EAS):
+Produkcnich buildu se dosahuje pres Expo Application Services:
 
 ```bash
-# Instalace EAS CLI
 npm install -g eas-cli
-
-# Login
 eas login
-
-# Konfigurace
 eas build:configure
-
-# Build
 eas build --platform android
 eas build --platform ios
 ```
 
----
+## Dokumentace
 
-**Poznámka:** Tento projekt slouží primárně pro akademické účely v rámci bakalářské práce.
+Podrobnejsi technicky kontext je v `MASTER_CONTEXT.md`. Instrukce pro praci s repozitarem jsou v `AGENTS.md` a `CLAUDE.md`.
