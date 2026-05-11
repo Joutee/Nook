@@ -44,20 +44,16 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
     setToasts((prev) => [...prev, newToast]);
 
-    // Animace
     const slideAnim = new Animated.Value(-100);
     setAnimations((prev) => new Map(prev).set(id, slideAnim));
 
-    // Animace vjezdu
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 300,
       useNativeDriver: true,
     }).start();
 
-    // Automatické odstranění po 3 sekundách
     setTimeout(() => {
-      // Animace výjezdu
       Animated.timing(slideAnim, {
         toValue: -100,
         duration: 300,

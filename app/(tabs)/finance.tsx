@@ -41,7 +41,6 @@ const Finance = () => {
 
     setIsLoading(true);
     try {
-      // Load balances from the view
       const { data: balancesData, error: balancesError } = await supabase
         .from("view_flat_balances")
         .select("*")
@@ -57,7 +56,6 @@ const Finance = () => {
         setBalances(balancesData || []);
       }
 
-      // Load expense history (join with profiles to get payer name)
       const { data: expensesData, error: expensesError } = await supabase
         .from("expenses")
         .select(
@@ -77,7 +75,6 @@ const Finance = () => {
           "error",
         );
       } else {
-        // Transform the data to match ExpenseWithDetails interface
         const transformedExpenses: ExpenseWithDetails[] = (
           expensesData || []
         ).map((expense: any) => ({
@@ -184,7 +181,6 @@ const Finance = () => {
       <ScrollView className="flex-1 px-4 py-4">
         <Text className="text-3xl font-bold text-foreground mb-4">Finance</Text>
 
-        {/* Balances Section */}
         <Card className="mb-3">
           <CardHeader className="flex-row items-center gap-2">
             <Ionicons
@@ -212,7 +208,6 @@ const Finance = () => {
           </CardContent>
         </Card>
 
-        {/* Settlements Section */}
         {balances.length > 0 && (
           <Card className="mb-3">
             <CardHeader className="flex-row items-center gap-2">
@@ -232,7 +227,6 @@ const Finance = () => {
           </Card>
         )}
 
-        {/* History Section */}
         <Card className="mb-4">
           <CardHeader className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
@@ -277,7 +271,6 @@ const Finance = () => {
         </Card>
       </ScrollView>
 
-      {/* Add Expense Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/expenses/create")}

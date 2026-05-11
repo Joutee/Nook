@@ -108,20 +108,16 @@ export const IssueForm: React.FC<IssueFormProps> = ({
       } = await supabase.auth.getSession();
       if (!session) throw new Error("Nejste přihlášeni");
 
-      // === EDIT MODE ===
       if (isEditMode && issueId) {
         let finalImagePath: string | null = originalImagePath;
 
-        // A) Uživatel vybral NOVÝ obrázek (imageUri je lokální cesta 'file://')
         if (imageUri && !imageUri.startsWith("http")) {
-          // 1. Smažeme starý, pokud existoval
           if (originalImagePath) {
             await supabase.storage
               .from("issue-images")
               .remove([originalImagePath]);
           }
 
-          // 2. Nahrajeme nový
           finalImagePath = await uploadFile({
             bucket: "issue-images",
             flatId: currentFlat.id,
@@ -130,16 +126,13 @@ export const IssueForm: React.FC<IssueFormProps> = ({
             mimeType: "image/jpeg",
           });
         }
-        // B) Uživatel ODSTRANIL obrázek (křížkem)
         else if (!imageUri && originalImagePath) {
           await supabase.storage
             .from("issue-images")
             .remove([originalImagePath]);
           finalImagePath = null;
         }
-        // C) Pokud imageUri začíná na "http", uživatel obrázek nezměnil -> neděláme nic se storage
 
-        // 3. Update databáze
         const { error } = await supabase
           .from("issues")
           .update({
@@ -153,7 +146,6 @@ export const IssueForm: React.FC<IssueFormProps> = ({
         if (error) throw error;
         showToast("Závada aktualizována", "success");
       }
-      // === CREATE MODE ===
       else {
         let imagePath: string | null = null;
 
@@ -167,7 +159,6 @@ export const IssueForm: React.FC<IssueFormProps> = ({
           });
         }
 
-        // Vložíme do databáze
         const { error } = await supabase.from("issues").insert({
           title: title.trim(),
           description: description.trim() || null,

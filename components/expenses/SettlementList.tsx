@@ -22,7 +22,6 @@ interface SettlementListProps {
 const calculateSettlements = (balances: Balance[]): Settlement[] => {
   const settlements: Settlement[] = [];
 
-  // Create mutable copies of balances
   const debtors = balances
     .filter((b) => b.net_balance < 0)
     .map((b) => ({
@@ -31,7 +30,7 @@ const calculateSettlements = (balances: Balance[]): Settlement[] => {
       surname: b.surname,
       amount: Math.abs(b.net_balance),
     }))
-    .sort((a, b) => b.amount - a.amount); // Sort descending
+    .sort((a, b) => b.amount - a.amount);
 
   const creditors = balances
     .filter((b) => b.net_balance > 0)
@@ -41,33 +40,29 @@ const calculateSettlements = (balances: Balance[]): Settlement[] => {
       surname: b.surname,
       amount: b.net_balance,
     }))
-    .sort((a, b) => b.amount - a.amount); // Sort descending
+    .sort((a, b) => b.amount - a.amount);
 
-  let i = 0; // Debtor index
-  let j = 0; // Creditor index
+  let i = 0;
+  let j = 0;
 
   while (i < debtors.length && j < creditors.length) {
     const debtor = debtors[i];
     const creditor = creditors[j];
 
-    // Find the minimum of what debtor owes and what creditor is owed
     const settlementAmount = Math.min(debtor.amount, creditor.amount);
 
-    // Create a settlement transaction
     settlements.push({
       fromName: debtor.name,
       fromSurname: debtor.surname,
       toName: creditor.name,
       toSurname: creditor.surname,
       toProfileId: creditor.profileId,
-      amount: Math.round(settlementAmount * 100) / 100, // Round to 2 decimal places
+      amount: Math.round(settlementAmount * 100) / 100,
     });
 
-    // Update balances
     debtor.amount -= settlementAmount;
     creditor.amount -= settlementAmount;
 
-    // Move to next debtor or creditor if their balance is settled
     if (debtor.amount === 0) i++;
     if (creditor.amount === 0) j++;
   }

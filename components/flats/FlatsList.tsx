@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import { useFlatContext } from "@/contexts/FlatContext";
 
 interface FlatsListProps {
-  onFlatSelect?: () => void; // Callback po výběru bytu (např. pro zavření modalu)
+  onFlatSelect?: () => void;
 }
 
 export const FlatsList: React.FC<FlatsListProps> = ({ onFlatSelect }) => {
@@ -15,7 +15,6 @@ export const FlatsList: React.FC<FlatsListProps> = ({ onFlatSelect }) => {
     name: string;
     address: string;
   }) => {
-    // Pokud už je tento byt vybraný, jen zavři modal
     if (currentFlat?.id === flat.id) {
       onFlatSelect?.();
       return;

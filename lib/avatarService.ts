@@ -5,23 +5,20 @@ import { compressImage } from "./fileService";
 import logger from "@/lib/logger";
 
 /**
- * Nahraje avatar do Supabase Storage a aktualizuje profiles.avatar_url
- * @returns veřejná URL nahraného avataru
+ * Uploads an avatar to Supabase Storage and updates profiles.avatar_url.
+ * @returns public URL of the uploaded avatar.
  */
 export const uploadAvatar = async (
   userId: string,
   imageUri: string,
 ): Promise<string> => {
-  // Komprese
   const compressedUri = await compressImage(imageUri);
 
-  // Konverze na base64
   const base64 = await readAsStringAsync(compressedUri, {
     encoding: "base64",
   });
   const fileData = decode(base64);
 
-  // Upload do storage s upsert
   const filePath = `${userId}/avatar.jpg`;
   const { error: uploadError } = await supabase.storage
     .from("avatars")
@@ -35,10 +32,8 @@ export const uploadAvatar = async (
     throw uploadError;
   }
 
-  // Získat veřejnou URL s cache-busting parametrem
   const publicUrl = getAvatarPublicUrl(filePath);
 
-  // Update profilu
   const { error: updateError } = await supabase
     .from("profiles")
     .update({ avatar_url: publicUrl })
@@ -54,13 +49,13 @@ export const uploadAvatar = async (
 };
 
 /**
- * Smaže avatar ze storage (pokud je uložen v avatars bucketu) a vymaže avatar_url z profilu
+ * Deletes an avatar from storage if it is stored in the avatars bucket, then clears avatar_url.
  */
 export const deleteAvatar = async (
   userId: string,
   currentUrl: string | null,
 ): Promise<void> => {
-  // Smazat ze storage jen pokud je to náš bucket (ne externí URL z Google OAuth)
+  // Only delete from storage for our bucket, not external Google OAuth URLs.
   if (currentUrl && currentUrl.includes("/storage/v1/object/public/avatars/")) {
     const filePath = `${userId}/avatar.jpg`;
     const { error: removeError } = await supabase.storage
@@ -73,7 +68,6 @@ export const deleteAvatar = async (
     }
   }
 
-  // Vymazat z profilu
   const { error: updateError } = await supabase
     .from("profiles")
     .update({ avatar_url: null })
@@ -88,7 +82,7 @@ export const deleteAvatar = async (
 };
 
 /**
- * Vrátí veřejnou URL avataru s cache-busting parametrem
+ * Returns the public avatar URL with a cache-busting parameter.
  */
 export const getAvatarPublicUrl = (path: string): string => {
   const { data } = supabase.storage.from("avatars").getPublicUrl(path);

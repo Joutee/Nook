@@ -19,32 +19,27 @@ export const IssuesWidget = () => {
   const { hasLandlord } = useFlatHasLandlord();
 
   useEffect(() => {
-    // 1. Prvotní načtení dat
     loadIssues();
 
-    // Pokud nemáme flat_id, nemá smysl nic poslouchat
     if (!currentFlat?.id) return;
 
-    // 2. Vytvoření Realtime kanálu
     const issuesChannel = supabase
-      .channel("public:issues") // Název kanálu (může být cokoliv)
+      .channel("public:issues")
       .on(
         "postgres_changes",
         {
-          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "issues",
-          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+          filter: `flat_id=eq.${currentFlat.id}`,
         },
         (payload) => {
           logger.log("Změna v závadách detekována!", payload);
-          // Když se něco změní (někdo přidá/upraví závadu), přenačteme widget
           loadIssues();
         },
       )
       .subscribe();
 
-    // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
     return () => {
       supabase.removeChannel(issuesChannel);
     };

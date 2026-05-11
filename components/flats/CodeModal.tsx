@@ -70,7 +70,7 @@ export default function CodeModal({ visible, code, onClose }: CodeModalProps) {
               </View>
 
               <Button
-                variant="outline"
+                variant="ghost"
                 onPress={handleCopyCode}
                 className="flex-row gap-2"
               >

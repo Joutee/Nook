@@ -10,15 +10,15 @@ import {
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import { Ionicons } from "@expo/vector-icons"; // Pro křížek na zavření
+import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import logger from "@/lib/logger";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  filePath?: string | null; // Cesta v Supabase (např. "flat_1/smlouva.pdf")
-  imageUri?: string | null; // Přímé URI pro lokální obrázky (před nahráním)
+  filePath?: string | null;
+  imageUri?: string | null;
   fileName?: string;
 };
 
@@ -35,9 +35,7 @@ export default function DocumentViewerModal({
     "unknown",
   );
 
-  // Načtení URL ze Supabase při otevření
   useEffect(() => {
-    // Pokud máme přímé imageUri, použijeme ho rovnou
     if (visible && imageUri) {
       setUrl(imageUri);
       setFileType("image");
@@ -45,7 +43,6 @@ export default function DocumentViewerModal({
     } else if (visible && filePath) {
       loadDocumentUrl();
     } else {
-      // Reset při zavření
       setUrl(null);
       setLoading(true);
     }
@@ -56,16 +53,14 @@ export default function DocumentViewerModal({
     setLoading(true);
 
     try {
-      // 1. Zjistíme typ souboru podle koncovky
       const lowerPath = filePath.toLowerCase();
       if (lowerPath.endsWith(".pdf")) setFileType("pdf");
       else if (lowerPath.match(/\.(jpg|jpeg|png|heic|webp)$/))
         setFileType("image");
       else setFileType("unknown");
 
-      // 2. Získáme podepsanou URL (platnou 1 hodinu)
       const { data, error } = await supabase.storage
-        .from("documents") // Tvůj bucket
+        .from("documents")
         .createSignedUrl(filePath, 3600);
 
       if (error) throw error;
@@ -142,7 +137,6 @@ export default function DocumentViewerModal({
       presentationStyle="pageSheet"
     >
       <SafeAreaView className="flex-1 bg-background">
-        {/* Hlavička s tlačítkem Zavřít */}
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-border">
           <Text
             className="text-lg font-bold text-foreground max-w-[80%]"
@@ -155,7 +149,6 @@ export default function DocumentViewerModal({
           </Pressable>
         </View>
 
-        {/* Obsah */}
         <View className="flex-1 bg-muted/30">{renderContent()}</View>
       </SafeAreaView>
     </Modal>

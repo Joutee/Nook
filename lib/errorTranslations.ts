@@ -49,18 +49,15 @@ export const getErrorMessage = (errorMessage: string): string => {
     PASSWORD_REQUIRED: "Heslo je povinné.",
   };
 
-  // Pokus najít přesnou shodu
   if (errorMap[errorMessage]) {
     return errorMap[errorMessage];
   }
 
-  // Pokus najít částečnou shodu
   for (const [key, value] of Object.entries(errorMap)) {
     if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
       return value;
     }
   }
 
-  // Výchozí zpráva
   return "Něco se nepovedlo. Zkuste to prosím znovu.";
 };

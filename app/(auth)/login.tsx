@@ -43,7 +43,6 @@ export default function Login() {
     checkBiometricForThisEmail();
   }, [email]);
 
-  // Automaticky spustit biometriku, když je k dispozici
   useEffect(() => {
     if (canUseBiometric && !hasTriedBiometric && !buttonLoading) {
       setHasTriedBiometric(true);
@@ -68,7 +67,7 @@ export default function Login() {
 
       const hasSaved = await hasBiometricCredentials(email);
       setCanUseBiometric(hasSaved);
-      setHasTriedBiometric(false); // Reset pro nový email
+      setHasTriedBiometric(false);
     } catch (error) {
       logger.log("Error checking biometric:", error);
       setCanUseBiometric(false);
@@ -84,7 +83,6 @@ export default function Login() {
       password: password,
     });
     if (error) {
-      // Kontrola, jestli email není ověřený
       if (error.message.includes("Email not confirmed")) {
         showToast("Email nebyl ověřen. Přesměrujeme vás na ověření.", "error");
         setButtonLoading(false);
@@ -92,7 +90,6 @@ export default function Login() {
         return;
       }
 
-      // Pokud uživatel neexistuje nebo má špatné heslo, zobrazit obecnou chybu
       if (error.message.includes("Invalid login credentials")) {
         showToast("Nesprávný email nebo heslo", "error");
         setButtonLoading(false);
@@ -103,7 +100,6 @@ export default function Login() {
       logger.log("Login error:", error);
       setButtonLoading(false);
     } else {
-      // Úspěšné přihlášení - uložit účet do seznamu použitých účtů
       await saveUsedAccount(email);
       showToast("Přihlášení bylo úspěšné", "success");
       setButtonLoading(false);
@@ -120,7 +116,6 @@ export default function Login() {
         return;
       }
 
-      // Ověřit, že email odpovídá
       if (credentials.email !== email) {
         showToast("Uložený email neodpovídá", "error");
         setButtonLoading(false);

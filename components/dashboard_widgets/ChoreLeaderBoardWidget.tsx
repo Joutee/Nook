@@ -26,13 +26,10 @@ export const ChoreLeaderBoardWidget = () => {
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
-    // 1. Prvotní načtení dat
     loadChoreStats();
 
-    // Pokud nemáme flat_id, nemá smysl nic poslouchat
     if (!currentFlat?.id) return;
 
-    // 2. Vytvoření Realtime kanálu pro změny v dokončení úkolů
     const completionsChannel = supabase
       .channel("public:chore_completions_leaderboard")
       .on(
@@ -49,7 +46,6 @@ export const ChoreLeaderBoardWidget = () => {
       )
       .subscribe();
 
-    // 3. Kanál pro změny v úkolech (nové úkoly, změny assignee atd.)
     const choresChannel = supabase
       .channel("public:chores_leaderboard")
       .on(
@@ -67,7 +63,6 @@ export const ChoreLeaderBoardWidget = () => {
       )
       .subscribe();
 
-    // 4. Úklid při opuštění obrazovky
     return () => {
       supabase.removeChannel(completionsChannel);
       supabase.removeChannel(choresChannel);
@@ -82,7 +77,6 @@ export const ChoreLeaderBoardWidget = () => {
 
     setIsLoading(true);
     try {
-      // 1. Načíst všechny členy bytu
       const { data: membersData, error: membersError } = await supabase
         .from("flat_profile")
         .select(
@@ -105,7 +99,6 @@ export const ChoreLeaderBoardWidget = () => {
         return;
       }
 
-      // 2. Načíst historii všech úkolů pro tento byt
       const { data: historyData, error: historyError } = await supabase
         .from("view_chore_history")
         .select("*")
@@ -117,23 +110,19 @@ export const ChoreLeaderBoardWidget = () => {
         return;
       }
 
-      // 3. Vypočítat statistiky pro každého člena
       const stats: MemberStats[] = membersData
         .map((member: any) => {
           const profileId = member.profile_id;
           const profile = member.profiles;
 
-          // Filtrovat úkoly přiřazené tomuto členovi
           const memberChores = (historyData as HistoryItem[]).filter(
             (item) => item.expected_profile_id === profileId,
           );
 
-          // Spočítat dokončené úkoly
           const completedChores = memberChores.filter(
             (item) => item.is_done,
           ).length;
 
-          // Vypočítat procento úspěšnosti
           const completionRate =
             memberChores.length > 0
               ? (completedChores / memberChores.length) * 100
@@ -149,8 +138,8 @@ export const ChoreLeaderBoardWidget = () => {
             completion_rate: completionRate,
           };
         })
-        .filter((stat) => stat.total_chores > 0) // Zobrazit jen členy, kteří mají nějaké úkoly
-        .sort((a, b) => b.completion_rate - a.completion_rate); // Seřadit od nejvyššího procenta
+        .filter((stat) => stat.total_chores > 0)
+        .sort((a, b) => b.completion_rate - a.completion_rate);
 
       setMemberStats(stats);
     } catch (error) {
@@ -201,7 +190,6 @@ export const ChoreLeaderBoardWidget = () => {
                   key={stat.profile_id}
                   className="flex-row items-center gap-2"
                 >
-                  {/* Position Number */}
                   <View className="w-8">
                     <Text
                       className="text-lg text-primary text-left
@@ -211,14 +199,12 @@ export const ChoreLeaderBoardWidget = () => {
                     </Text>
                   </View>
 
-                  {/* Avatar */}
                   <Avatar
                     name={stat.name}
                     imageUrl={stat.avatar_url}
                     size="xl"
                   />
 
-                  {/* Name and Stats */}
                   <View className="flex-1">
                     <View className="flex-row items-center justify-between mb-1">
                       <Text className="text-sm font-semibold text-foreground">
@@ -231,7 +217,6 @@ export const ChoreLeaderBoardWidget = () => {
                       </Text>
                     </View>
 
-                    {/* Progress Bar */}
                     <View className="h-2 bg-secondary rounded-full overflow-hidden">
                       <View
                         className={`h-full rounded-full ${getCompletionBarColor(stat.completion_rate)}`}
@@ -241,7 +226,6 @@ export const ChoreLeaderBoardWidget = () => {
                       />
                     </View>
 
-                    {/* Chore Count */}
                     <Text className="text-xs text-muted-foreground mt-1">
                       {stat.completed_chores} z {stat.total_chores} úkolů
                     </Text>

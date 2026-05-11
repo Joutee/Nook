@@ -53,22 +53,18 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
       onSelectedMembersChange(
         selectedMembers.filter((m) => m.id !== member.id),
       );
-      // Remove manual amount if exists
       const newManualAmounts = { ...manualAmounts };
       delete newManualAmounts[member.id];
       onManualAmountsChange(newManualAmounts);
-      // Remove from touched members
       const newTouched = new Set(touchedMembers);
       newTouched.delete(member.id);
       onTouchedMembersChange(newTouched);
     } else {
-      // Simply add the member - field will be empty/zero until user changes any field
       onSelectedMembersChange([...selectedMembers, member]);
     }
   };
 
   const handleManualAmountChange = (memberId: string, value: string) => {
-    // Just update the value - recalculation happens on blur
     const newManualAmounts = {
       ...manualAmounts,
       [memberId]: value,
@@ -77,19 +73,16 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
   };
 
   const handleAmountBlur = (memberId: string) => {
-    // Mark this member as touched
     const newTouched = new Set(touchedMembers);
     newTouched.add(memberId);
     onTouchedMembersChange(newTouched);
 
     const valueNum = parseFloat(manualAmounts[memberId]) || 0;
 
-    // Find untouched members
     const untouchedMembers = selectedMembers.filter(
       (m) => !newTouched.has(m.id),
     );
 
-    // If no untouched members, just update total amount to sum of all fields
     if (untouchedMembers.length === 0) {
       const newTotal = selectedMembers.reduce((sum, member) => {
         const amt = parseFloat(manualAmounts[member.id]) || 0;
@@ -100,7 +93,6 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
       return;
     }
 
-    // Calculate total of all touched members (including the one just edited)
     const touchedTotal = Array.from(newTouched).reduce((sum, id) => {
       const amt = parseFloat(manualAmounts[id]) || 0;
       return sum + amt;
@@ -108,21 +100,16 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
 
     const amountNum = parseFloat(amount);
 
-    // Calculate remaining for untouched members
     const remaining = amountNum - touchedTotal;
 
-    // Sum of current untouched amounts
     const untouchedSum = untouchedMembers.reduce((sum, member) => {
       return sum + (parseFloat(manualAmounts[member.id]) || 0);
     }, 0);
 
-    // Calculate the difference
     const tmp = remaining - untouchedSum;
 
-    // Calculate adjustment per untouched member
     const perMemberAdjustment = tmp / untouchedMembers.length;
 
-    // Calculate new untouched amounts
     let hasNegative = false;
     untouchedMembers.forEach((member) => {
       const currentAmount = parseFloat(manualAmounts[member.id]) || 0;
@@ -134,12 +121,10 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
 
     const newManualAmounts = { ...manualAmounts };
 
-    // If any untouched would be negative, increase total amount and keep untouched unchanged
     if (hasNegative) {
       const newTotalAmount = amountNum + Math.abs(tmp);
       onAmountChange(newTotalAmount.toFixed(2));
     } else {
-      // Apply adjustments to untouched members
       untouchedMembers.forEach((member) => {
         const currentAmount = parseFloat(manualAmounts[member.id]) || 0;
         newManualAmounts[member.id] = (
@@ -152,7 +137,6 @@ export const ExpenseSplitSection: React.FC<ExpenseSplitSectionProps> = ({
 
   const handleSplitModeChange = (newMode: "auto" | "manual" | "items") => {
     if (newMode === "manual") {
-      // Switching to manual - pre-fill with equal amounts
       const amountNum = parseFloat(amount);
       if (!isNaN(amountNum) && selectedMembers.length > 0) {
         const newManualAmounts: Record<string, string> = {};

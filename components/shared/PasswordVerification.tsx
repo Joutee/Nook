@@ -21,7 +21,7 @@ interface PasswordVerificationProps {
   onCancel: () => void;
   title?: string;
   description?: string;
-  returnPassword?: boolean; // Nová prop pro vrácení hesla
+  returnPassword?: boolean;
 }
 
 export default function PasswordVerification({
@@ -29,7 +29,7 @@ export default function PasswordVerification({
   onCancel,
   title = "Ověření totožnosti",
   description = "Pro pokračování zadejte své heslo",
-  returnPassword = false, // Default je false pro zpětnou kompatibilitu
+  returnPassword = false,
 }: PasswordVerificationProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,7 +45,6 @@ export default function PasswordVerification({
 
     setLoading(true);
 
-    // Získat aktuálního uživatele
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -56,7 +55,6 @@ export default function PasswordVerification({
       return;
     }
 
-    // Ověřit heslo přihlášením
     const { error } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: password,
@@ -68,7 +66,6 @@ export default function PasswordVerification({
     } else {
       showToast("Heslo bylo ověřeno", "success");
       setLoading(false);
-      // Volitelně vrátí heslo, pokud je to požadováno
       onVerified(returnPassword ? password : undefined);
     }
   };

@@ -95,7 +95,6 @@ const ProfilePage = () => {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Pokud není ID, použij aktuálního uživatele
       const profileId = params.id || user?.id;
       if (!profileId) {
         setIsLoading(false);
@@ -401,7 +400,6 @@ const ProfilePage = () => {
       className="flex-1"
     >
       <View className="p-5 gap-6">
-        {/* Avatar + jméno */}
         <View className="items-center gap-3 pt-4">
           {isOwnProfile ? (
             <Pressable
@@ -420,7 +418,6 @@ const ProfilePage = () => {
                     size="2xl"
                   />
                 )}
-                {/* Camera badge */}
                 <View className="absolute bottom-0 right-0 bg-primary rounded-full w-7 h-7 items-center justify-center border-2 border-background">
                   <Ionicons name="camera" size={14} color="white" />
                 </View>
@@ -438,7 +435,6 @@ const ProfilePage = () => {
           </Text>
         </View>
 
-        {/* Informace */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Informace
@@ -685,7 +681,6 @@ const ProfilePage = () => {
           </Card>
         </View>
 
-        {/* Platební údaje */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Platební údaje
@@ -762,7 +757,6 @@ const ProfilePage = () => {
           </Card>
         </View>
 
-        {/* Účet — pouze vlastní profil */}
         {isOwnProfile && (
           <View className="gap-2">
             <Card className="gap-0 py-0">

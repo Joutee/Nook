@@ -21,7 +21,7 @@ export type { Member };
 
 interface MemberListProps {
   showActions?: boolean;
-  flatId?: string | null; // Volitelný flatId - pokud není poskytnut, použije currentFlat z kontextu
+  flatId?: string | null;
 }
 
 export const MemberList = ({
@@ -36,7 +36,6 @@ export const MemberList = ({
   const { showToast } = useToast();
   const router = useRouter();
 
-  // Použít propFlatId pokud je poskytnut, jinak currentFlat.id
   const effectiveFlatId = propFlatId || currentFlat?.id;
 
   const [removeAlert, setRemoveAlert] = useState<{
@@ -64,7 +63,6 @@ export const MemberList = ({
 
     setIsLoading(true);
     try {
-      // Získat aktuálního uživatele a jeho roli
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -307,7 +305,6 @@ export const MemberList = ({
         );
       })}
 
-      {/* Alert dialog pro odstranění člena */}
       <AlertDialog
         open={removeAlert.open}
         onOpenChange={(open) =>
@@ -321,7 +318,6 @@ export const MemberList = ({
         destructive
       />
 
-      {/* Alert dialog pro změnu role */}
       <AlertDialog
         open={roleAlert.open}
         onOpenChange={(open) =>

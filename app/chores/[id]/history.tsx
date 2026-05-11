@@ -59,7 +59,12 @@ const ChoreHistory = () => {
         logger.error("Error loading history:", error);
         showToast("Nepodařilo se načíst historii: " + error.message, "error");
       } else {
-        setHistory(data || []);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const filtered = (data || []).filter(
+          (h) => h.is_done || new Date(h.cycle_start_date).setHours(0, 0, 0, 0) < today.getTime(),
+        );
+        setHistory(filtered);
       }
     } catch (error) {
       logger.error("Error:", error);

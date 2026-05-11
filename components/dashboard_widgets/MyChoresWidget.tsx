@@ -17,7 +17,7 @@ import { Chore } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { THEME } from "@/lib/theme";
 import logger from "@/lib/logger";
-import { calculateNextCycleDate } from "@/lib/intervalUtils";
+import { calculateNextCycleDate, isStartDateInFuture } from "@/lib/intervalUtils";
 
 export const MyChoresWidget = () => {
   const [myChores, setMyChores] = useState<Chore[]>([]);
@@ -40,26 +40,22 @@ export const MyChoresWidget = () => {
   const borderColor = isDark ? THEME.dark.border : THEME.light.border;
 
   useEffect(() => {
-    // 1. Prvotní načtení dat
     loadMyChores();
 
-    // Pokud nemáme flat_id, nemá smysl nic poslouchat
     if (!currentFlat?.id) return;
 
-    // 2. Vytvoření Realtime kanálu
     const choresChannel = supabase
-      .channel("public:chores") // Název kanálu (může být cokoliv)
+      .channel("public:chores")
       .on(
         "postgres_changes",
         {
-          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "chores",
-          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+          filter: `flat_id=eq.${currentFlat.id}`,
         },
         (payload) => {
           logger.log("Změna v úkolech detekována!", payload);
-          // Když se něco změní (někdo přidá/upraví úkol), přenačteme widget
           loadMyChores();
         },
       )
@@ -81,7 +77,6 @@ export const MyChoresWidget = () => {
       )
       .subscribe();
 
-    // 4. Úklid při opuštění obrazovky (zavře kanály a šetří limit 200 připojení)
     return () => {
       supabase.removeChannel(choresChannel);
       supabase.removeChannel(completionsChannel);
@@ -103,7 +98,6 @@ export const MyChoresWidget = () => {
       if (user) {
         setCurrentUserId(user.id);
 
-        // Načíst všechny úkoly pro správné seřazení
         const { data, error } = await supabase
           .from("view_chore_dashboard")
           .select("*")
@@ -113,20 +107,16 @@ export const MyChoresWidget = () => {
         if (error) {
           logger.error("Error loading my chores:", error);
         } else {
-          const now = new Date();
           const allChoresData = (data || []).filter(
-            (c) => !c.start_date || new Date(c.start_date) <= now,
+            (c) => !isStartDateInFuture(c.start_date),
           );
           setTotalCount(allChoresData.length);
 
-          // Seřadit: 1) nesplněné nahoře, 2) podle data nového cyklu (nejbližší nahoře)
           const sorted = allChoresData.sort((a, b) => {
-            // Primární řazení: nesplněné nahoře
             if (a.is_completed_current_cycle !== b.is_completed_current_cycle) {
               return a.is_completed_current_cycle ? 1 : -1;
             }
 
-            // Sekundární řazení: podle data nového cyklu
             const dateA = calculateNextCycleDate(a);
             const dateB = calculateNextCycleDate(b);
 
@@ -138,7 +128,6 @@ export const MyChoresWidget = () => {
           });
 
           setAllChores(sorted);
-          // Zobrazit pouze prvních 5 pokud není rozbaleno
           setMyChores(isExpanded ? sorted : sorted.slice(0, 5));
         }
       }

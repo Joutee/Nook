@@ -34,7 +34,6 @@ const EditExpense = () => {
 
     setIsLoadingData(true);
     try {
-      // Load expense data
       const { data: expenseData, error: expenseError } = await supabase
         .from("expenses")
         .select(
@@ -55,7 +54,6 @@ const EditExpense = () => {
         return;
       }
 
-      // Load expense shares
       const { data: sharesData, error: sharesError } = await supabase
         .from("expense_shares")
         .select(
@@ -77,7 +75,6 @@ const EditExpense = () => {
         return;
       }
 
-      // Load expense items (if any)
       const { data: itemsData } = await supabase
         .from("expense_items")
         .select(`
@@ -94,7 +91,6 @@ const EditExpense = () => {
 
       const hasItems = itemsData && itemsData.length > 0;
 
-      // Process the data
       const selectedMembers: Member[] = sharesData
         .map((share: any) => share.profile)
         .filter((p: any) => p)
@@ -105,7 +101,6 @@ const EditExpense = () => {
         manualAmounts[share.profile_id] = share.owed_amount.toFixed(2);
       });
 
-      // Determine split mode
       let detectedSplitMode: "auto" | "manual" | "items" = "auto";
 
       if (hasItems) {

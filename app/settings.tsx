@@ -115,10 +115,9 @@ const Settings = () => {
 
   const handleBiometricToggle = async (enabled: boolean) => {
     if (enabled) {
-      // Zapnout biometriku - vyžaduje heslo
+      // Enabling biometrics requires password verification.
       setShowPasswordDialog(true);
     } else {
-      // Vypnout biometriku - smazat credentials pro aktuálního uživatele
       try {
         await deleteBiometricCredentials(currentEmail);
         setBiometricEnabled(false);
@@ -152,14 +151,12 @@ const Settings = () => {
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="p-5 gap-6">
-        {/* Domácnost */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Domácnost
           </Text>
 
           <Card className="gap-0 py-0">
-            {/* Kód bytu */}
             {flatCode && (
               <>
                 <Button
@@ -192,7 +189,6 @@ const Settings = () => {
             )}
             <Separator />
 
-            {/* Členové bytu */}
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
@@ -215,7 +211,6 @@ const Settings = () => {
 
             <Separator />
 
-            {/* Připojit se k dalšímu bytu */}
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
@@ -238,7 +233,6 @@ const Settings = () => {
 
             <Separator />
 
-            {/* Vytvořit novou domácnost */}
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"
@@ -261,7 +255,6 @@ const Settings = () => {
           </Card>
         </View>
 
-        {/* Aplikace */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Aplikace
@@ -272,7 +265,6 @@ const Settings = () => {
           </Card>
         </View>
 
-        {/* Bezpečnost */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Bezpečnost
@@ -305,7 +297,6 @@ const Settings = () => {
           </Card>
         </View>
 
-        {/* Účet */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Účet
@@ -379,13 +370,11 @@ const Settings = () => {
         </View>
       </View>
 
-      {/* Bottom Sheet pro členy bytu */}
       <MembersBottomSheet
         visible={isMembersModalVisible}
         onClose={() => setIsMembersModalVisible(false)}
       />
 
-      {/* Alert Dialog pro odhlášení */}
       <AlertDialog
         open={logoutDialogOpen}
         onOpenChange={setLogoutDialogOpen}
@@ -397,7 +386,6 @@ const Settings = () => {
         destructive
       />
 
-      {/* Modal pro zapnutí biometriky */}
       <Modal
         visible={showPasswordDialog}
         transparent

@@ -2,24 +2,22 @@ import { supabase } from "./supabase";
 import { Chore } from "../types/chores";
 
 /**
- * Dokončí úkol v aktuálním cyklu
- * @param chore - Úkol k dokončení
- * @param currentUserId - ID aktuálního uživatele
- * @param showToast - Funkce pro zobrazení toast notifikace
- * @returns Promise<boolean> - true pokud byl úkol úspěšně dokončen, jinak false
+ * Completes a chore in the current cycle.
+ * @param chore - Chore to complete.
+ * @param currentUserId - Current user ID.
+ * @param showToast - Toast notification callback.
+ * @returns Promise<boolean> - true when the chore was completed successfully.
  */
 export const completeChore = async (
   chore: Chore,
   currentUserId: string | null,
   showToast: (message: string, type: "success" | "error" | "info") => void,
 ): Promise<boolean> => {
-  // Kontrola oprávnění
   if (chore.assignee_user_id !== currentUserId) {
     showToast("Tento úkol není přiřazen vám", "error");
     return false;
   }
 
-  // Kontrola, jestli už není dokončeno
   if (chore.is_completed_current_cycle) {
     showToast("Tento úkol je již dokončen", "info");
     return false;
@@ -46,11 +44,11 @@ export const completeChore = async (
 };
 
 /**
- * Zruší splnění úkolu v aktuálním cyklu (smaže záznam z chore_completions)
- * @param chore - Úkol k odznačení
- * @param currentUserId - ID aktuálního uživatele
- * @param showToast - Funkce pro zobrazení toast notifikace
- * @returns Promise<boolean> - true pokud byl úkol úspěšně odznačen
+ * Reverts chore completion in the current cycle by deleting the chore_completions row.
+ * @param chore - Chore to uncomplete.
+ * @param currentUserId - Current user ID.
+ * @param showToast - Toast notification callback.
+ * @returns Promise<boolean> - true when the chore was uncompleted successfully.
  */
 export const uncompleteChore = async (
   chore: Chore,

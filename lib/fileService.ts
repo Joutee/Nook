@@ -111,7 +111,7 @@ export const pickFile = async (): Promise<{
     let fileName = file.name.toLowerCase();
     let mimeType = file.mimeType;
 
-    // Oprava neznámého MIME typu (fix pro Android)
+    // Fix unknown MIME type on Android.
     if (!mimeType || mimeType === "application/octet-stream") {
       if (fileName.endsWith(".pdf")) mimeType = "application/pdf";
       else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
@@ -162,7 +162,6 @@ export const uploadFile = async ({
   fileName,
   mimeType,
 }: UploadFileParams): Promise<string> => {
-  // Komprese obrázků
   let processedUri = fileUri;
   let processedMimeType = mimeType;
   let processedFileName = fileName;
@@ -176,7 +175,6 @@ export const uploadFile = async ({
     }
   }
 
-  // Kontrola velikosti
   const fileInfo = await getInfoAsync(processedUri);
   if (fileInfo.exists && fileInfo.size && fileInfo.size > SUPABASE_LIMIT) {
     const sizeInMb = (fileInfo.size / (1024 * 1024)).toFixed(2);
@@ -185,7 +183,6 @@ export const uploadFile = async ({
 
   logger.log("Zpracovávám pro upload:", processedFileName, processedMimeType);
 
-  // Konverze na base64
   const base64 = await readAsStringAsync(processedUri, {
     encoding: "base64",
   });
@@ -196,7 +193,6 @@ export const uploadFile = async ({
 
   logger.log("Nahrávám do Supabase...");
 
-  // Upload do storage
   const { data, error } = await supabase.storage
     .from(bucket)
     .upload(filePath, fileData, {
@@ -233,14 +229,12 @@ export const deleteFile = async ({
   tableName,
   recordId,
 }: DeleteFileParams): Promise<void> => {
-  // Smazat ze storage
   const { error: storageError } = await supabase.storage
     .from(bucket)
     .remove([path]);
 
   if (storageError) throw storageError;
 
-  // Smazat z databáze
   const { error: dbError } = await supabase
     .from(tableName)
     .delete()

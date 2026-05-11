@@ -33,18 +33,15 @@ export function AlertDialog({
       animationType="fade"
       onRequestClose={() => onOpenChange(false)}
     >
-      {/* Overlay */}
       <Pressable
         className="flex-1 bg-black/75 items-center justify-center p-4"
         onPress={() => onOpenChange(false)}
       >
-        {/* Dialog Content */}
         <Pressable
           className="w-72 max-w-[600px]"
           onPress={(e) => e.stopPropagation()}
         >
           <Card className="w-full max-w-[600px] gap-4 py-6">
-            {/* Header */}
             <View className="px-6 gap-2">
               <Text className="text-lg font-semibold text-foreground">
                 {title}
@@ -54,7 +51,6 @@ export function AlertDialog({
               </Text>
             </View>
 
-            {/* Footer - Buttons */}
             <View className="px-6 flex-row gap-3 justify-end">
               <Button
                 variant="secondary"

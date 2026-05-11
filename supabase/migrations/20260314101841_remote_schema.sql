@@ -79,14 +79,14 @@ DECLARE
   v_assignee_id uuid;
   v_total_assignees int;
 BEGIN
-  -- 1. Zjistíme, kolik lidí se střídá
+  -- 1. Count people in the rotation.
   SELECT count(*) INTO v_total_assignees
   FROM chore_profile
   WHERE chore_id = p_chore_id;
 
   IF v_total_assignees = 0 OR v_total_assignees IS NULL THEN RETURN NULL; END IF;
 
-  -- 2. Najdeme uživatele
+  -- 2. Find the assignee.
   IF p_cycle_index < 0 THEN
      SELECT profile_id INTO v_assignee_id
      FROM chore_profile
@@ -94,8 +94,7 @@ BEGIN
      ORDER BY rotation_order
      LIMIT 1;
   ELSE
-     -- Tady musíme přetypovat bigint na int pro operaci modulo a offset, 
-     -- protože pole/offset v Postgresu vyžadují integer.
+     -- Cast bigint to int for modulo and offset because PostgreSQL offsets require integer.
      SELECT profile_id INTO v_assignee_id
      FROM chore_profile
      WHERE chore_id = p_chore_id
@@ -133,9 +132,9 @@ CREATE OR REPLACE FUNCTION "public"."reassign_admin_on_delete"() RETURNS "trigge
     LANGUAGE "plpgsql"
     AS $$
 BEGIN
-  -- Pokud se mazal admin
+  -- If the deleted member was an admin.
   IF OLD.is_admin = true THEN
-    -- Nastavit nejstaršího zbývajícího uživatele jako nového admina
+    -- Promote the oldest remaining member to admin.
     UPDATE flat_profile
     SET is_admin = true
     WHERE flat_id = OLD.flat_id
@@ -159,11 +158,11 @@ ALTER FUNCTION "public"."reassign_admin_on_delete"() OWNER TO "postgres";
 CREATE OR REPLACE FUNCTION "public"."set_first_user_as_admin"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$BEGIN
-  -- Pokud je pronajímatel, vždy je admin
+  -- Landlords are always admins.
   IF NEW.role = 'pronajimatel' THEN
     NEW.is_admin = true;
   ELSE
-    -- Zkontrolovat, jestli je nejstarší člen v bytě podle joined_at
+    -- Check whether this is the oldest member in the flat by joined_at.
     IF NEW.joined_at = (
       SELECT MIN(joined_at) 
       FROM flat_profile 
@@ -1383,6 +1382,5 @@ with check (((bucket_id = 'issue-images'::text) AND (((storage.foldername(name))
 using (((bucket_id = 'issue-images'::text) AND (((storage.foldername(name))[1])::uuid IN ( SELECT flat_profile.flat_id
    FROM public.flat_profile
   WHERE (flat_profile.profile_id = auth.uid())))));
-
 
 

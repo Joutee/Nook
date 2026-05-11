@@ -2,8 +2,8 @@ import { DarkTheme, DefaultTheme, type Theme } from "@react-navigation/native";
 
 export const THEME = {
   light: {
-    background: "hsl(0 0% 100%)", // Musí sedět s --background v :root
-    foreground: "hsl(0 0% 3.9%)", // Musí sedět s --foreground
+    background: "hsl(0 0% 100%)", // Must match --background in :root.
+    foreground: "hsl(0 0% 3.9%)", // Must match --foreground.
     card: "hsl(0 0% 100%)",
     cardForeground: "hsl(0 0% 3.9%)",
     popover: "hsl(0 0% 100%)",

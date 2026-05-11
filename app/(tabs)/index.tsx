@@ -16,7 +16,7 @@ import {
 } from "@/config/widgetConfig";
 import logger from "@/lib/logger";
 
-// Modulová proměnná pro sledování, pro které byty už proběhl Supabase sync v této session
+// Tracks which flats have already been synced from Supabase in this session.
 let syncedFlats = new Set<string>();
 
 export default function Home() {
@@ -67,7 +67,6 @@ export default function Home() {
     try {
       setIsLoading(true);
 
-      // Pokud už byl tento byt načten v této session, použij local storage
       if (syncedFlats.has(currentFlat.id)) {
         const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
         if (storedLayout) {
@@ -75,10 +74,8 @@ export default function Home() {
           setIsLoading(false);
           return;
         }
-        // Pokud z nějakého důvodu není v local storage, pokračuj na načtení z DB
       }
 
-      // První načtení tohoto bytu v session - načíst z databáze
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -93,28 +90,23 @@ export default function Home() {
 
         if (error) {
           logger.error("Error loading dashboard layout:", error);
-          // Při chybě použij local storage jako fallback
           const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
           const layoutToUse = storedLayout
             ? JSON.parse(storedLayout)
             : getDefaultWidgetsByRole(userRole);
           setWidgetKeys(layoutToUse);
         } else {
-          // Data ze Supabase přišla - použij je jako primární zdroj
           const dbLayout =
             data?.dashboard_layout || getDefaultWidgetsByRole(userRole);
           setWidgetKeys(dbLayout);
-          // Synchronizovat s AsyncStorage
           await AsyncStorage.setItem(
             DASHBOARD_LAYOUT_KEY,
             JSON.stringify(dbLayout),
           );
         }
 
-        // Označit tento byt jako načtený v této session
         syncedFlats.add(currentFlat.id);
       } else {
-        // Pokud není user, použij local storage nebo výchozí layout
         const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
         const layoutToUse = storedLayout
           ? JSON.parse(storedLayout)
@@ -123,7 +115,6 @@ export default function Home() {
       }
     } catch (error) {
       logger.error("Error in loadDashboardLayout:", error);
-      // Použít local storage nebo výchozí layout při chybě
       try {
         const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
         const layoutToUse = storedLayout
@@ -162,10 +153,8 @@ export default function Home() {
           Vítejte, {userName || "uživateli"}!
         </Text>
 
-        {/* Dynamické vykreslení widgetů */}
         {widgetKeys
           .filter((key) => {
-            // Filtrovat widgety podle role
             const allowedWidgets = getWidgetsByRole(userRole);
             return allowedWidgets.includes(key);
           })
@@ -178,7 +167,6 @@ export default function Home() {
             return <WidgetComponent key={key} />;
           })}
 
-        {/* Tlačítko pro uspořádání widgetů */}
         <View className="items-center">
           <Button
             variant="outline"

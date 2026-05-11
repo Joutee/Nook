@@ -9,7 +9,6 @@ export default function VerifyEmail() {
   const { email } = useLocalSearchParams<{ email: string }>();
 
   const handleSuccess = () => {
-    // Po úspěšné verifikaci je uživatel přihlášen a můžeme ho přesměrovat
   };
 
   return (

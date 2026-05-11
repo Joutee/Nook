@@ -79,33 +79,9 @@ const Issues = () => {
                 </Text>
               </View>
             </View>
-            {item.description && (
-              <Text
-                className="text-sm text-muted-foreground mb-2"
-                numberOfLines={2}
-              >
-                {item.description}
-              </Text>
-            )}
-            <View className="flex-row justify-between items-center">
-              <View className="flex-row items-center gap-1">
-                <Ionicons
-                  name="calendar-outline"
-                  size={12}
-                  className="text-muted-foreground"
-                />
-                <Text className="text-xs text-muted-foreground w-6/12">
-                  {formatDate(item.created_at)}
-                </Text>
-              </View>
-              {item.image_path && (
-                <Ionicons
-                  name="image-outline"
-                  size={16}
-                  className="text-muted-foreground"
-                />
-              )}
-            </View>
+            <Text className="text-xs text-muted-foreground">
+              {formatDate(item.created_at)}
+            </Text>
           </View>
         </CardContent>
       </Card>
@@ -164,7 +140,6 @@ const Issues = () => {
         )}
       </ScrollView>
 
-      {/* Floating Action Button pro nájemce */}
       {userRole === "najemce" && (
         <Pressable
           className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"

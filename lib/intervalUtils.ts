@@ -58,11 +58,23 @@ export function formatInterval(
   }
 }
 
+// Compares calendar days, not instants. Avoids false positives when
+// start_date is stored as midnight UTC and rendered hours later in a
+// non-UTC timezone.
+export function isStartDateInFuture(startDate: string | null | undefined): boolean {
+  if (!startDate) return false;
+  const start = new Date(startDate);
+  const today = new Date();
+  start.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return start.getTime() > today.getTime();
+}
+
 export function calculateNextCycleDate(chore: Chore): Date | null {
   if (!chore.start_date) return null;
 
   const startDate = new Date(chore.start_date);
-  const nextCycle = chore.current_cycle_index + 1;
+  const nextCycle = Math.max(chore.current_cycle_index + 1, 1);
 
   switch (chore.interval_type) {
     case "daily": {
@@ -108,11 +120,10 @@ export function calculateIntervalStartDate(
   customDays?: number | null,
 ): string {
   const now = new Date();
-  // Work with UTC dates to avoid timezone shift when saving to DB
-  const todayYear = now.getUTCFullYear();
-  const todayMonth = now.getUTCMonth(); // 0-indexed
-  const todayDate = now.getUTCDate();
-  const todayDow = now.getUTCDay() || 7; // Convert Sunday 0 to 7 (ISO: 1=Mon..7=Sun)
+  const todayYear = now.getFullYear();
+  const todayMonth = now.getMonth(); // 0-indexed
+  const todayDate = now.getDate();
+  const todayDow = now.getDay() || 7; // Convert Sunday 0 to 7 (ISO: 1=Mon..7=Sun)
 
   function toDateString(y: number, m: number, d: number): string {
     return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -128,8 +139,8 @@ export function calculateIntervalStartDate(
       if (todayDow === targetDay) return toDateString(todayYear, todayMonth, todayDate);
       const diff = targetDay - todayDow;
       const daysForward = diff > 0 ? diff : diff + 7;
-      const d = new Date(Date.UTC(todayYear, todayMonth, todayDate + daysForward));
-      return toDateString(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      const d = new Date(todayYear, todayMonth, todayDate + daysForward);
+      return toDateString(d.getFullYear(), d.getMonth(), d.getDate());
     }
 
     case "monthly": {
@@ -137,23 +148,23 @@ export function calculateIntervalStartDate(
       if (todayDate === targetDom) return toDateString(todayYear, todayMonth, todayDate);
       if (todayDate < targetDom) {
         // Later this month (clamp to last day of month)
-        const lastDay = new Date(Date.UTC(todayYear, todayMonth + 1, 0)).getUTCDate();
+        const lastDay = new Date(todayYear, todayMonth + 1, 0).getDate();
         const day = Math.min(targetDom, lastDay);
         return toDateString(todayYear, todayMonth, day);
       }
       // Next month
-      const next = new Date(Date.UTC(todayYear, todayMonth + 1, 1));
-      const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
+      const next = new Date(todayYear, todayMonth + 1, 1);
+      const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
       const day = Math.min(targetDom, lastDay);
-      return toDateString(next.getUTCFullYear(), next.getUTCMonth(), day);
+      return toDateString(next.getFullYear(), next.getMonth(), day);
     }
 
     case "yearly": {
       const targetDay = intervalDay ?? 1;
       const targetMonth = (intervalMonth ?? 1) - 1;
-      const todayUtc = new Date(Date.UTC(todayYear, todayMonth, todayDate));
-      const thisYear = new Date(Date.UTC(todayYear, targetMonth, targetDay));
-      if (thisYear >= todayUtc) {
+      const todayLocal = new Date(todayYear, todayMonth, todayDate);
+      const thisYear = new Date(todayYear, targetMonth, targetDay);
+      if (thisYear >= todayLocal) {
         return toDateString(todayYear, targetMonth, targetDay);
       }
       return toDateString(todayYear + 1, targetMonth, targetDay);

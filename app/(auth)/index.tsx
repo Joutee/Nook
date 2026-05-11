@@ -40,27 +40,22 @@ export default function AuthEntry() {
 
   async function checkForDefaultAccount() {
     try {
-      // Nejdřív migrovat stará data
       await migrateLegacyBiometricCredentials();
 
-      // Pokud má parametr skipAutoLogin, nepřesměrovávat automaticky
       if (params.skipAutoLogin === "true") {
         setIsCheckingBiometric(false);
         return;
       }
 
-      // Zkusit najít naposledy použitý účet
       const defaultAccount = await getDefaultUsedAccount();
 
       if (defaultAccount) {
-        // Automaticky přesměrovat na login s naposledy použitým emailem
         router.replace(
           `/(auth)/login?email=${encodeURIComponent(defaultAccount.email)}`,
         );
         return;
       }
 
-      // Žádný účet není uložený - zobrazit formulář pro email
     } catch (error) {
       logger.log("Error checking for default account:", error);
     } finally {
@@ -74,7 +69,6 @@ export default function AuthEntry() {
       return;
     }
 
-    // Validace emailu
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       showToast("Zadejte platný email", "error");
@@ -84,7 +78,6 @@ export default function AuthEntry() {
     setIsLoading(true);
 
     try {
-      // Jednoduše přesměrujeme na login
       router.push(`/(auth)/login?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
       logger.log("Error:", error);
@@ -109,7 +102,6 @@ export default function AuthEntry() {
     setIsLoading(true);
 
     try {
-      // Přesměrujeme na registraci (email je volitelný)
       const emailParam = email.trim()
         ? `?email=${encodeURIComponent(email)}`
         : "";

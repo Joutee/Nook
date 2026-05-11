@@ -14,7 +14,7 @@ import { Chore, HistoryItem } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
-import { formatInterval } from "@/lib/intervalUtils";
+import { formatInterval, isStartDateInFuture } from "@/lib/intervalUtils";
 
 const ChoreDetail = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -82,12 +82,19 @@ const ChoreDetail = () => {
         .select("*")
         .eq("chore_id", id)
         .order("cycle_index", { ascending: false })
-        .limit(3);
+        .limit(4);
 
       if (error) {
         logger.error("Error loading history:", error);
       } else {
-        setHistory(data || []);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const filtered = (data || []).filter(
+          (h) =>
+            h.is_done ||
+            new Date(h.cycle_start_date).setHours(0, 0, 0, 0) < today.getTime(),
+        );
+        setHistory(filtered.slice(0, 3));
       }
     } catch (error) {
       logger.error("Error:", error);
@@ -173,8 +180,7 @@ const ChoreDetail = () => {
 
   const isMyTurn = chore.assignee_user_id === currentUserId;
   const isCompleted = chore.is_completed_current_cycle;
-  const isFutureStart =
-    chore.start_date && new Date(chore.start_date) > new Date();
+  const isFutureStart = isStartDateInFuture(chore.start_date);
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -292,10 +298,7 @@ const ChoreDetail = () => {
                 disabled={isDeleting || completingChore}
               >
                 {isDeleting ? (
-                  <ActivityIndicator
-                    size="small"
-                    className="text-primary"
-                  />
+                  <ActivityIndicator size="small" className="text-primary" />
                 ) : (
                   <>
                     <Text>Smazat úkol</Text>
@@ -306,48 +309,40 @@ const ChoreDetail = () => {
             {isMyTurn && !isCompleted && !isFutureStart && (
               <Button
                 variant="default"
-                className="flex-1 flex-row gap-2"
                 onPress={handleCompleteChore}
                 disabled={completingChore || isDeleting}
               >
                 {completingChore ? (
-                  <ActivityIndicator
-                    size="small"
-                    className="text-primary"
-                  />
+                  <ActivityIndicator size="small" className="text-primary" />
                 ) : (
-                  <>
+                  <View className="flex-row items-center justify-center gap-2">
                     <Ionicons
                       name="checkmark-circle"
                       size={22}
                       className="text-primary-foreground"
                     />
                     <Text>Splnit</Text>
-                  </>
+                  </View>
                 )}
               </Button>
             )}
             {isMyTurn && isCompleted && !isFutureStart && (
               <Button
                 variant="secondary"
-                className="flex-1 flex-row gap-2"
                 onPress={handleUncompleteChore}
                 disabled={completingChore || isDeleting}
               >
                 {completingChore ? (
-                  <ActivityIndicator
-                    size="small"
-                    className="text-primary"
-                  />
+                  <ActivityIndicator size="small" className="text-primary" />
                 ) : (
-                  <>
+                  <View className="flex-row items-center justify-center gap-2">
                     <Ionicons
                       name="close-circle"
                       size={22}
                       className="text-secondary-foreground"
                     />
-                    <Text>Zrušit splnění</Text>
-                  </>
+                    <Text>Zrušit</Text>
+                  </View>
                 )}
               </Button>
             )}

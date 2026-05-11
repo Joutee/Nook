@@ -42,7 +42,6 @@ const IssueEdit = () => {
 
       let imageUri: string | null = null;
 
-      // Načteme URL pro zobrazení existujícího obrázku
       if (data.image_path) {
         const { data: urlData, error: signedUrlError } = await supabase.storage
           .from("issue-images")

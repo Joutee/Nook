@@ -35,7 +35,6 @@ const more = () => {
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="p-5 gap-6">
-        {/* Funkce */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Funkce
@@ -69,14 +68,12 @@ const more = () => {
           </Card>
         </View>
 
-        {/* Účet */}
         <View className="gap-2">
           <Text className="text-xs font-semibold text-muted-foreground uppercase ml-1">
             Účet
           </Text>
 
           <Card className="gap-0 py-0">
-            {/* Nastavení */}
             <Button
               variant="ghost"
               className="flex-row justify-between items-center h-auto py-4 px-6 rounded-none"

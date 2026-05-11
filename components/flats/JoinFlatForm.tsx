@@ -91,7 +91,7 @@ export default function JoinFlatForm({
     <KeyboardAwareScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       enableOnAndroid={true}
-      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+      extraScrollHeight={20}
     >
       <View className="flex-1 bg-background justify-center p-5">
         <Card className="max-w-md w-full mx-auto">

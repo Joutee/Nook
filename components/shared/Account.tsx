@@ -32,7 +32,7 @@ export default function Account({ session }: { session: Session }) {
         .eq("id", session?.user.id)
         .single();
 
-      // Ignorovat chybu 406 (profil ještě neexistuje) - vytvoří se při prvním update
+      // Ignore 406 when the profile does not exist yet; it is created on first update.
       if (error && status !== 406) {
         throw error;
       }
@@ -44,7 +44,6 @@ export default function Account({ session }: { session: Session }) {
       }
     } catch (error) {
       if (error instanceof Error) {
-        // Nevypisovat chybu, pokud profil ještě neexistuje
         logger.log("Profile not found yet, will be created on first update");
       }
     } finally {

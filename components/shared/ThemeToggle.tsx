@@ -12,12 +12,10 @@ const THEME_STORAGE_KEY = "@theme_mode";
 export function ThemeToggle() {
   const { setColorScheme } = useColorScheme();
 
-  // Vlastní stav pro sledování vybrané volby
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(
     "system",
   );
 
-  // Načíst uložené nastavení při startu
   useEffect(() => {
     const loadTheme = async () => {
       try {
@@ -51,7 +49,6 @@ export function ThemeToggle() {
     setThemeMode(newMode);
     setColorScheme(newMode);
 
-    // Uložit nastavení
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
     } catch (error) {
@@ -78,7 +75,6 @@ export function ThemeToggle() {
       onPress={handleThemeChange}
     >
       <View className="flex-row items-center gap-3">
-        {/* Přetypování as any pro případ, že TypeScript nezná přesný název ikony */}
         <Ionicons
           name={getThemeIcon() as any}
           size={24}

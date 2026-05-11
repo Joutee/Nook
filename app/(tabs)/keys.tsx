@@ -24,12 +24,10 @@ const Keys = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Přiřazování klíčů
   const [assigningKey, setAssigningKey] = useState<KeyWithAssignee | null>(
     null,
   );
 
-  // Smazání klíče
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<KeyWithAssignee | null>(null);
 
@@ -156,10 +154,8 @@ const Keys = () => {
   const renderKey = (item: KeyWithAssignee) => (
     <Card key={item.id} className="mb-3 py-4">
       <CardContent className="flex-row items-center px-4 gap-4">
-        {/* Ikona klíče */}
         <Ionicons name="key-outline" size={24} className="text-foreground" />
 
-        {/* Obsah */}
         <View className="flex-1">
           <Text className="text-base font-semibold text-foreground">
             {item.name}
@@ -173,7 +169,6 @@ const Keys = () => {
             </Text>
           ) : null}
 
-          {/* Přiřazení */}
           <View className="flex-row items-center gap-1.5 mt-1.5">
             {item.assignee ? (
               <>
@@ -197,10 +192,8 @@ const Keys = () => {
           </View>
         </View>
 
-        {/* Akce pronajímatele */}
         {isLandlord && (
           <View className="flex-row gap-1">
-            {/* Přiřadit */}
             <Pressable
               className="w-10 h-10 items-center justify-center"
               onPress={() => openAssignSheet(item)}
@@ -212,7 +205,6 @@ const Keys = () => {
               />
             </Pressable>
 
-            {/* Upravit */}
             <Pressable
               className="w-10 h-10 items-center justify-center"
               onPress={() => router.push(`/keys/${item.id}/edit`)}
@@ -224,7 +216,6 @@ const Keys = () => {
               />
             </Pressable>
 
-            {/* Smazat */}
             <Pressable
               className="w-10 h-10 items-center justify-center"
               onPress={() => handleDeleteKey(item)}
@@ -296,7 +287,6 @@ const Keys = () => {
         )}
       </ScrollView>
 
-      {/* FAB — pouze pronajímatel */}
       {isLandlord && (
         <Pressable
           className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
@@ -306,7 +296,6 @@ const Keys = () => {
         </Pressable>
       )}
 
-      {/* MemberSelector Sheet pro přiřazení klíče */}
       <MemberSelectorSheet
         visible={!!assigningKey}
         onClose={closeAssignSheet}
@@ -321,7 +310,6 @@ const Keys = () => {
         title={`Přiřadit: ${assigningKey?.name ?? ""}`}
       />
 
-      {/* AlertDialog pro smazání */}
       <AlertDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

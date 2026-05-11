@@ -346,7 +346,6 @@ export const ChoreForm: React.FC<ChoreFormProps> = ({
             />
           </View>
 
-          {/* Bottom Actions */}
           <View className="flex-col gap-3">
             <Button
               className="flex-1"

@@ -17,8 +17,8 @@ import { useToast } from "@/contexts/ToastContext";
 
 interface EmailVerificationProps {
   mode: "change" | "verify";
-  email?: string; // Pro verify mód
-  currentEmail?: string; // Pro change mód - kontrola duplikátu
+  email?: string;
+  currentEmail?: string;
   onSuccess: () => void;
 }
 
@@ -41,7 +41,6 @@ export default function EmailVerification({
   const { showToast } = useToast();
   const codeInputRef = useRef<TextInput>(null);
 
-  // Pro verify mód - nastavit step na "code" při načtení
   useEffect(() => {
     if (mode === "verify" && initialEmail && step !== "code") {
       setStep("code");
@@ -51,7 +50,6 @@ export default function EmailVerification({
     }
   }, [mode, initialEmail]);
 
-  // Odeslat verifikační kód (pro verify mód)
   const sendVerificationCode = async (email: string) => {
     setLoading(true);
     const { error } = await supabase.auth.resend({
@@ -71,7 +69,6 @@ export default function EmailVerification({
     setLoading(false);
   };
 
-  // Požádat o změnu e-mailu (pro change mód)
   const handleRequestChange = async () => {
     if (!newEmail || !newEmail.includes("@")) {
       showToast("Zadejte platný nový e-mail", "error");
@@ -102,7 +99,6 @@ export default function EmailVerification({
     setLoading(false);
   };
 
-  // Ověřit kód
   const handleVerifyCode = async () => {
     if (!code || code.length < 8) {
       showToast("Zadejte platný kód", "error");
@@ -134,7 +130,6 @@ export default function EmailVerification({
     }
   };
 
-  // Znovu odeslat kód
   const handleResendCode = async () => {
     if (mode === "verify") {
       await sendVerificationCode(emailForVerification);
@@ -171,7 +166,6 @@ export default function EmailVerification({
       </CardHeader>
       <CardContent className="gap-6">
         {step === "email" && mode === "change" ? (
-          // --- FORMULÁŘ: ZADÁNÍ NOVÉHO E-MAILU ---
           <View className="gap-6">
             <View className="gap-1.5">
               <Label htmlFor="newEmail">Nová e-mailová adresa</Label>
@@ -197,7 +191,6 @@ export default function EmailVerification({
             </Button>
           </View>
         ) : (
-          // --- FORMULÁŘ: OVĚŘENÍ KÓDU ---
           <View className="gap-6">
             <View className="gap-1.5">
               <Label htmlFor="code">Ověřovací kód</Label>

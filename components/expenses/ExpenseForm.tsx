@@ -91,7 +91,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   }, [currentFlat]);
 
   useEffect(() => {
-    // Set default payer when members are loaded and current user is known (only in create mode)
     if (
       mode === "create" &&
       flatMembers.length > 0 &&
@@ -148,7 +147,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           role: m.role,
         }));
         setFlatMembers(members);
-        // Pre-select all members by default only in create mode
         if (mode === "create" && selectedMembers.length === 0) {
           setSelectedMembers(members);
         }
@@ -162,7 +160,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   };
 
   const handlePayerSelect = (member: Member) => {
-    // For single select, replace the selection
     setSelectedPayer([member]);
   };
 
@@ -190,7 +187,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     try {
       const result = await parseReceipt(imageUri);
 
-      // Pre-fill form fields
       setTitle(result.store_name || "Účtenka");
       if (result.date) {
         const parsedDate = new Date(result.date);
@@ -200,7 +196,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       }
       setAmount(result.total.toFixed(2));
 
-      // Check if item sum matches receipt total
       const itemSum = result.items.reduce((sum, item) => sum + item.price, 0);
       if (Math.abs(itemSum - result.total) > 1) {
         showToast(
@@ -209,7 +204,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         );
       }
 
-      // Convert to ExpenseItems with all members assigned by default
       const allMemberIds = flatMembers.map((m) => m.id);
       const items: ExpenseItem[] = result.items.map((item, index) => ({
         name: item.name,
@@ -256,7 +250,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
     setIsDeleting(true);
     try {
-      // Delete expense (shares will be deleted automatically due to CASCADE)
       const { error } = await supabase
         .from("expenses")
         .delete()
@@ -290,7 +283,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       }
     }
 
-    // Round to 2 decimal places
     for (const key of Object.keys(shares)) {
       shares[key] = Math.round(shares[key] * 100) / 100;
     }
@@ -381,7 +373,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
   };
 
   const handleSave = async () => {
-    // Validation
     const finalTitle = title.trim() || `Výdaj z ${formatDate(date)}`;
 
     const amountNum = parseFloat(amount);
@@ -400,15 +391,12 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       return;
     }
 
-    // Validate manual amounts if in manual mode
     if (splitMode === "manual") {
       const totalManual = calculateTotalManualAmount();
       const untouchedCount = selectedMembers.filter(
         (m) => !touchedMembers.has(m.id),
       ).length;
 
-      // Only validate total if there are untouched members
-      // If all are touched, the amount has been auto-updated
       if (untouchedCount > 0 && Math.abs(totalManual - amountNum) > 0.01) {
         showToast(
           `Součet částek (${formatCurrency(totalManual)}) musí odpovídat celkové částce (${formatCurrency(amountNum)})`,
@@ -417,7 +405,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         return;
       }
 
-      // Check that all selected members have amounts
       for (const member of selectedMembers) {
         const memberAmount = parseFloat(manualAmounts[member.id] || "0");
         if (isNaN(memberAmount) || memberAmount < 0) {
@@ -426,9 +413,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         }
       }
 
-      // If all members are touched, use the calculated total as the final amount
       if (untouchedCount === 0) {
-        // Update amountNum to the actual total
         const finalAmount = totalManual;
         if (finalAmount <= 0) {
           showToast("Celková částka musí být větší než 0", "error");
@@ -437,7 +422,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       }
     }
 
-    // Validate items mode
     if (splitMode === "items") {
       if (expenseItems.length === 0) {
         showToast("Přidejte alespoň jednu položku", "error");
@@ -457,7 +441,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
       }
-      // Check if item sum matches the entered amount
       const itemSum = expenseItems.reduce((sum, item) => sum + item.price, 0);
       if (Math.abs(itemSum - amountNum) > 1) {
         showToast(
@@ -475,7 +458,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
     setIsSaving(true);
     try {
-      // Determine final amount - if all members are touched in manual mode, use their total
       let finalAmount = amountNum;
       if (splitMode === "manual") {
         const untouchedCount = selectedMembers.filter(
@@ -491,7 +473,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       }
 
       if (mode === "edit" && expenseId) {
-        // Update existing expense
         const { error: expenseError } = await supabase
           .from("expenses")
           .update({
@@ -511,7 +492,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Delete existing shares
         const { error: deleteSharesError } = await supabase
           .from("expense_shares")
           .delete()
@@ -526,7 +506,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           return;
         }
 
-        // Delete existing expense items (CASCADE deletes item_members too)
         await supabase
           .from("expense_items")
           .delete()
@@ -553,7 +532,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         showToast("Výdaj byl úspěšně upraven", "success");
       } else {
-        // Create new expense
         const { data: expenseData, error: expenseError } = await supabase
           .from("expenses")
           .insert({
@@ -597,7 +575,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
         showToast("Výdaj byl úspěšně přidán", "success");
 
-        // Create recurring expense template if toggle is on
         if (isRecurring) {
           const { data: intervalData, error: intervalError } = await supabase
             .from("recurring_intervals")
@@ -683,7 +660,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       extraScrollHeight={20}
       className="flex-1"
     >
-      {/* Receipt Upload */}
       <Card className="mb-4 mx-4">
         <CardContent>
           <Pressable
@@ -714,7 +690,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Title Input */}
       <Card className="mb-4 mx-4">
         <CardContent className="gap-4">
           <View className="gap-2">
@@ -726,8 +701,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               maxLength={100}
             />
           </View>
-
-          {/* Amount Input */}
 
           <View className="gap-2">
             <Label>Částka (Kč)</Label>
@@ -764,8 +737,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               )}
           </View>
 
-          {/* Date Picker */}
-
           <View className="gap-2">
             <Label>Datum</Label>
             <DatePickerInput
@@ -775,7 +746,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             />
           </View>
 
-          {/* Recurring Toggle */}
           {mode === "create" && (
             <View className="gap-3">
               <View className="flex-row items-center justify-between">
@@ -804,8 +774,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               )}
             </View>
           )}
-          {/* Who Paid */}
-
           <View className="gap-2">
             <Label>Kdo zaplatil</Label>
             <MemberSelector
@@ -816,8 +784,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               title="Vyberte plátce"
             />
           </View>
-
-          {/* For Whom (Split) */}
 
           <ExpenseSplitSection
             flatMembers={flatMembers}
@@ -835,7 +801,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             onExpenseItemsChange={setExpenseItems}
           />
 
-          {/* Bottom Actions */}
           <View className="flex-col gap-3">
             {mode === "edit" && expenseId && (
               <Button
@@ -872,13 +837,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
             >
               <Text>Zrušit</Text>
             </Button>
-
-            {/* Delete Button (only in edit mode) */}
           </View>
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -889,7 +851,6 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         onAction={confirmDelete}
         destructive
       />
-      {/* Receipt Source BottomSheet */}
       <BottomSheet
         visible={showReceiptSheet}
         onClose={() => setShowReceiptSheet(false)}

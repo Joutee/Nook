@@ -15,7 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
-import CodeModal from "@/components/keys/CodeModal";
+import CodeModal from "@/components/flats/CodeModal";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as Crypto from "expo-crypto";
 
@@ -72,14 +72,13 @@ export default function CreateFlatForm({
     while (attempts < maxAttempts) {
       const code = generateCode();
 
-      // Zkontrolovat, jestli kód už existuje
       const { data, error } = await supabase
         .from("flats")
         .select("id")
         .eq("code", code)
         .maybeSingle();
 
-      // Pokud neexistuje (data je null), kód je unikátní
+      // If there is no row, the code is unique.
       if (!data && !error) {
         return code;
       }
@@ -87,7 +86,6 @@ export default function CreateFlatForm({
       attempts++;
     }
 
-    // Fallback - použít kryptograficky bezpečný generátor
     return generateCode();
   };
 
@@ -100,7 +98,6 @@ export default function CreateFlatForm({
     setLoading(true);
 
     try {
-      // Získat aktuálního uživatele
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -111,10 +108,11 @@ export default function CreateFlatForm({
         return;
       }
 
-      // Vytvořit nový byt s vygenerovaným unikátním kódem
       const code = await generateUniqueCode();
+      const flatId = Crypto.randomUUID();
 
       const { error: flatError } = await supabase.from("flats").insert({
+        id: flatId,
         code: code,
         address: address.trim(),
         name: name.trim(),
@@ -126,24 +124,8 @@ export default function CreateFlatForm({
         return;
       }
 
-      // Najít právě vytvořený byt podle kodu (fallback)
-      const { data: createdFlat, error: findError } = await supabase
-        .from("flats")
-        .select("id")
-        .eq("code", code)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (findError || !createdFlat) {
-        showToast("Nepodařilo se najít vytvořený byt", "error");
-        setLoading(false);
-        return;
-      }
-
-      // Přidat uživatele do bytu
       const { error: joinError } = await supabase.from("flat_profile").insert({
-        flat_id: createdFlat.id,
+        flat_id: flatId,
         profile_id: user.id,
         role: null,
         active: true,
@@ -159,19 +141,17 @@ export default function CreateFlatForm({
         return;
       }
 
-      // Načíst kompletní info o bytu a nastavit jako currentFlat
       const { data: flatData, error: flatDataError } = await supabase
         .from("flats")
         .select("id, name, address")
-        .eq("id", createdFlat.id)
+        .eq("id", flatId)
         .single();
 
-      // Zobrazit modal s kódem a počkat na jeho zavření
       setGeneratedCode(code);
       setShowCodeModal(true);
       await waitForModalClose();
 
-      // Teprve po zavření modalu pokračovat s aktualizací kontextu
+      // Continue updating context only after the code modal closes.
       if (!flatDataError && flatData) {
         setCurrentFlat(flatData);
       }
@@ -187,7 +167,7 @@ export default function CreateFlatForm({
     <KeyboardAwareScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       enableOnAndroid={true}
-      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+      extraScrollHeight={20}
     >
       <View className="flex-1 bg-background justify-center p-5">
         <CodeModal

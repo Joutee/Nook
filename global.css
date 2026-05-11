@@ -4,68 +4,68 @@
 
 @layer base {
   :root {
-    /* Hlavní pozadí aplikace - používej pro View, Screen backgrounds */
+    /* Main app background for views and screens. */
     --background: 0 0% 100%;
 
-    /* Hlavní barva textu - používej pro běžný text, nadpisy */
+    /* Main text color for body copy and headings. */
     --foreground: 0 0% 3.9%;
 
-    /* Pozadí pro karty, kontejnery, modaly - odděluje obsah od pozadí */
+    /* Card, container, and modal background. */
     --card: 0 0% 100%;
 
-    /* Text na kartách - používej pro text uvnitř card komponent */
+    /* Text color inside card components. */
     --card-foreground: 0 0% 3.9%;
 
-    /* Pozadí pro vyskakovací menu, dropdown, tooltip */
+    /* Popover, dropdown, and tooltip background. */
     --popover: 0 0% 100%;
 
-    /* Text ve vyskakovacích menu */
+    /* Text color in popovers. */
     --popover-foreground: 0 0% 3.9%;
 
-    /* Primární akční barva - používej pro hlavní CTA tlačítka, aktivní stavy */
+    /* Primary action color for main CTAs and active states. */
     --primary: 270 89.1% 49%;
 
-    /* Text na primárních tlačítkách */
+    /* Text color on primary controls. */
     --primary-foreground: 0 0% 98%;
 
-    /* Sekundární prvky - méně důležitá tlačítka, badge, tagy */
+    /* Secondary controls, badges, and tags. */
     --secondary: 0 0% 96.1%;
 
-    /* Text na sekundárních prvcích */
+    /* Text color on secondary controls. */
     --secondary-foreground: 0 0% 9%;
 
-    /* Ztlumené pozadí - používej pro neaktivní/zakázané stavy, subtle highlights */
+    /* Muted background for inactive states and subtle highlights. */
     --muted: 0 0% 96.1%;
 
-    /* Ztlumený text - popisky, pomocný text, placeholder */
+    /* Muted text for labels, helper text, and placeholders. */
     --muted-foreground: 0 0% 45.1%;
 
-    /* Zvýraznění při hover - používej pro hover efekty, zvýraznění položek */
+    /* Accent background for hover and highlighted items. */
     --accent: 0 0% 96.1%;
 
-    /* Text na zvýrazněných prvcích */
+    /* Text color on accent backgrounds. */
     --accent-foreground: 0 0% 9%;
 
-    /* Destruktivní akce - mazání, varování, chyby */
+    /* Destructive actions, warnings, and errors. */
     --destructive: 0 84.2% 60.2%;
 
     --success: 142 76% 36%;
 
     --warning: 43 74% 66%;
-    /* Bordery - používej pro ohraničení karet, separátory, inputy */
+    /* Borders for cards, separators, and inputs. */
     --border: 0 0% 89.8%;
 
-    /* Border u input polí - může být stejný jako border nebo lehce odlišný */
+    /* Input border color. */
     --input: 0 0% 89.8%;
 
     --input-placeholder: 0 0% 45.1%;
-    /* Focus ring - zvýraznění při focusu na interaktivní prvky */
+    /* Focus ring for interactive elements. */
     --ring: 0 0% 63%;
 
-    /* Globální border radius - používej pro konzistentní zaoblení */
+    /* Global radius for consistent rounding. */
     --radius: 0.625rem;
 
-    /* Barvy pro grafy a vizualizace dat */
+    /* Chart and data visualization colors. */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -74,69 +74,69 @@
   }
 
   .dark:root {
-    /* Tmavé pozadí aplikace */
+    /* Dark-mode app background. */
     --background: 0 0% 4%;
 
-    /* Světlý text pro tmavý režim */
+    /* Light text for dark mode. */
     --foreground: 0 0% 98%;
 
-    /* Pozadí karet navbaru a topbaru v dark mode - svetlejsi než background pro kontrast */
+    /* Card, navbar, and topbar background in dark mode. */
     --card: 0 0% 9%;
 
-    /* Text na kartách v dark mode */
+    /* Card text in dark mode. */
     --card-foreground: 0 0% 98%;
 
-    /* Pozadí pro popover v dark mode */
+    /* Popover background in dark mode. */
     --popover: 0 0% 3.9%;
 
-    /* Text v popover v dark mode */
+    /* Popover text in dark mode. */
     --popover-foreground: 0 0% 98%;
 
-    /* Primární akční barva v dark mode - světlejší než v light mode */
+    /* Primary action color in dark mode. */
     --primary: 270 89.1% 49%;
 
-    /* Text na primárních tlačítkách v dark mode */
+    /* Text color on primary controls in dark mode. */
     --primary-foreground: 0 0% 98%;
 
-    /* Sekundární prvky v dark mode */
+    /* Secondary controls in dark mode. */
     --secondary: 0 0% 13%;
 
-    /* Text na sekundárních prvcích v dark mode */
+    /* Text color on secondary controls in dark mode. */
     --secondary-foreground: 0 0% 98%;
 
-    /* Ztlumené pozadí v dark mode */
+    /* Muted background in dark mode. */
     --muted: 0 0% 14.9%;
 
-    /* Ztlumený text v dark mode */
+    /* Muted text in dark mode. */
     --muted-foreground: 0 0% 63.9%;
 
-    /* Zvýraznění při hover v dark mode */
+    /* Accent background for hover in dark mode. */
     --accent: 0 0% 14.9%;
 
-    /* Text na zvýrazněných prvcích v dark mode */
+    /* Text color on accent backgrounds in dark mode. */
     --accent-foreground: 0 0% 98%;
 
-    /* Destruktivní akce v dark mode */
+    /* Destructive actions in dark mode. */
     --destructive: 0 84.2% 60.2%;
 
     --success: 142 76% 36%;
 
     --warning: 43 74% 66%;
 
-    /* Bordery v dark mode - světlejší než background */
+    /* Borders in dark mode. */
     --border: 0 0% 14.9%;
 
-    /* Border u input polí v dark mode */
+    /* Input border color in dark mode. */
     --input: 0 0% 8%;
 
     --input-placeholder: 0 0% 23.8%;
 
-    /* Focus ring v dark mode */
+    /* Focus ring in dark mode. */
     --ring: 300 0% 45%;
 
     --radius: 0.625rem;
 
-    /* Barvy pro grafy v dark mode - upravené pro lepší viditelnost */
+    /* Chart colors adjusted for dark-mode visibility. */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;

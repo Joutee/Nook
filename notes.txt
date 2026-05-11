@@ -1,26 +1,29 @@
-vytvorit tabulky pro interval opakovani a tu pouzivat jak pro chores (tam je potreba opravit to zadavani) tak pro opakujici se expenseanoo 
-profilovky
+pridat omezeni aby uzivatel nemohl spamovat nacitani uctenek do clauda, a obecne spamovani requestu
+pravit aby se profilovka a jmeno ukladalo do nejake local storage a nefetchovalo vzdy z db
+lokalizace ruzna
+opravit doplnovani castky do financi u rucniho zadavani, kdyz mam rozpocitanou castku a odeberu nekoho a pridam nekoho tak se mu nevrati ta castka
+bottom bar je trosku rozbitej neumi se skalovat
 iOS google OAuth
+dalsi funkcionality pro pronajimatele
+
+ten text hrozne divne se orezava v tom chatu porad, ted je jsou tam nahardcodene neviditelne mezery
+v chatu input bar neni videt kdyz se otevre klavesnice
+badge a push notifikace
+
+
 
 iOS nekompatibility list:
-tlacitko zpet funguje kdyz jdu z choore detail do chore history ale nefunguje kdyz jdu z chores na chore-create
+tlacitko zpet funguje kdyz jdu z chore detail do chore history ale nefunguje kdyz jdu z chores na chore-create
 
 TODO:
 u edit screen povolit odeslani pouze pokud se neco zmenilo
-vypsat hlasku a znepristupnit moduly ktere jsou na komunikaci s pronajimatelem pokud zadny pronajimatel v byte neni
 reset password je to nejaky weird ten supabase.auth.verifyOtp nastavi nejakou session a pak me to z nejakyho duvodu presmeruje na /
 je potreba oddelit is_admin do samostatne tabulky z tabulky flat_profile protoze tedka ma kazdy user povoleny update takze si muze zmenit is_admin
-name change
-telefonni cislo a email ke kazdemu profilu
 skryt tu bocni listu na scollovani
 
 
 kdyz zbyde cas:
-profilovka (nahrazeni tech pismennejch a zaroven pridani profilovky do finance tabu)
-pridat do clenu bytu asi i telefonni cislo by davalo smysl
-pridat vic intervalu repetetivnosti u chores (tyden, mesic,...)
-o auth
-opakujici se vydaje (najem)
+
 
 
 

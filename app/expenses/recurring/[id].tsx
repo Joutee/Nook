@@ -54,7 +54,6 @@ const RecurringExpenseDetail = () => {
 
     setIsLoading(true);
     try {
-      // Fetch flat members
       const { data: membersData, error: membersError } = await supabase
         .from("flat_profile")
         .select(
@@ -88,7 +87,6 @@ const RecurringExpenseDetail = () => {
       }));
       setFlatMembers(members);
 
-      // Fetch recurring expense
       const { data: expenseData, error: expenseError } = await supabase
         .from("recurring_expenses")
         .select(
@@ -104,7 +102,6 @@ const RecurringExpenseDetail = () => {
         return;
       }
 
-      // Fetch recurring expense members
       const { data: expenseMembersData, error: expenseMembersError } =
         await supabase
           .from("recurring_expense_members")
@@ -121,7 +118,6 @@ const RecurringExpenseDetail = () => {
         return;
       }
 
-      // Set state from fetched data
       setTitle(expenseData.title);
       setAmount(String(expenseData.amount));
       setRecurringInterval(expenseData.recurring_interval.type as RecurringInterval);
@@ -185,7 +181,6 @@ const RecurringExpenseDetail = () => {
 
     setIsSaving(true);
     try {
-      // Update interval
       const { error: intervalError } = await supabase
         .from("recurring_intervals")
         .update(buildIntervalPayload(recurringInterval, intervalDay, intervalMonth, customDays))
@@ -197,7 +192,6 @@ const RecurringExpenseDetail = () => {
         return;
       }
 
-      // Update expense (no more interval columns)
       const { error: updateError } = await supabase
         .from("recurring_expenses")
         .update({
@@ -220,7 +214,6 @@ const RecurringExpenseDetail = () => {
         return;
       }
 
-      // Delete old members
       const { error: deleteError } = await supabase
         .from("recurring_expense_members")
         .delete()
@@ -232,7 +225,6 @@ const RecurringExpenseDetail = () => {
         return;
       }
 
-      // Insert new members
       const memberRows = selectedMembers.map((m) => ({
         recurring_expense_id: id,
         profile_id: m.id,
@@ -275,7 +267,6 @@ const RecurringExpenseDetail = () => {
       }
 
       showToast("Opakující se výdaj byl smazán", "success");
-      // Clean up orphaned interval
       if (recurringIntervalId) {
         await supabase
           .from("recurring_intervals")
@@ -308,7 +299,6 @@ const RecurringExpenseDetail = () => {
       >
         <Card className="mb-4">
           <CardContent className="gap-4">
-            {/* Title */}
             <View className="gap-2">
               <Label>Název výdaje</Label>
               <Input
@@ -319,7 +309,6 @@ const RecurringExpenseDetail = () => {
               />
             </View>
 
-            {/* Amount */}
             <View className="gap-2">
               <Label>Částka (Kč)</Label>
               <Input
@@ -331,7 +320,6 @@ const RecurringExpenseDetail = () => {
               />
             </View>
 
-            {/* Payer */}
             <View className="gap-2">
               <Label>Kdo zaplatí</Label>
               <MemberSelector
@@ -343,7 +331,6 @@ const RecurringExpenseDetail = () => {
               />
             </View>
 
-            {/* Members */}
             <View className="gap-2">
               <Label>Mezi koho rozdělit</Label>
               <MemberSelector
@@ -363,7 +350,6 @@ const RecurringExpenseDetail = () => {
               />
             </View>
 
-            {/* Pause toggle */}
             <Switch
               value={isPaused}
               onValueChange={setIsPaused}
@@ -371,7 +357,6 @@ const RecurringExpenseDetail = () => {
               leftIcon="pause-circle-outline"
             />
 
-            {/* Interval picker */}
             <RecurringIntervalPicker
               interval={recurringInterval}
               onIntervalChange={setRecurringInterval}
@@ -385,7 +370,6 @@ const RecurringExpenseDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Actions */}
         <View className="gap-3">
           <Button onPress={handleSave} disabled={isSaving || isDeleting}>
             {isSaving ? (

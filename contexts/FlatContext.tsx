@@ -32,7 +32,6 @@ export const useFlatContext = () => {
     throw new Error("useFlatContext must be used within FlatProvider");
   }
 
-  // Computed values
   const hasFlat = context.flats.length > 0;
   const hasRole = hasFlat && context.userRole !== null;
 
@@ -68,7 +67,6 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
     try {
       setIsLoading(true);
       logger.log("started Fetching flats");
-      // Načíst všechny byty, ke kterým má uživatel přístup
       const { data: flatProfiles, error } = await supabase
         .from("flat_profile")
         .select("flat_id, role, flat:flats(id, name, address)")
@@ -94,7 +92,6 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
 
         setFlats(userFlats);
 
-        // Pokud není nastaven žádný byt, nastav první nebo načti z AsyncStorage
         if (!currentFlat && userFlats.length > 0) {
           try {
             const savedFlatId = await AsyncStorage.getItem(CURRENT_FLAT_KEY);
@@ -103,14 +100,12 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
               : null;
 
             if (savedFlat) {
-              // Použij uložený byt
               const savedProfile = flatProfiles.find(
                 (fp) => (fp.flat as any).id === savedFlatId,
               );
               setCurrentFlatState(savedFlat);
               setUserRole((savedProfile?.role as UserRole) || null);
             } else {
-              // Nastav první byt v seznamu
               setCurrentFlatState(userFlats[0]);
               setUserRole(flatProfiles[0].role as UserRole);
               await AsyncStorage.setItem(CURRENT_FLAT_KEY, userFlats[0].id);
@@ -121,14 +116,12 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
             setUserRole(flatProfiles[0].role as UserRole);
           }
         } else if (currentFlat) {
-          // Zkontroluj, jestli aktuální byt je stále v seznamu
           const stillExists = userFlats.find((f) => f.id === currentFlat.id);
           if (!stillExists) {
             setCurrentFlatState(userFlats[0]);
             setUserRole(flatProfiles[0].role as UserRole);
             await AsyncStorage.setItem(CURRENT_FLAT_KEY, userFlats[0].id);
           } else {
-            // Aktualizuj roli pro současný byt
             const currentProfile = flatProfiles.find(
               (fp) => (fp.flat as any).id === currentFlat.id,
             );
@@ -157,14 +150,12 @@ export const FlatProvider: React.FC<FlatProviderProps> = ({
   const setCurrentFlat = async (flat: Flat) => {
     setCurrentFlatState(flat);
 
-    // Uložit vybraný byt do AsyncStorage
     try {
       await AsyncStorage.setItem(CURRENT_FLAT_KEY, flat.id);
     } catch (error) {
       logger.error("Chyba při ukládání bytu:", error);
     }
 
-    // Načíst roli pro nově vybraný byt
     if (session?.user?.id) {
       const { data } = await supabase
         .from("flat_profile")

@@ -18,32 +18,27 @@ export const RepaymentWidget = () => {
   const { currentFlat } = useFlatContext();
 
   useEffect(() => {
-    // 1. Prvotní načtení dat
     loadFinanceData();
 
-    // Pokud nemáme flat_id, nemá smysl nic poslouchat
     if (!currentFlat?.id) return;
 
-    // 2. Vytvoření Realtime kanálu
     const expensesChannel = supabase
-      .channel("public:expenses") // Název kanálu (může být cokoliv)
+      .channel("public:expenses")
       .on(
         "postgres_changes",
         {
-          event: "*", // Chceme poslouchat vše (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "expenses",
-          filter: `flat_id=eq.${currentFlat.id}`, // MAGIE: Posloucháme jen náš byt!
+          filter: `flat_id=eq.${currentFlat.id}`,
         },
         (payload) => {
           logger.log("Změna v výdajích detekována!", payload);
-          // Když se něco změní (někdo přidá/upraví výdaj), přenačteme widget
           loadFinanceData();
         },
       )
       .subscribe();
 
-    // 3. Úklid při opuštění obrazovky (zavře trubku a šetří limit 200 připojení)
     return () => {
       supabase.removeChannel(expensesChannel);
     };

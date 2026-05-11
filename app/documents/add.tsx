@@ -38,7 +38,7 @@ const DocumentAdd = () => {
     try {
       const file = await pickFile();
       if (file) {
-        // Pokud je to obrázek, zkomprimuj ho, jinak (např. PDF) použij originál
+        // Compress images; keep other files such as PDFs unchanged.
         if (file.mimeType.startsWith("image/")) {
           const compressed = await compressImage(file.uri);
           setFile({ ...file, uri: compressed });
@@ -70,7 +70,6 @@ const DocumentAdd = () => {
       } = await supabase.auth.getSession();
       if (!session) throw new Error("Nejste přihlášeni");
 
-      // Nahrajeme soubor do storage
       const documentPath = await uploadFile({
         bucket: "documents",
         flatId: currentFlat.id,
@@ -79,7 +78,6 @@ const DocumentAdd = () => {
         mimeType: file.mimeType,
       });
 
-      // Přidáme záznam do databáze
       const { error } = await supabase.from("documents").insert({
         flat_id: currentFlat.id,
         document_path: documentPath,
@@ -107,7 +105,7 @@ const DocumentAdd = () => {
           uri: compressed,
           name: fileName,
           mimeType: "image/jpeg",
-          size: 0, // velikost není k dispozici při přímém focení
+          size: 0,
         });
       }
     } catch (error: any) {

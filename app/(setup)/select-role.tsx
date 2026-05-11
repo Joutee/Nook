@@ -41,7 +41,6 @@ export default function SelectRole() {
         return;
       }
 
-      // Aktualizovat roli v flat_profile
       const { error } = await supabase
         .from("flat_profile")
         .update({ role })
@@ -55,7 +54,7 @@ export default function SelectRole() {
         return;
       }
 
-      // Obnovit kontext - layout se postará o přesměrování
+      // Refresh context; the layout handles redirection.
       await refreshFlats();
       setLoading(false);
 

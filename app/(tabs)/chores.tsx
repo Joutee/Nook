@@ -14,7 +14,7 @@ import { Chore } from "@/types/chores";
 import { completeChore, uncompleteChore } from "@/lib/choreUtils";
 import { Avatar } from "@/components/ui/avatar";
 import logger from "@/lib/logger";
-import { formatInterval, calculateNextCycleDate } from "@/lib/intervalUtils";
+import { formatInterval, calculateNextCycleDate, isStartDateInFuture } from "@/lib/intervalUtils";
 
 const Chores = () => {
   const [chores, setChores] = useState<Chore[]>([]);
@@ -132,8 +132,7 @@ const Chores = () => {
   const renderChoreItem = (item: Chore) => {
     const isMyTurn = item.assignee_user_id === currentUserId;
     const isCompleted = item.is_completed_current_cycle;
-    const isFutureStart =
-      item.start_date && new Date(item.start_date) > new Date();
+    const isFutureStart = isStartDateInFuture(item.start_date);
     const nextCycleDate = calculateNextCycleDate(item);
     const nextCycleText = formatNextCycle(nextCycleDate);
 
@@ -292,7 +291,6 @@ const Chores = () => {
         )}
       </ScrollView>
 
-      {/* Add Chore Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/chores/create")}

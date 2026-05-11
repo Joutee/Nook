@@ -25,7 +25,7 @@ export default function ChangeEmail() {
   }, []);
 
   const handleSuccess = () => {
-    router.back(); // Návrat zpět do Nastavení
+    router.back();
   };
 
   return (

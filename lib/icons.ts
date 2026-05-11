@@ -10,5 +10,5 @@ function registerIcon(icon: any) {
   });
 }
 
-// Zde zaregistruješ všechny sady, které v projektu používáš
+// Register all icon sets used by the project here.
 registerIcon(Ionicons);

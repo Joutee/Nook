@@ -85,17 +85,15 @@ const documents = () => {
     name: string,
   ) => {
     try {
-      // Získání podepsané URL s download parametrem
       const { data, error } = await supabase.storage
         .from("documents")
         .createSignedUrl(document_path, 3600, {
-          download: name, // Nastaví Content-Disposition: attachment; filename="name"
+          download: name,
         });
 
       if (error) throw error;
       if (!data?.signedUrl) throw new Error("Nepodařilo se získat URL");
 
-      // Otevřít URL v prohlížeči - soubor se automaticky stáhne díky download parametru
       const canOpen = await Linking.canOpenURL(data.signedUrl);
       if (canOpen) {
         await Linking.openURL(data.signedUrl);
@@ -145,7 +143,6 @@ const documents = () => {
     >
       <Card className="mb-3">
         <CardContent className="flex-row items-center px-4 gap-4">
-          {/* Ikona dokumentu */}
           <Ionicons
             name="document-text-outline"
             size={24}
@@ -153,7 +150,6 @@ const documents = () => {
           />
 
           <View className="flex-1 flex-row">
-            {/* Obsah dokumentu */}
             <View className="flex-1">
               <Text className="text-base font-semibold text-foreground mb-0.5">
                 {item.name}
@@ -173,7 +169,6 @@ const documents = () => {
               </View>
             </View>
 
-            {/* Akční tlačítka */}
             <View className="flex-row gap-1">
               <Pressable
                 className="w-10 h-10 items-center justify-center"
@@ -237,7 +232,6 @@ const documents = () => {
         )}
       </ScrollView>
 
-      {/* Floating Action Button */}
       <Pressable
         className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg"
         onPress={() => router.push("/documents/add")}

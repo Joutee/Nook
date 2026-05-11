@@ -21,8 +21,8 @@ export interface UsedAccount {
 }
 
 /**
- * Vytvoří bezpečný klíč pro SecureStore z emailu.
- * SecureStore klíče musí odpovídat [a-zA-Z0-9._-] na Androidu.
+ * Creates a SecureStore-safe key from an email.
+ * SecureStore keys must match [a-zA-Z0-9._-] on Android.
  */
 function getStorageKey(prefix: string, email: string): string {
   let hash = 0;
@@ -35,7 +35,7 @@ function getStorageKey(prefix: string, email: string): string {
 }
 
 /**
- * Zkontroluje, zda je biometrická autentizace dostupná na zařízení
+ * Checks whether biometric authentication is available on the device.
  */
 export async function isBiometricAvailable(): Promise<boolean> {
   const compatible = await LocalAuthentication.hasHardwareAsync();
@@ -46,7 +46,7 @@ export async function isBiometricAvailable(): Promise<boolean> {
 }
 
 /**
- * Získá typy dostupné biometrické autentizace
+ * Gets the available biometric authentication types.
  */
 export async function getBiometricTypes(): Promise<
   LocalAuthentication.AuthenticationType[]
@@ -55,7 +55,7 @@ export async function getBiometricTypes(): Promise<
 }
 
 /**
- * Získá seznam všech biometrických účtů
+ * Gets all biometric accounts.
  */
 export async function getAllBiometricAccounts(): Promise<BiometricAccount[]> {
   try {
@@ -69,16 +69,16 @@ export async function getAllBiometricAccounts(): Promise<BiometricAccount[]> {
 }
 
 /**
- * Aktualizuje seznam biometrických účtů
+ * Updates the biometric accounts list.
  */
 async function updateBiometricAccountsList(accounts: BiometricAccount[]): Promise<void> {
   await SecureStore.setItemAsync(BIOMETRIC_ACCOUNTS_LIST_KEY, JSON.stringify(accounts));
 }
 
 /**
- * Uloží credentials pro biometrickou autentizaci pro konkrétní email.
- * Heslo je uloženo v SecureStore (iOS Keychain / Android Keystore),
- * což poskytuje hardwarově šifrované úložiště.
+ * Saves biometric credentials for a specific email.
+ * The password is stored in SecureStore (iOS Keychain / Android Keystore),
+ * which provides hardware-backed encrypted storage.
  */
 export async function saveBiometricCredentials(
   email: string,
@@ -90,7 +90,6 @@ export async function saveBiometricCredentials(
   await SecureStore.setItemAsync(emailKey, email);
   await SecureStore.setItemAsync(passwordKey, password);
 
-  // Aktualizovat seznam účtů
   const accounts = await getAllBiometricAccounts();
   const existingIndex = accounts.findIndex(acc => acc.email === email);
 
@@ -107,7 +106,7 @@ export async function saveBiometricCredentials(
 }
 
 /**
- * Načte uložené credentials pro konkrétní email
+ * Loads saved credentials for a specific email.
  */
 export async function getBiometricCredentials(email: string): Promise<BiometricCredentials | null> {
   try {
@@ -126,7 +125,7 @@ export async function getBiometricCredentials(email: string): Promise<BiometricC
 }
 
 /**
- * Smaže uložené credentials pro konkrétní email
+ * Deletes saved credentials for a specific email.
  */
 export async function deleteBiometricCredentials(email: string): Promise<void> {
   try {
@@ -136,11 +135,10 @@ export async function deleteBiometricCredentials(email: string): Promise<void> {
     await SecureStore.deleteItemAsync(emailKey);
     await SecureStore.deleteItemAsync(passwordKey);
 
-    // Také smazat případný starý refresh token klíč
+    // Also remove the old refresh-token key if it exists.
     const rtKey = getStorageKey("bio_rt", email);
     await SecureStore.deleteItemAsync(rtKey).catch(() => {});
 
-    // Odebrat z hlavního seznamu
     const accounts = await getAllBiometricAccounts();
     const filteredAccounts = accounts.filter(acc => acc.email !== email);
     await updateBiometricAccountsList(filteredAccounts);
@@ -150,7 +148,7 @@ export async function deleteBiometricCredentials(email: string): Promise<void> {
 }
 
 /**
- * Zkontroluje, zda jsou credentials uložené pro konkrétní email
+ * Checks whether credentials are saved for a specific email.
  */
 export async function hasBiometricCredentials(email: string): Promise<boolean> {
   const credentials = await getBiometricCredentials(email);
@@ -158,21 +156,18 @@ export async function hasBiometricCredentials(email: string): Promise<boolean> {
 }
 
 /**
- * Získá nejnovější použitý biometrický účet (výchozí)
+ * Gets the most recently used biometric account.
  */
 export async function getDefaultBiometricAccount(): Promise<BiometricAccount | null> {
   const accounts = await getAllBiometricAccounts();
   if (accounts.length === 0) return null;
 
-  // Seřadit podle posledního použití (nejnovější první)
   accounts.sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
   return accounts[0];
 }
 
-// ===== SPRÁVA VŠECH POUŽITÝCH ÚČTŮ =====
-
 /**
- * Získá seznam všech použitých účtů (nezávisle na biometrii)
+ * Gets all used accounts, independent of biometrics.
  */
 export async function getAllUsedAccounts(): Promise<UsedAccount[]> {
   try {
@@ -186,14 +181,14 @@ export async function getAllUsedAccounts(): Promise<UsedAccount[]> {
 }
 
 /**
- * Aktualizuje seznam použitých účtů
+ * Updates the used accounts list.
  */
 async function updateUsedAccountsList(accounts: UsedAccount[]): Promise<void> {
   await SecureStore.setItemAsync(USED_ACCOUNTS_LIST_KEY, JSON.stringify(accounts));
 }
 
 /**
- * Uloží nebo aktualizuje účet v seznamu použitých účtů
+ * Saves or updates an account in the used accounts list.
  */
 export async function saveUsedAccount(email: string): Promise<void> {
   try {
@@ -216,19 +211,18 @@ export async function saveUsedAccount(email: string): Promise<void> {
 }
 
 /**
- * Získá nejnovější použitý účet (nezávisle na biometrii)
+ * Gets the most recently used account, independent of biometrics.
  */
 export async function getDefaultUsedAccount(): Promise<UsedAccount | null> {
   const accounts = await getAllUsedAccounts();
   if (accounts.length === 0) return null;
 
-  // Seřadit podle posledního použití (nejnovější první)
   accounts.sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
   return accounts[0];
 }
 
 /**
- * Smaže účet ze seznamu použitých účtů
+ * Removes an account from the used accounts list.
  */
 export async function removeUsedAccount(email: string): Promise<void> {
   try {
@@ -241,7 +235,7 @@ export async function removeUsedAccount(email: string): Promise<void> {
 }
 
 /**
- * Aktualizuje čas posledního použití pro konkrétní email
+ * Updates the last-used timestamp for a specific email.
  */
 export async function updateLastUsed(email: string): Promise<void> {
   const accounts = await getAllBiometricAccounts();
@@ -254,7 +248,7 @@ export async function updateLastUsed(email: string): Promise<void> {
 }
 
 /**
- * Provede biometrickou autentizaci a vrátí credentials pro konkrétní email pokud je úspěšná
+ * Runs biometric authentication and returns credentials for a specific email on success.
  */
 export async function authenticateWithBiometrics(email: string): Promise<BiometricCredentials | null> {
   const result = await LocalAuthentication.authenticateAsync({
@@ -274,12 +268,12 @@ export async function authenticateWithBiometrics(email: string): Promise<Biometr
 }
 
 /**
- * Migrace ze starého systému (jeden účet) na nový systém (více účtů)
- * ODSTRANIT PO NĚKOLIKA VERZÍCH
+ * Migrates from the legacy single-account system to the multi-account system.
+ * Remove after several releases.
  */
 export async function migrateLegacyBiometricCredentials(): Promise<void> {
   try {
-    // Smazat staré klíče z původního formátu
+    // Remove keys from the old storage format.
     await SecureStore.deleteItemAsync("biometric_email").catch(() => {});
     await SecureStore.deleteItemAsync("biometric_password").catch(() => {});
   } catch (error) {

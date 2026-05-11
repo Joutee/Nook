@@ -14,7 +14,6 @@ export const DEFAULT_WIDGETS = [
   "issues_widget",
 ];
 
-// Výchozí widgety podle role
 export const DEFAULT_WIDGETS_BY_ROLE: Record<
   "pronajimatel" | "najemce",
   string[]
@@ -23,7 +22,6 @@ export const DEFAULT_WIDGETS_BY_ROLE: Record<
   najemce: ["my_chores_widget", "repayment_widget", "issues_widget"],
 };
 
-// Mapování klíčů na lidsky čitelné názvy
 export const WIDGET_NAMES: Record<string, string> = {
   repayment_widget: "Vyrovnání dluhů",
   issues_widget: "Poslední závady",
@@ -35,7 +33,6 @@ export const WIDGET_NAMES: Record<string, string> = {
   keys_widget: "Klíče",
 };
 
-// Mapování klíčů na ikony
 export const WIDGET_ICONS: Record<string, any> = {
   repayment_widget: "cash-outline",
   issues_widget: "warning-outline",
@@ -47,7 +44,6 @@ export const WIDGET_ICONS: Record<string, any> = {
   keys_widget: "key-outline",
 };
 
-// Mapování klíčů na komponenty
 export const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   repayment_widget: RepaymentWidget,
   issues_widget: IssuesWidget,
@@ -59,7 +55,6 @@ export const WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   keys_widget: KeysWidget,
 };
 
-// Všechny dostupné widgety
 export const ALL_WIDGETS = [
   "my_chores_widget",
   "repayment_widget",
@@ -71,7 +66,6 @@ export const ALL_WIDGETS = [
   "keys_widget",
 ];
 
-// Mapování widgetů na role - které widgety jsou dostupné pro koho
 export const WIDGETS_BY_ROLE: Record<"pronajimatel" | "najemce", string[]> = {
   pronajimatel: [
     "issues_widget",
@@ -79,7 +73,6 @@ export const WIDGETS_BY_ROLE: Record<"pronajimatel" | "najemce", string[]> = {
     "flat_members_widget",
     "documents_widget",
     "keys_widget",
-    // Pronajímatel NEVIDÍ my_chores_widget
   ],
   najemce: [
     "my_chores_widget",
@@ -93,7 +86,6 @@ export const WIDGETS_BY_ROLE: Record<"pronajimatel" | "najemce", string[]> = {
   ],
 };
 
-// Helper funkce pro získání widgetů podle role
 export const getWidgetsByRole = (
   role: "pronajimatel" | "najemce" | null,
 ): string[] => {
@@ -101,7 +93,6 @@ export const getWidgetsByRole = (
   return WIDGETS_BY_ROLE[role] || [];
 };
 
-// Helper funkce pro získání výchozích widgetů podle role
 export const getDefaultWidgetsByRole = (
   role: "pronajimatel" | "najemce" | null,
 ): string[] => {

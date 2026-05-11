@@ -93,7 +93,6 @@ export const RecurringIntervalPicker: React.FC<
   return (
     <Card>
       <CardContent className="gap-4">
-        {/* Interval picker */}
         <View className="gap-2">
           <Label>Interval</Label>
           <View className="flex-row gap-2">
@@ -121,7 +120,6 @@ export const RecurringIntervalPicker: React.FC<
           </View>
         </View>
 
-        {/* Weekly: day-of-week picker */}
         {interval === "weekly" && (
           <View className="gap-2">
             <Label>Den v týdnu</Label>
@@ -151,7 +149,6 @@ export const RecurringIntervalPicker: React.FC<
           </View>
         )}
 
-        {/* Monthly: day-of-month input */}
         {interval === "monthly" && (
           <View className="gap-2">
             <Label>Den v měsíci</Label>
@@ -171,7 +168,6 @@ export const RecurringIntervalPicker: React.FC<
           </View>
         )}
 
-        {/* Yearly: day + month picker */}
         {interval === "yearly" && (
           <View className="gap-2">
             <Label>Den a měsíc</Label>
@@ -211,7 +207,6 @@ export const RecurringIntervalPicker: React.FC<
             </View>
           </View>
         )}
-        {/* Custom: number of days input */}
         {interval === "custom" && (
           <View className="gap-2">
             <Label>Počet dní</Label>

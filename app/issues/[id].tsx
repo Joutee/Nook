@@ -39,14 +39,12 @@ const IssueDetail = () => {
 
   const isDeletedRef = useRef(false);
 
-  // 1. ČÁST: Načtení dat (Text + Profil)
   const loadIssueData = useCallback(async () => {
     if (!id || isDeletedRef.current) return;
 
     setIsLoading(true);
 
     try {
-      // A) Načteme issue
       const { data: issueData, error: issueError } = await supabase
         .from("issues")
         .select("*")
@@ -64,7 +62,6 @@ const IssueDetail = () => {
       }
       setIssue(issueData);
 
-      // B) Načteme profil (pokud existuje)
       if (issueData.profile_id) {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
@@ -87,30 +84,25 @@ const IssueDetail = () => {
     }
   }, [id, showToast]);
 
-  // useFocusEffect zajistí načtení dat při příchodu na obrazovku
   useFocusEffect(
     useCallback(() => {
       loadIssueData();
     }, [loadIssueData]),
   );
 
-  // 2. ČÁST: Inteligentní načtení obrázku (Effect)
-  // Tento efekt se spustí POUZE tehdy, když se změní řetězec 'image_path'.
-  // Pokud změníte status, title nebo cokoliv jiného, tento kód se ignoruje -> ŽÁDNÉ BLIKÁNÍ.
   useEffect(() => {
-    // Pokud issue nemá obrázek, vyčistíme URI a končíme
     if (!issue?.image_path) {
       setImageUri(null);
       return;
     }
 
-    let isMounted = true; // Ochrana proti memory leaku
+    let isMounted = true;
 
     const fetchSignedUrl = async () => {
       try {
         const { data, error } = await supabase.storage
           .from("issue-images")
-          .createSignedUrl(issue.image_path!, 3600); // 1 hodina platnost
+          .createSignedUrl(issue.image_path!, 3600);
 
         if (error) {
           logger.error("Chyba signed URL:", error);
@@ -127,13 +119,10 @@ const IssueDetail = () => {
 
     fetchSignedUrl();
 
-    // Cleanup funkce
     return () => {
       isMounted = false;
     };
-  }, [issue?.image_path]); // <--- KLÍČOVÉ: Sledujeme jen cestu k souboru
-
-  // --- Pomocné funkce (UI) ---
+  }, [issue?.image_path]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -145,8 +134,6 @@ const IssueDetail = () => {
       minute: "2-digit",
     });
   };
-
-  // --- Logika změny stavu ---
 
   const handleChangeStatus = async () => {
     if (!issue) return;
@@ -177,7 +164,6 @@ const IssueDetail = () => {
 
       if (error) throw error;
 
-      // Aktualizujeme lokální stav (to spustí re-render, ale ne efekt obrázku)
       setIssue({ ...issue, status: newStatus });
       showToast("Stav závady byl změněn", "success");
     } catch (error: any) {
@@ -197,7 +183,6 @@ const IssueDetail = () => {
 
     setIsDeleting(true);
     try {
-      // Pokud má issue obrázek, smažeme ho ze storage
       if (issue.image_path) {
         const { error: storageError } = await supabase.storage
           .from("issue-images")
@@ -205,11 +190,9 @@ const IssueDetail = () => {
 
         if (storageError) {
           logger.error("Chyba při mazání obrázku:", storageError);
-          // Pokračujeme i přes chybu storage, hlavně aby se smazal záznam
         }
       }
 
-      // Smažeme záznam z databáze
       const { error } = await supabase.from("issues").delete().eq("id", id);
 
       if (error) throw error;
@@ -222,8 +205,6 @@ const IssueDetail = () => {
       setIsDeleting(false);
     }
   };
-
-  // --- Render ---
 
   if (isLoading) {
     return (
@@ -249,7 +230,6 @@ const IssueDetail = () => {
   return (
     <ScrollView className="flex-1 bg-background">
       <View className="p-5">
-        {/* Název závady + Status Badge */}
         <View className="flex-row items-center justify-between mb-5">
           <Text className="text-3xl font-bold text-foreground flex-1 mr-3">
             {issue.title}
@@ -264,7 +244,6 @@ const IssueDetail = () => {
           </View>
         </View>
 
-        {/* Obrázek */}
         {imageUri && (
           <Pressable
             onPress={() => setViewerVisible(true)}
@@ -277,7 +256,6 @@ const IssueDetail = () => {
           </Pressable>
         )}
 
-        {/* Popis */}
         {issue.description && (
           <Card className="mb-4">
             <CardContent className="px-4">
@@ -291,7 +269,6 @@ const IssueDetail = () => {
           </Card>
         )}
 
-        {/* Informace */}
         <Card className="mb-4">
           <CardContent className="px-4">
             <Text className="text-base font-semibold text-foreground mb-3">
@@ -334,7 +311,6 @@ const IssueDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Tlačítka */}
         {userRole === "najemce" && issue.status === "new" && (
           <View className="gap-3 mt-2">
             <Button

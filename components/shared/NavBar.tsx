@@ -14,7 +14,6 @@ const NavBar = () => {
   const insets = useSafeAreaInsets();
   const { userRole } = useFlatContext();
 
-  // Definice navigačních položek s ikonami
   const tenantNavItems = [
     {
       name: "Domů",

@@ -13,9 +13,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const MAX_HEIGHT_PERCENTAGE = 0.85; // Maximálně 85% obrazovky
-const MIN_HEIGHT_PERCENTAGE = 0.35; // Minimálně 30% obrazovky
-const HEADER_HEIGHT = 80; // Přibližná výška headeru + drag handle
+const MAX_HEIGHT_PERCENTAGE = 0.85; // Maximum 85% of the screen.
+const MIN_HEIGHT_PERCENTAGE = 0.35; // Minimum 35% of the screen.
+const HEADER_HEIGHT = 80; // Approximate header and drag-handle height.
 
 interface BottomSheetProps {
   visible: boolean;
@@ -41,7 +41,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     SCREEN_HEIGHT * MIN_HEIGHT_PERCENTAGE,
   );
 
-  // Vypočítat optimální výšku podle obsahu
   useEffect(() => {
     if (contentHeight > 0 && visible) {
       const totalHeight = contentHeight + HEADER_HEIGHT + (insets.bottom || 20);
@@ -62,11 +61,10 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         return Math.abs(gestureState.dy) > 5 && !isAnimating.current;
       },
       onPanResponderGrant: (_, gestureState) => {
-        startPosition.current = 0; // Současná pozice je 0 (viditelný)
+        startPosition.current = 0;
       },
       onPanResponderMove: (_, gestureState) => {
-        // gestureState.dy > 0 znamená pohyb dolů
-        // Povolit jen tažení dolů (zvětšování translateY od 0 směrem k sheetHeight)
+        // gestureState.dy > 0 means downward movement; only allow dragging down.
         if (gestureState.dy >= 0) {
           const newValue = gestureState.dy;
           if (newValue <= sheetHeight) {
@@ -77,13 +75,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       onPanResponderRelease: (_, gestureState) => {
         const velocity = gestureState.vy;
 
-        // Pokud je gesture rychlé dolů nebo táhne hodně dolů -> zavřít
+        // Close on fast or long downward gestures.
         if (gestureState.dy > 100 || velocity > 0.5) {
           closeBottomSheet();
           return;
         }
 
-        // Jinak vrátit na viditelnou pozici
         snapTo(0);
       },
     }),
@@ -103,11 +100,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   useEffect(() => {
     if (visible) {
-      // Otevřít sheet
       translateY.setValue(sheetHeight);
       snapTo(0);
     } else {
-      // Zavřít sheet a resetovat
       translateY.setValue(sheetHeight);
       setContentHeight(0);
       setSheetHeight(SCREEN_HEIGHT * MIN_HEIGHT_PERCENTAGE);

@@ -33,7 +33,6 @@ export default function ReorderWidgets() {
   const { showToast } = useToast();
   const { hasLandlord } = useFlatHasLandlord();
 
-  // Získat widgety dostupné pro aktuální roli, odfiltrovat widgety vyžadující pronajímatele
   const allowedWidgets = getWidgetsByRole(userRole).filter(
     (w) => hasLandlord || !LANDLORD_ONLY_WIDGETS.includes(w),
   );
@@ -52,7 +51,6 @@ export default function ReorderWidgets() {
 
     setIsLoading(true);
     try {
-      // Načíst z AsyncStorage
       const storedLayout = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY);
       let active: string[];
 
@@ -62,10 +60,8 @@ export default function ReorderWidgets() {
         active = getDefaultWidgetsByRole(userRole);
       }
 
-      // Filtrovat podle role - zobrazit jen widgety dostupné pro aktuální roli
       const filteredActive = active.filter((w) => allowedWidgets.includes(w));
 
-      // Rozdělit na aktivní a skryté (pouze z povolených widgetů)
       setActiveWidgets(filteredActive);
       const hidden = allowedWidgets.filter((w) => !filteredActive.includes(w));
       setHiddenWidgets(hidden);
@@ -92,7 +88,6 @@ export default function ReorderWidgets() {
 
     setIsSaving(true);
     try {
-      // 1. Získat aktuálního uživatele a uložit do Supabase
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -109,7 +104,6 @@ export default function ReorderWidgets() {
         }
       }
 
-      // 2. Po úspěšném uložení do Supabase aktualizovat AsyncStorage
       await AsyncStorage.setItem(
         DASHBOARD_LAYOUT_KEY,
         JSON.stringify(activeWidgets),
@@ -117,7 +111,6 @@ export default function ReorderWidgets() {
 
       showToast("Rozložení bylo úspěšně uloženo", "success");
 
-      // 3. Vrátit se zpět na dashboard
       router.back();
     } catch (error: any) {
       logger.error("Error saving layout:", error);
@@ -148,7 +141,6 @@ export default function ReorderWidgets() {
     );
   }
 
-  // Kombinovaná datová struktura pro jeden DraggableFlatList
   type WidgetItem = {
     key: string;
     type:
@@ -164,10 +156,8 @@ export default function ReorderWidgets() {
   const buildItemsList = (): WidgetItem[] => {
     const items: WidgetItem[] = [];
 
-    // Header pro aktivní
     items.push({ key: "header-active", type: "header-active" });
 
-    // Aktivní widgety
     if (activeWidgets.length === 0) {
       items.push({ key: "empty-active", type: "empty-active" });
     } else {
@@ -176,17 +166,14 @@ export default function ReorderWidgets() {
       });
     }
 
-    // Header pro skryté (jen pokud jsou nějaké)
     if (hiddenWidgets.length > 0) {
       items.push({ key: "header-hidden", type: "header-hidden" });
 
-      // Skryté widgety
       hiddenWidgets.forEach((w) => {
         items.push({ key: `hidden-${w}`, type: "widget-hidden", widgetKey: w });
       });
     }
 
-    // Tlačítka
     items.push({ key: "buttons", type: "buttons" });
 
     return items;
@@ -282,7 +269,6 @@ export default function ReorderWidgets() {
   };
 
   const handleDragEnd = ({ data }: { data: WidgetItem[] }) => {
-    // Najít pozici headeru pro skryté widgety
     const hiddenHeaderIndex = data.findIndex(
       (item) => item.type === "header-hidden",
     );
@@ -291,19 +277,16 @@ export default function ReorderWidgets() {
     const newHidden: string[] = [];
 
     data.forEach((item, index) => {
-      // Pokud je to widget
       if (
         (item.type === "widget-active" || item.type === "widget-hidden") &&
         item.widgetKey
       ) {
-        // Pokud je header-hidden v seznamu a widget je za ním, je skrytý
         if (hiddenHeaderIndex !== -1 && index > hiddenHeaderIndex) {
           newHidden.push(item.widgetKey);
         } else if (
           item.type === "widget-active" ||
           item.type === "widget-hidden"
         ) {
-          // Jinak je aktivní (nebo pokud header-hidden není v seznamu)
           newActive.push(item.widgetKey);
         }
       }
