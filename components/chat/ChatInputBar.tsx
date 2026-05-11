@@ -22,7 +22,7 @@ export function ChatInputBar({ onSend, sending }: ChatInputBarProps) {
   };
 
   return (
-    <View className="flex-row items-end gap-2 px-4 py-3 border-t border-border bg-card">
+    <View className="flex-row items-center gap-2 px-4 py-3 border-t border-border bg-card">
       <TextInput
         className="flex-1 bg-muted rounded-2xl px-4 py-2 text-foreground max-h-24"
         placeholder="Napište zprávu..."

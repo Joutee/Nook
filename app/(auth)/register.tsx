@@ -87,16 +87,13 @@ export default function Register() {
       showToast(getErrorMessage(error.message), "error");
       setLoading(false);
     } else {
-      // Úspěšná registrace - uložit účet do seznamu použitých účtů
       await saveUsedAccount(email);
       showToast("Ověřovací kód byl odeslán na váš e-mail", "success");
       setLoading(false);
 
-      //pro testovani vypnuto
-
-      //je potreba to zapnout v supabase auth settings -> Sign In/Providers -> Confirm email
-      // Přesměrování na stránku pro ověření e-mailu
-      //router.push(`/(auth)/verify-email?email=${encodeURIComponent(email)}`);
+      // Disabled for testing. Re-enable in Supabase Auth settings:
+      // Sign In/Providers -> Confirm email.
+      router.push(`/(auth)/verify-email?email=${encodeURIComponent(email)}`);
     }
   }
 
@@ -109,7 +106,7 @@ export default function Register() {
         padding: 20,
       }}
       enableOnAndroid={true}
-      extraScrollHeight={20} // O kolik výš nad klávesnici se má input posunout
+      extraScrollHeight={20}
     >
       <Card className="border-border">
         <CardHeader>

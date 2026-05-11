@@ -45,11 +45,11 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: "600",
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
-      {/* Domů - zobrazit všem */}
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Domů",
           tabBarIcon: ({ color, focused }) => (
@@ -62,7 +62,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Finance - pouze pro nájemníky */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
+
       <Tabs.Screen
         name="finance"
         options={{
@@ -78,7 +84,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Úkoly - pouze pro nájemníky */}
       <Tabs.Screen
         name="chores"
         options={{
@@ -94,7 +99,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Závady - pouze pro pronajímatele */}
       <Tabs.Screen
         name="issues"
         options={{
@@ -110,7 +114,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Chat - pouze pro pronajímatele jako tab */}
       <Tabs.Screen
         name="chat"
         options={{
@@ -127,7 +130,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Klíče - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="keys"
         options={{
@@ -135,7 +137,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Dokumenty - skrytý tab (přesunuto do Další pro pronajímatele) */}
       <Tabs.Screen
         name="documents"
         options={{
@@ -143,7 +144,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Další - zobrazit všem */}
       <Tabs.Screen
         name="more"
         options={{

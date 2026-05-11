@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, View } from "react-native";
+import {
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+} from "react-native";
 import { Text } from "@/components/ui/text";
 import { useFlatContext } from "@/contexts/FlatContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -16,6 +22,7 @@ import { ReadReceipts } from "./ReadReceipts";
 import { ChatInputBar } from "./ChatInputBar";
 import { useFocusEffect } from "expo-router";
 import { ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ReadReceiptUser {
   id: string;
@@ -35,18 +42,34 @@ export function ChatScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [sending, setSending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   const flatId = currentFlat?.id;
 
-  // Get current user ID
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setUserId(data.user.id);
     });
   }, []);
 
-  // Load messages and read receipts on focus
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       if (!flatId || !userId) return;
@@ -69,7 +92,6 @@ export function ChatScreen() {
             }))
           );
           setHasMore(msgs.length >= 50);
-          // Mark as read
           await markChatAsRead(userId, flatId);
         } catch {
           showToast("Nepodařilo se načíst zprávy", "error");
@@ -82,7 +104,6 @@ export function ChatScreen() {
     }, [flatId, userId])
   );
 
-  // Realtime subscription
   useEffect(() => {
     if (!flatId || !userId) return;
 
@@ -99,7 +120,6 @@ export function ChatScreen() {
         async (payload) => {
           const newMsg = payload.new as any;
 
-          // Fetch the full message with sender join
           const { data } = await supabase
             .from("messages")
             .select("id, flat_id, sender_id, content, created_at, sender:profiles!messages_sender_id_fkey(id, name, surname, avatar_url)")
@@ -113,9 +133,7 @@ export function ChatScreen() {
             });
           }
 
-          // Mark as read since chat is open
           await markChatAsRead(userId, flatId);
-          // Refresh read receipts
           const receipts = await fetchReadReceipts(flatId);
           setReadReceipts(
             receipts.map((r) => ({
@@ -135,7 +153,6 @@ export function ChatScreen() {
     };
   }, [flatId, userId]);
 
-  // Load older messages
   const loadMore = async () => {
     if (loadingMore || !hasMore || !flatId || messages.length === 0) return;
     setLoadingMore(true);
@@ -151,7 +168,6 @@ export function ChatScreen() {
     }
   };
 
-  // Send message with optimistic update
   const handleSend = async (content: string) => {
     if (!flatId || !userId) return;
     setSending(true);
@@ -181,7 +197,6 @@ export function ChatScreen() {
     }
   };
 
-  // Grouping logic
   const shouldShowSender = (index: number): boolean => {
     const msg = messages[index];
     const nextMsg = messages[index + 1];
@@ -191,7 +206,6 @@ export function ChatScreen() {
     return diff > 5 * 60 * 1000;
   };
 
-  // Read receipt positions
   const readerPositions = new Map<string, string>();
   if (messages.length > 0) {
     for (const reader of readReceipts) {
@@ -219,6 +233,11 @@ export function ChatScreen() {
     );
   }
 
+  const androidKeyboardOffset =
+    Platform.OS === "android" && keyboardHeight > 0
+      ? Math.max(keyboardHeight - insets.bottom + 24, 0)
+      : 0;
+
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-background"
@@ -240,7 +259,12 @@ export function ChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           inverted
-          contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8 }}
+          contentContainerStyle={{
+            paddingHorizontal: 12,
+            paddingTop: 8,
+            paddingBottom: keyboardHeight > 0 ? 16 : 8,
+          }}
+          keyboardShouldPersistTaps="handled"
           onEndReached={loadMore}
           onEndReachedThreshold={0.3}
           ListFooterComponent={
@@ -271,7 +295,9 @@ export function ChatScreen() {
         />
       )}
 
-      <ChatInputBar onSend={handleSend} sending={sending} />
+      <View style={{ marginBottom: androidKeyboardOffset }}>
+        <ChatInputBar onSend={handleSend} sending={sending} />
+      </View>
     </KeyboardAvoidingView>
   );
 }

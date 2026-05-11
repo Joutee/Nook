@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Text as RNText, useWindowDimensions, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
@@ -16,22 +16,21 @@ function formatTime(dateStr: string): string {
 
 export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps) {
   const senderName = [message.sender.name, message.sender.surname].filter(Boolean).join(" ");
+  const { width } = useWindowDimensions();
+  const bubbleMaxWidth = Math.floor(width * 0.7);
 
   return (
     <View className={`${showSender ? "mt-3" : "mt-0.5"}`}>
-      {/* Sender name */}
       {showSender && !isOwn && (
         <Text className="text-xs text-muted-foreground mb-1 ml-11">
           {senderName}
         </Text>
       )}
 
-      {/* Row: constrain width via padding on the opposite side */}
       <View
-        className={`flex-row ${isOwn ? "justify-end" : "justify-start"}`}
-        style={isOwn ? { paddingLeft: "25%" } : { paddingRight: "25%" }}
+        className={`w-full ${isOwn ? "items-end" : "flex-row items-end"}`}
+        style={isOwn ? { paddingRight: 12 } : { paddingLeft: 12 }}
       >
-        {/* Avatar */}
         {!isOwn && (
           <View className="w-8 mr-2 justify-end">
             {showSender && (
@@ -44,24 +43,33 @@ export function MessageBubble({ message, isOwn, showSender }: MessageBubbleProps
           </View>
         )}
 
-        {/* Bubble */}
         <View
           className={`px-3 py-2 rounded-2xl ${
             isOwn
               ? "bg-primary rounded-br-sm"
               : "bg-muted rounded-bl-sm"
           }`}
+          style={{
+            maxWidth: bubbleMaxWidth,
+            alignSelf: isOwn ? "flex-end" : "flex-start",
+            overflow: "visible",
+          }}
         >
-          <Text
-            className={isOwn ? "text-primary-foreground" : "text-foreground"}
+          <RNText
+            className={`text-base ${
+              isOwn ? "text-primary-foreground" : "text-foreground"
+            }`}
+            style={{
+              includeFontPadding: true,
+              flexShrink: 1,
+            }}
             textBreakStrategy="simple"
           >
-            {message.content + '\u200A'.repeat(20)}
-          </Text>
+            {message.content + " "}
+          </RNText>
         </View>
       </View>
 
-      {/* Timestamp */}
       <Text className={`text-[10px] text-muted-foreground mt-0.5 ${isOwn ? "text-right mr-1" : "ml-11"}`}>
         {formatTime(message.created_at)}
       </Text>

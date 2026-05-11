@@ -16,7 +16,7 @@ import { THEME } from "@/lib/theme";
 import { PortalHost } from "@rn-primitives/portal";
 import logger from "@/lib/logger";
 
-// Vnitřní komponenta s přístupem k FlatContext
+// Inner component with access to FlatContext.
 const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const { isLoading, hasFlat, hasRole } = useFlatContext();
   const segments = useSegments();
@@ -36,7 +36,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     const inSetupGroup = segmentsArray[0] === "(setup)";
     const inTabsGroup = segmentsArray[0] === "(tabs)";
 
-    // Reset password má speciální handling - může být přístupná bez přihlášení
+    // Reset password has special handling and can be accessed without login.
     if (
       segmentsArray[0] === "(auth)" &&
       segmentsArray[1] === "reset-password"
@@ -44,7 +44,7 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
       return;
     }
 
-    // Není přihlášený -> redirect na login
+    // Not signed in -> login.
     if (!session && !inAuthGroup) {
       router.replace("/(auth)/");
       logger.log("redirect to login");
@@ -54,23 +54,23 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
     logger.log("isLoading in layout:", isLoading);
     if (isLoading) return;
 
-    // Přihlášený ale nemá byt -> redirect na join-flat
+    // Signed in without a flat -> join-flat.
     if (session && !hasFlat && !inSetupGroup) {
       logger.log("redirect to join-flat");
       router.replace("/(setup)/join-flat");
       return;
     }
 
-    // Přihlášený, má byt, ale nemá roli -> redirect na select-role
+    // Signed in with a flat but no role -> select-role.
     if (session && hasFlat && !hasRole && segmentsArray[1] !== "select-role") {
       router.replace("/(setup)/select-role");
       return;
     }
 
-    // Přihlášený, má byt i roli -> přesměrovat z auth/setup na hlavní stránku
+    // Signed in with both flat and role -> leave auth/setup.
     if (session && hasFlat && hasRole && (inAuthGroup || inSetupGroup)) {
       logger.log("redirect to home");
-      setTimeout(() => router.replace("/(tabs)"), 0);
+      setTimeout(() => router.replace("/(tabs)/home"), 0);
       return;
     }
   }, [session, segments, isLoading, hasFlat, hasRole]);
@@ -79,11 +79,11 @@ const LayoutContent: React.FC<{ session: Session | null }> = ({ session }) => {
   const isDark = colorScheme === "dark";
   const currentTheme = THEME[isDark ? "dark" : "light"];
 
-  // Zobrazit TopBar pouze v tabs
+  // Show TopBar only in tabs.
   const showTopBar = segments[0] === "(tabs)";
 
   if (session && isLoading) {
-    return null; // Nebo loading screen
+    return null;
   }
 
   return (
@@ -208,18 +208,16 @@ const RootLayout = () => {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Ověřit platnost session na serveru
+    // Verify session validity on the server.
     supabase.auth
       .getSession()
       .then(async ({ data: { session } }) => {
         if (session) {
-          // Zkontrolovat, jestli je session platný
           const {
             data: { user },
             error,
           } = await supabase.auth.getUser();
           if (error || !user) {
-            // Session není platný - smazat a odhlásit
             await supabase.auth.signOut();
             setSession(null);
           } else {
@@ -231,9 +229,7 @@ const RootLayout = () => {
         setInitializing(false);
       })
       .catch(async (error) => {
-        // Zachytit chyby s neplatným refresh tokenem
         logger.log("Error getting session:", error.message);
-        // Vyčistit neplatnou session
         await supabase.auth.signOut();
         setSession(null);
         setInitializing(false);
@@ -249,7 +245,7 @@ const RootLayout = () => {
   }, []);
 
   if (initializing) {
-    return null; // Nebo loading screen
+    return null;
   }
 
   return (

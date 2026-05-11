@@ -70,7 +70,7 @@ export default function ResetPassword() {
 
     setButtonLoading(true);
 
-    // Nejdřív ověříme OTP kód a pak změníme heslo
+    // Verify the OTP code before changing the password.
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email as string,
       token: code,
@@ -83,7 +83,6 @@ export default function ResetPassword() {
       return;
     }
 
-    // Teď změníme heslo
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -94,9 +93,8 @@ export default function ResetPassword() {
     } else {
       showToast("Heslo bylo úspěšně změněno", "success");
       setButtonLoading(false);
-      // Odhlásit uživatele a poslat ho na login
       await supabase.auth.signOut();
-      router.replace("/(auth)/login");
+      router.replace(`/(auth)/login?email=${encodeURIComponent(email as string)}`);
     }
   }
 
@@ -214,7 +212,7 @@ export default function ResetPassword() {
             <Button
               variant="secondary"
               className="w-full"
-              onPress={() => router.replace("/login")}
+              onPress={() => router.replace("/(auth)/login")}
             >
               <Text className="text-center flex-1">Zpět na přihlášení</Text>
             </Button>

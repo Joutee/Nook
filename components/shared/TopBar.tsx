@@ -42,9 +42,8 @@ const TopBar = () => {
 
   const handleFlatSelect = () => {
     setIsModalVisible(false);
-    // Pouze pokud nejsme na domovské stránce, přejdi na ni
-    if (pathname !== "/") {
-      router.push("/");
+    if (pathname !== "/home") {
+      router.push("/(tabs)/home");
     }
   };
 
@@ -55,7 +54,6 @@ const TopBar = () => {
   };
 
   const handleSettingsPress = () => {
-    // Pouze pokud nejsme už v nastavení, přejdi tam
     if (pathname !== "/settings") {
       router.push("/settings");
     }
@@ -67,7 +65,6 @@ const TopBar = () => {
         className="flex-row items-center justify-between px-4 py-3 bg-card border-b border-border shadow-sm"
         style={{ paddingTop: insets.top + 12 }}
       >
-        {/* Levá strana - název bytu s možností přepínání */}
         <TouchableOpacity
           className="flex-1 flex-row items-center pr-4"
           onPress={handleFlatPress}
@@ -88,7 +85,6 @@ const TopBar = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Pravá strana - profil + nastavení */}
         <View className="flex-row items-center gap-2">
           <TouchableOpacity className="p-1" onPress={handleSettingsPress}>
             <Ionicons
@@ -103,7 +99,6 @@ const TopBar = () => {
         </View>
       </View>
 
-      {/* BottomSheet pro výběr bytu */}
       <BottomSheet
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
